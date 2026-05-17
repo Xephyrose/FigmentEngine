@@ -37,3 +37,152 @@ float Vector2::getDegrees() const
 {
     return fmodf((atan2f(y, x) * 180.0f / static_cast<float>(M_PI)) + 720.0f, 360.0f);
 }
+
+float Vector2::Length() const
+{
+    return sqrtf(LengthSquared());
+}
+
+float Vector2::LengthSquared() const
+{
+    return x * x + y * y;
+}
+
+void Vector2::Normalize()
+{
+    float length = LengthSquared();
+    if (length != 0)
+    {
+        length = sqrtf(length);
+        x /= length;
+        y /= length;
+    }
+}
+
+Vector2 Vector2::Normalized() const
+{
+    Vector2 vector2(x, y);
+    vector2.Normalize();
+    return vector2;
+}
+
+float Vector2::DistanceTo(const Vector2& aVector) const
+{
+    return sqrtf(DistanceSquaredTo(aVector));
+}
+
+float Vector2::DistanceSquaredTo(const Vector2& aVector) const
+{
+    return (x - aVector.x) * (x - aVector.x) + (y - aVector.y) * (y - aVector.y);
+}
+
+float Vector2::DotProductTo(const Vector2& vector2) const
+{
+    return x * vector2.x + y * vector2.y;
+}
+
+Vector2 Vector2::operator+(const Vector2& vector2) const
+    {
+        return {x + vector2.x, y + vector2.y};
+    }
+
+    void Vector2::operator+=(const Vector2& vector2)
+    {
+        x += vector2.x;
+        y += vector2.y;
+    }
+
+    Vector2 Vector2::operator-(const Vector2& vector2) const
+    {
+        return {x - vector2.x, y - vector2.y};
+    }
+
+    void Vector2::operator-=(const Vector2& vector2)
+    {
+        x -= vector2.x;
+        y -= vector2.y;
+    }
+
+    Vector2 Vector2::operator*(const Vector2& vector2) const
+    {
+        return {x * vector2.x, y * vector2.y};
+    }
+
+    Vector2 Vector2::operator*(const float& scale) const
+    {
+        return {x * scale, y * scale};
+    }
+
+    void Vector2::operator*=(const Vector2& vector2)
+    {
+        x *= vector2.x;
+        y *= vector2.y;
+    }
+
+    void Vector2::operator*=(const float& scale)
+    {
+        x *= scale;
+        y *= scale;
+    }
+
+    Vector2 Vector2::operator/(const Vector2& vector2) const
+    {
+        return {x / vector2.x, y / vector2.y};
+    }
+
+    Vector2 Vector2::operator/(const float& scale) const
+    {
+        return {x / scale, y / scale};
+    }
+
+    void Vector2::operator/=(const Vector2& vector2)
+    {
+        x /= vector2.x;
+        y /= vector2.y;
+    }
+
+    void Vector2::operator/=(const float& scale)
+    {
+        x /= scale;
+        y /= scale;
+    }
+
+    Vector2 Vector2::operator-() const
+    {
+        return {-x, -y};
+    }
+
+    bool Vector2::operator==(const Vector2& vector2) const
+    {
+        return x == vector2.x && y == vector2.y;
+    }
+
+    bool Vector2::operator != (const Vector2& vector2) const
+    {
+        return x != vector2.x || y != vector2.y;
+    }
+
+    bool Vector2::operator<(const Vector2& aVector2) const
+    {
+        return (x == aVector2.x) ? (y < aVector2.y) : (x < aVector2.x);
+    }
+
+    bool Vector2::operator<=(const Vector2& aVector2) const
+    {
+        return (x == aVector2.x) ? (y <= aVector2.y) : (x <= aVector2.x);
+    }
+
+    bool Vector2::operator>(const Vector2& aVector2) const
+    {
+        return (x == aVector2.x) ? (y > aVector2.y) : (x > aVector2.x);
+    }
+
+    bool Vector2::operator>=(const Vector2& aVector2) const
+    {
+        return (x == aVector2.x) ? (y >= aVector2.y) : (x >= aVector2.x);
+    }
+
+	Vector2 operator* (float scale, const Vector2& vector2)
+	{
+		return {vector2.x * scale, vector2.y * scale};
+	}

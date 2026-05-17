@@ -1,9 +1,8 @@
-#ifndef SDL_TEST_NODE_H
-#define SDL_TEST_NODE_H
+#ifndef FIGMENTENGINE_NODE_H
+#define FIGMENTENGINE_NODE_H
 #include <string>
 
 #include "Vector2.h"
-
 
 class Node {
 public:
@@ -13,4 +12,4 @@ public:
 };
 
 
-#endif //SDL_TEST_NODE_H
+#endif //FIGMENTENGINE_NODE_H
