@@ -1,12 +1,8 @@
-//
-// Created by max on 2026-05-17.
-//
-
 #ifndef FIGMENTENGINE_VECTOR3_H
 #define FIGMENTENGINE_VECTOR3_H
 
-
 class Vector3 {
+public:
     float x, y, z;
 
     Vector3(float x, float y, float z);
@@ -23,7 +19,7 @@ class Vector3 {
     [[nodiscard]] float Length() const;
     [[nodiscard]] float LengthSquared() const;
     void Normalize();
-    Vector3 Normalized() const;
+    [[nodiscard]] Vector3 Normalized() const;
     [[nodiscard]] float DistanceTo(const Vector3& Vector3) const;
     [[nodiscard]] float DistanceSquaredTo(const Vector3& Vector3) const;
     [[nodiscard]] float DotProductTo(const Vector3& Vector3) const;
@@ -57,6 +53,5 @@ class Vector3 {
     bool operator>(const Vector3& Vector3) const;
     bool operator>=(const Vector3& Vector3) const;
 };
-
 
 #endif //FIGMENTENGINE_VECTOR3_H
