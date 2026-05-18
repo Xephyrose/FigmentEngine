@@ -2,8 +2,7 @@
 #define FIGMENTENGINE_VECTOR2_H
 
 struct Vector2 {
-    float x;
-    float y;
+    float x, y;
 
     Vector2(float x, float y);
     Vector2(const Vector2& vector2);
