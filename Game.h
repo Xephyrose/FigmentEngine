@@ -6,9 +6,7 @@
 #define FIGMENTENGINE_GAME_H
 
 
-static class Game {
-public:
-
+class Game {
 };
 
 

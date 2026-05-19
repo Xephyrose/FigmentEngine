@@ -1,19 +1,61 @@
 #include <filesystem>
 #include <iostream>
+#include <vector>
 #include <SDL3/SDL.h>
+
 #include "Node.h"
 #include "Vector3.h"
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
 
+struct Mesh {
+    std::vector<Vector3> vertices;
+    std::vector<uint16_t> indices;
+
+    static Mesh CreateQuad(float width = 1.6f, float height = 1.6f) {
+        float halfW = width * 0.5f;
+        float halfH = height * 0.5f;
+
+        Mesh mesh;
+        mesh.vertices = {
+            Vector3{-halfW, -halfH, 0.0f}, // Bottom-Left
+            Vector3{ halfW, -halfH, 0.0f}, // Bottom-Right
+            Vector3{ halfW,  halfH, 0.0f}, // Top-Right
+            Vector3{-halfW,  halfH, 0.0f}, // Top-Left
+        };
+
+        mesh.indices = {
+            0, 3, 2,  // Triangle 1: Bottom-Left, Top-Left, Top-Right (CCW)
+            0, 2, 1   // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)
+        };
+
+        return mesh;
+    }
+
+    static Mesh CreateTriangle(float size = 1.4f) {
+        Mesh mesh;
+        mesh.vertices = {
+            Vector3{-size * 0.5f, -size * 0.5f, 0.0f},
+            Vector3{ size * 0.5f, -size * 0.5f, 0.0f},
+            Vector3{ 0.0f,        size * 0.5f, 0.0f},
+        };
+
+        mesh.indices = {0, 1, 2};
+
+        return mesh;
+    }
+};
+
 struct AppState
 {
     SDL_Window* window = nullptr;
     SDL_GPUDevice* device = nullptr;
-
     SDL_GPUGraphicsPipeline* pipeline = nullptr;
-    Uint32 numVertexes = 0;
+
     SDL_GPUBuffer* vertexBuffer = nullptr;
+    SDL_GPUBuffer* indexBuffer = nullptr;
+    Uint32 numVertexes = 0;
+    Uint32 numIndices = 0;
 };
 
 SDL_GPUShader* LoadShader(SDL_GPUDevice* device, const std::string& shaderFilename) {
@@ -151,8 +193,8 @@ bool CreatePipeline(AppState* appState) {
         },
         .primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
         .rasterizer_state = SDL_GPURasterizerState{
-            .fill_mode = SDL_GPU_FILLMODE_FILL,
-            .cull_mode = SDL_GPU_CULLMODE_BACK,
+            .fill_mode = SDL_GPU_FILLMODE_LINE,
+            //.cull_mode = SDL_GPU_CULLMODE_BACK,
             .front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE,
         },
         .target_info = SDL_GPUGraphicsPipelineTargetInfo{
@@ -172,7 +214,7 @@ bool CreatePipeline(AppState* appState) {
     return true;
 }
 
-bool CreateVertexBuffer(AppState* myAppState, std::span<Vector3> vertexes) {
+bool CreateVertexBuffer(AppState* myAppState, std::span<const Vector3> vertexes) {
     // Allocate memory for whatever number of vertexes we need
     myAppState->numVertexes = vertexes.size();
     Uint32 vertexSize = myAppState->numVertexes * sizeof(Vector3);
@@ -255,14 +297,101 @@ bool CreateVertexBuffer(AppState* myAppState, std::span<Vector3> vertexes) {
     return true;
 }
 
+bool CreateIndexBuffer(AppState* myAppState, std::span<const uint16_t> indices) {
+    myAppState->numIndices = indices.size();
+    Uint32 indexSize = indices.size() * sizeof(uint16_t);
+
+    auto indexBufferCreateInfo = SDL_GPUBufferCreateInfo{
+        .usage = SDL_GPU_BUFFERUSAGE_INDEX,
+        .size = indexSize,
+    };
+    myAppState->indexBuffer = SDL_CreateGPUBuffer(myAppState->device, &indexBufferCreateInfo);
+    if (myAppState->indexBuffer == nullptr) {
+        SDL_Log("Couldn't create index buffer: %s", SDL_GetError());
+        return false;
+    }
+
+    // Create transfer buffer
+    auto transferBufferCreateInfo = SDL_GPUTransferBufferCreateInfo{
+        .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
+        .size = indexSize,
+    };
+    SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(myAppState->device, &transferBufferCreateInfo);
+    if (transferBuffer == nullptr) {
+        SDL_Log("Couldn't create transfer buffer: %s", SDL_GetError());
+        return false;
+    }
+
+    // Map and copy
+    auto* transferData = static_cast<uint16_t*>(SDL_MapGPUTransferBuffer(myAppState->device, transferBuffer, false));
+    if (transferData == nullptr) {
+        SDL_Log("Couldn't map transfer buffer: %s", SDL_GetError());
+        SDL_ReleaseGPUTransferBuffer(myAppState->device, transferBuffer);
+        return false;
+    }
+
+    SDL_memcpy(transferData, indices.data(), indexSize);
+    SDL_UnmapGPUTransferBuffer(myAppState->device, transferBuffer);
+
+    // Upload to index buffer
+    SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(myAppState->device);
+    if (uploadCmdBuf == nullptr) {
+        SDL_Log("Couldn't acquire GPU command buffer: %s", SDL_GetError());
+        return false;
+    }
+
+    SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
+
+    auto bufferLocation = SDL_GPUTransferBufferLocation{
+        .transfer_buffer = transferBuffer,
+        .offset = 0,
+    };
+
+    auto bufferRegion = SDL_GPUBufferRegion{
+        .buffer = myAppState->indexBuffer,
+        .offset = 0,
+        .size = indexSize,
+    };
+
+    SDL_UploadToGPUBuffer(copyPass, &bufferLocation, &bufferRegion, false);
+    SDL_EndGPUCopyPass(copyPass);
+
+    if (!SDL_SubmitGPUCommandBuffer(uploadCmdBuf)) {
+        SDL_Log("Couldn't submit GPU command buffer: %s", SDL_GetError());
+        return false;
+    }
+
+    SDL_ReleaseGPUTransferBuffer(myAppState->device, transferBuffer);
+    return true;
+}
+
+bool LoadMeshToGPU(AppState* appState, const Mesh& mesh) {
+    // Release old buffers if they exist
+    if (appState->vertexBuffer) {
+        SDL_ReleaseGPUBuffer(appState->device, appState->vertexBuffer);
+    }
+    if (appState->indexBuffer) {
+        SDL_ReleaseGPUBuffer(appState->device, appState->indexBuffer);
+    }
+
+    // Create new buffers
+    if (!CreateVertexBuffer(appState, mesh.vertices)) {
+        return false;
+    }
+
+    if (!CreateIndexBuffer(appState, mesh.indices)) {
+        return false;
+    }
+
+    return true;
+}
+
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
-    SDL_Log("Init");
-
     auto* appState = new AppState();
     *appstate = appState;
 
-    appState->window = SDL_CreateWindow("Hello, SDL GPU!", 1280, 720, 0);
+    appState->window = SDL_CreateWindow("FigmentEngine", 1280, 720, 0);
     if (appState->window == nullptr)
     {
         SDL_Log("Couldn't create window: %s", SDL_GetError());
@@ -288,15 +417,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
 
-    // Must be counter-clockwise to face forward
-    std::array vertexes{
-        Vector3{-0.7f, -0.7f, 0.0f}, // Bottom-Left
-        Vector3{0.7f, -0.7f, 0.0f}, // Bottom-Right
-        Vector3{0.0f, 0.7f, 0.0f}, // Top-Middle
-    };
-
-    if (!CreateVertexBuffer(appState, vertexes))
-    {
+    Mesh quad = Mesh::CreateQuad(1.6f, 1.6f);
+    if (!LoadMeshToGPU(appState, quad)) {
         return SDL_APP_FAILURE;
     }
 
@@ -305,7 +427,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 {
-    SDL_Log("Event");
     switch (event->type)
     {
         case SDL_EVENT_KEY_DOWN:
@@ -321,7 +442,6 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 
 SDL_AppResult SDL_AppIterate(void* appstate)
 {
-    SDL_Log("Iterate");
     const AppState* appState = static_cast<AppState*>(appstate);
 
     // Here's where we store the commands that will be eventually sent to the GPU
@@ -365,8 +485,15 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         // Bind our vertex buffer to the render pass
         SDL_BindGPUVertexBuffers(renderPass, 0, vertexBuffers.data(), vertexBuffers.size());
 
+        // Index, too
+        SDL_GPUBufferBinding indexBinding = {
+            .buffer = appState->indexBuffer,
+            .offset = 0
+        };
+        SDL_BindGPUIndexBuffer(renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+
         // Draw stuff
-        SDL_DrawGPUPrimitives(renderPass, appState->numVertexes, 1, 0, 0);
+        SDL_DrawGPUIndexedPrimitives(renderPass, appState->numIndices, 1, 0, 0, 0);
 
         // Finally, end the render pass
         SDL_EndGPURenderPass(renderPass);
@@ -379,7 +506,6 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 
 void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {
-    SDL_Log("Quit");
     const AppState* appState = static_cast<AppState*>(appstate);
 
     SDL_ReleaseWindowFromGPUDevice(appState->device, appState->window);

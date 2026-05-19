@@ -65,12 +65,12 @@
   }
 }</component>
   <component name="RunManager">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+    <configuration name="FigmentEngine" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="FigmentEngine" TARGET_NAME="FigmentEngine" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="FigmentEngine" RUN_TARGET_NAME="FigmentEngine">
       <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="FigmentEngine" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="FigmentEngine" TARGET_NAME="FigmentEngine" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="FigmentEngine" RUN_TARGET_NAME="FigmentEngine">
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -87,6 +87,7 @@
       <workItem from="1779088143878" duration="19000" />
       <workItem from="1779088288786" duration="471000" />
       <workItem from="1779167864549" duration="9708000" />
+      <workItem from="1779200853055" duration="5663000" />
     </task>
     <servers />
   </component>
