@@ -3,48 +3,12 @@
 #include <vector>
 #include <SDL3/SDL.h>
 
+#include "Mesh.h"
 #include "Node.h"
-#include "Vector3.h"
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
 
-struct Mesh {
-    std::vector<Vector3> vertices;
-    std::vector<uint16_t> indices;
-
-    static Mesh CreateQuad(float width = 1.6f, float height = 1.6f) {
-        float halfW = width * 0.5f;
-        float halfH = height * 0.5f;
-
-        Mesh mesh;
-        mesh.vertices = {
-            Vector3{-halfW, -halfH, 0.0f}, // Bottom-Left
-            Vector3{ halfW, -halfH, 0.0f}, // Bottom-Right
-            Vector3{ halfW,  halfH, 0.0f}, // Top-Right
-            Vector3{-halfW,  halfH, 0.0f}, // Top-Left
-        };
-
-        mesh.indices = {
-            0, 3, 2,  // Triangle 1: Bottom-Left, Top-Left, Top-Right (CCW)
-            0, 2, 1   // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)
-        };
-
-        return mesh;
-    }
-
-    static Mesh CreateTriangle(float size = 1.4f) {
-        Mesh mesh;
-        mesh.vertices = {
-            Vector3{-size * 0.5f, -size * 0.5f, 0.0f},
-            Vector3{ size * 0.5f, -size * 0.5f, 0.0f},
-            Vector3{ 0.0f,        size * 0.5f, 0.0f},
-        };
-
-        mesh.indices = {0, 1, 2};
-
-        return mesh;
-    }
-};
+#include "Vertex.h"
 
 struct AppState
 {
@@ -146,16 +110,16 @@ bool CreatePipeline(AppState* appState) {
         return false;
     }
 
-    std::array vertexBufferDescriptions{
+    constexpr std::array vertexBufferDescriptions{
         SDL_GPUVertexBufferDescription{
             .slot = 0,
-            .pitch = sizeof(Vector3),
+            .pitch = sizeof(Vertex),
             .input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX,
             .instance_step_rate = 0,
         },
     };
 
-    std::array vertexAttributes{
+    constexpr std::array vertexAttributes{
         SDL_GPUVertexAttribute{
             .location = 0,
             .buffer_slot = 0,
@@ -176,13 +140,13 @@ bool CreatePipeline(AppState* appState) {
         },
     };
 
-    std::array colorTargetDescriptions{
+    const std::array colorTargetDescriptions{
         SDL_GPUColorTargetDescription{
             .format = SDL_GetGPUSwapchainTextureFormat(appState->device, appState->window)
         }
     };
 
-    auto pipelineCreateInfo = SDL_GPUGraphicsPipelineCreateInfo{
+    const auto pipelineCreateInfo = SDL_GPUGraphicsPipelineCreateInfo{
         .vertex_shader = vertexShader,
         .fragment_shader = fragmentShader,
         .vertex_input_state = SDL_GPUVertexInputState{
@@ -214,13 +178,13 @@ bool CreatePipeline(AppState* appState) {
     return true;
 }
 
-bool CreateVertexBuffer(AppState* myAppState, std::span<const Vector3> vertexes) {
+bool CreateVertexBuffer(AppState* myAppState, const std::span<const Vertex> vertexes) {
     // Allocate memory for whatever number of vertexes we need
     myAppState->numVertexes = vertexes.size();
-    Uint32 vertexSize = myAppState->numVertexes * sizeof(Vector3);
+    const Uint32 vertexSize = myAppState->numVertexes * sizeof(Vertex);
 
     // Create buffer to store vertexes
-    auto vertexBufferCreateInfo = SDL_GPUBufferCreateInfo{
+    const auto vertexBufferCreateInfo = SDL_GPUBufferCreateInfo{
         .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
         .size = vertexSize,
     };
@@ -232,7 +196,7 @@ bool CreateVertexBuffer(AppState* myAppState, std::span<const Vector3> vertexes)
     }
 
     // Create a buffer that will upload the data to our GPU
-    auto transferBufferCreateInfo = SDL_GPUTransferBufferCreateInfo{
+    const auto transferBufferCreateInfo = SDL_GPUTransferBufferCreateInfo{
         .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
         .size = vertexSize,
     };
@@ -244,7 +208,7 @@ bool CreateVertexBuffer(AppState* myAppState, std::span<const Vector3> vertexes)
     }
 
     // Use SDL_MapGPUTransferBuffer to find the first area in our memory that is large enough to store this data
-    auto* transferData = static_cast<Vector3*>(SDL_MapGPUTransferBuffer(myAppState->device, transferBuffer, false));
+    auto* transferData = static_cast<Vertex*>(SDL_MapGPUTransferBuffer(myAppState->device, transferBuffer, false));
     if (transferData == nullptr)
     {
         SDL_Log("Couldn't map transfer buffer: %s", SDL_GetError());
@@ -269,13 +233,13 @@ bool CreateVertexBuffer(AppState* myAppState, std::span<const Vector3> vertexes)
     SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
 
     // Decide the source of our upload
-    auto bufferLocation = SDL_GPUTransferBufferLocation{
+    const auto bufferLocation = SDL_GPUTransferBufferLocation{
         .transfer_buffer = transferBuffer,
         .offset = 0,
     };
 
     // Decide the destination of our upload
-    auto bufferRegion = SDL_GPUBufferRegion{
+    const auto bufferRegion = SDL_GPUBufferRegion{
         .buffer = myAppState->vertexBuffer,
         .offset = 0,
         .size = vertexSize,
@@ -297,11 +261,11 @@ bool CreateVertexBuffer(AppState* myAppState, std::span<const Vector3> vertexes)
     return true;
 }
 
-bool CreateIndexBuffer(AppState* myAppState, std::span<const uint16_t> indices) {
+bool CreateIndexBuffer(AppState* myAppState, const std::span<const uint16_t> indices) {
     myAppState->numIndices = indices.size();
-    Uint32 indexSize = indices.size() * sizeof(uint16_t);
+    const Uint32 indexSize = indices.size() * sizeof(uint16_t);
 
-    auto indexBufferCreateInfo = SDL_GPUBufferCreateInfo{
+    const auto indexBufferCreateInfo = SDL_GPUBufferCreateInfo{
         .usage = SDL_GPU_BUFFERUSAGE_INDEX,
         .size = indexSize,
     };
@@ -312,7 +276,7 @@ bool CreateIndexBuffer(AppState* myAppState, std::span<const uint16_t> indices) 
     }
 
     // Create transfer buffer
-    auto transferBufferCreateInfo = SDL_GPUTransferBufferCreateInfo{
+    const auto transferBufferCreateInfo = SDL_GPUTransferBufferCreateInfo{
         .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
         .size = indexSize,
     };
@@ -342,12 +306,12 @@ bool CreateIndexBuffer(AppState* myAppState, std::span<const uint16_t> indices) 
 
     SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
 
-    auto bufferLocation = SDL_GPUTransferBufferLocation{
+    const auto bufferLocation = SDL_GPUTransferBufferLocation{
         .transfer_buffer = transferBuffer,
         .offset = 0,
     };
 
-    auto bufferRegion = SDL_GPUBufferRegion{
+    const auto bufferRegion = SDL_GPUBufferRegion{
         .buffer = myAppState->indexBuffer,
         .offset = 0,
         .size = indexSize,
@@ -398,7 +362,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
 
-    SDL_GPUShaderFormat formatFlags = SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL;
+    constexpr SDL_GPUShaderFormat formatFlags = SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL;
     appState->device = SDL_CreateGPUDevice(formatFlags, true, nullptr);
     if (appState->device == nullptr)
     {
@@ -462,7 +426,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 
     if (swapchainTexture != nullptr) {
         // Here we create the first render pass, which just clears the screen
-        SDL_GPUColorTargetInfo colorTargetInfo = {
+        const SDL_GPUColorTargetInfo colorTargetInfo = {
             .texture = swapchainTexture,
             .clear_color = SDL_FColor{0.4f, 0.6f, 0.9f, 1.0f},
             .load_op = SDL_GPU_LOADOP_CLEAR,
@@ -476,7 +440,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         SDL_BindGPUGraphicsPipeline(renderPass, appState->pipeline);
 
         // Define which vertex buffers we'll be using (in this case, just the one)
-        std::array vertexBuffers{
+        const std::array vertexBuffers{
             SDL_GPUBufferBinding{
                 .buffer = appState->vertexBuffer,
                 .offset = 0,
@@ -486,7 +450,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         SDL_BindGPUVertexBuffers(renderPass, 0, vertexBuffers.data(), vertexBuffers.size());
 
         // Index, too
-        SDL_GPUBufferBinding indexBinding = {
+        const SDL_GPUBufferBinding indexBinding = {
             .buffer = appState->indexBuffer,
             .offset = 0
         };

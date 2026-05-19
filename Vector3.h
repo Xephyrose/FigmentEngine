@@ -1,8 +1,7 @@
 #ifndef FIGMENTENGINE_VECTOR3_H
 #define FIGMENTENGINE_VECTOR3_H
 
-class Vector3 {
-public:
+struct Vector3 {
     float x, y, z;
 
     Vector3(float x, float y, float z);

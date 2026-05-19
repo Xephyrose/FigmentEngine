@@ -19,6 +19,10 @@ add_executable(FigmentEngine
         Vector3.h
         Game.cpp
         Game.h
+        Mesh.cpp
+        Mesh.h
+        Vertex.cpp
+        Vertex.h
 )
 
 target_link_libraries(FigmentEngine PRIVATE SDL3::SDL3)
