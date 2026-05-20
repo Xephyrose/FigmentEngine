@@ -9,6 +9,7 @@
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
 
+#include "Camera3D.h"
 #include "Vertex.h"
 
 struct AppState
@@ -24,7 +25,25 @@ struct AppState
 
     SDL_GPUTexture* texture = nullptr;
     SDL_GPUSampler* sampler = nullptr;
+
+    Camera3D camera;
+    Transform3D modelTransform;
+
+    float currentAspectRatio = 720.0f / 720.0f;
 };
+
+void UpdateAndUploadMVP(AppState* appState, SDL_GPUCommandBuffer* cmdBuf) {
+    // Get matrices
+    glm::mat4 model = appState->modelTransform.GetModelMatrix();
+    glm::mat4 view = appState->camera.GetViewMatrix();
+    glm::mat4 projection = appState->camera.GetProjectionMatrix(appState->currentAspectRatio);
+
+    // Combine into MVP
+    glm::mat4 mvp = projection * view * model;
+
+    // Push to GPU (slot 0, matching b0 in space1)
+    SDL_PushGPUVertexUniformData(cmdBuf, 0, &mvp[0][0], sizeof(glm::mat4));
+}
 
 bool LoadTextureFromFile(AppState* appState, const std::string& texturePath) {
     if (appState->texture) {
@@ -137,7 +156,7 @@ SDL_GPUShader* LoadShader(SDL_GPUDevice* device, const std::string& shaderFilena
 
         .num_storage_textures = 0u,
         .num_storage_buffers = 0u,
-        .num_uniform_buffers = 0u,
+        .num_uniform_buffers = stage == SDL_GPU_SHADERSTAGE_VERTEX ? 1u : 0u,
     };
 
     SDL_GPUShader* shader = SDL_CreateGPUShader(device, &shaderInfo);
@@ -452,6 +471,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
 
+    appState->camera.transform.position = glm::vec3(0.0f, 0.0f, -2.0f);
+
     return SDL_APP_CONTINUE;
 }
 
@@ -472,7 +493,10 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 
 SDL_AppResult SDL_AppIterate(void* appstate)
 {
-    const AppState* appState = static_cast<AppState*>(appstate);
+    AppState* appState = static_cast<AppState*>(appstate);
+
+    //appState->camera.transform.position += glm::vec3(0.0f, 0.0f, -0.1f);
+    appState->modelTransform.rotation *= glm::angleAxis(0.01f, glm::vec3(0.25f, 0.5f, 0.1));
 
     // Here's where we store the commands that will be eventually sent to the GPU
     SDL_GPUCommandBuffer* commandBuffer = SDL_AcquireGPUCommandBuffer(appState->device);
@@ -521,6 +545,8 @@ SDL_AppResult SDL_AppIterate(void* appstate)
             .offset = 0
         };
         SDL_BindGPUIndexBuffer(renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+
+        UpdateAndUploadMVP(appState, commandBuffer);
 
         // Bind texture and sampler (if they exist)
         SDL_GPUTextureSamplerBinding textureBinding = {

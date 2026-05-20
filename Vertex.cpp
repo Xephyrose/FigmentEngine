@@ -8,4 +8,4 @@ Vertex::Vertex(const float x, const float y, const float z, const float u, const
     uv.y = v;
 }
 
-Vertex::Vertex(const Vector3 &position, const Vector2 &uv) : position(position), uv(uv) {}
+Vertex::Vertex(const glm::vec3 &position, const glm::vec2 &uv) : position(position), uv(uv) {}

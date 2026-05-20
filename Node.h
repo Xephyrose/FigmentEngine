@@ -2,12 +2,11 @@
 #define FIGMENTENGINE_NODE_H
 #include <string>
 
-#include "Vector2.h"
+#include <glm/glm.hpp>
 
 class Node {
 public:
     std::string name;
-    Vector2 position;
     float radians;
 };
 

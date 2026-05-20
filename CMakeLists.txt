@@ -10,10 +10,14 @@ find_package(SDL3_image REQUIRED)
 add_executable(FigmentEngine
         main.cpp
         Node.cpp
-        Vector2.cpp
-        Vector3.cpp
         Mesh.cpp
         Vertex.cpp
+        Transform3D.cpp
+        Transform3D.h
+        Node3D.cpp
+        Node3D.h
+        Camera3D.cpp
+        Camera3D.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

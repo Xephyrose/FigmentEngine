@@ -84,15 +84,15 @@ Mesh Mesh::LoadGLB(const std::string& filepath) {
                 size_t vertexCount = positions.size() / 3;
                 result.vertices.resize(startVertex + vertexCount);
 
-                // Convert positions to Vector3
+                // Convert positions to glm::vec3
                 for (size_t i = 0; i < vertexCount; i++) {
-                    result.vertices[startVertex + i].position = Vector3(
+                    result.vertices[startVertex + i].position = glm::vec3(
                         positions[i * 3],
                         positions[i * 3 + 1],
                         positions[i * 3 + 2]
                     );
                     // Set UVs
-                    result.vertices[startVertex + i].uv = Vector2(0.0f, 0.0f);
+                    result.vertices[startVertex + i].uv = glm::vec2(0.0f, 0.0f);
                 }
             }
 
@@ -103,7 +103,7 @@ Mesh Mesh::LoadGLB(const std::string& filepath) {
 
                 size_t vertexCount = uvs.size() / 2;
                 for (size_t i = 0; i < vertexCount && i < (result.vertices.size() - startVertex); i++) {
-                    result.vertices[startVertex + i].uv = Vector2(uvs[i * 2], uvs[i * 2 + 1]);
+                    result.vertices[startVertex + i].uv = glm::vec2(uvs[i * 2], uvs[i * 2 + 1]);
                 }
             }
 
@@ -195,12 +195,12 @@ Mesh Mesh::LoadGLBFromMemory(const std::vector<uint8_t>& data) {
                 result.vertices.resize(startVertex + vertexCount);
 
                 for (size_t i = 0; i < vertexCount; i++) {
-                    result.vertices[startVertex + i].position = Vector3(
+                    result.vertices[startVertex + i].position = glm::vec3(
                         positions[i * 3],
                         positions[i * 3 + 1],
                         positions[i * 3 + 2]
                     );
-                    result.vertices[startVertex + i].uv = Vector2(0.0f, 0.0f);
+                    result.vertices[startVertex + i].uv = glm::vec2(0.0f, 0.0f);
                 }
             }
 
@@ -211,7 +211,7 @@ Mesh Mesh::LoadGLBFromMemory(const std::vector<uint8_t>& data) {
 
                 size_t vertexCount = uvs.size() / 2;
                 for (size_t i = 0; i < vertexCount && i < (result.vertices.size() - startVertex); i++) {
-                    result.vertices[startVertex + i].uv = Vector2(uvs[i * 2], uvs[i * 2 + 1]);
+                    result.vertices[startVertex + i].uv = glm::vec2(uvs[i * 2], uvs[i * 2 + 1]);
                 }
             }
 
@@ -261,10 +261,10 @@ Mesh Mesh::CreateQuad(const float width, const float height) {
     float halfH = height * 0.5f;
 
     mesh.vertices = {
-        Vertex(Vector3(-halfW,  halfH, 0.0f), Vector2(0.0f, 0.0f)),
-        Vertex(Vector3( halfW,  halfH, 0.0f), Vector2(1.0f, 0.0f)),
-        Vertex(Vector3( halfW, -halfH, 0.0f), Vector2(1.0f, 1.0f)),
-        Vertex(Vector3(-halfW, -halfH, 0.0f), Vector2(0.0f, 1.0f))
+        Vertex(glm::vec3(-halfW,  halfH, 0.0f), glm::vec2(0.0f, 0.0f)),
+        Vertex(glm::vec3( halfW,  halfH, 0.0f), glm::vec2(1.0f, 0.0f)),
+        Vertex(glm::vec3( halfW, -halfH, 0.0f), glm::vec2(1.0f, 1.0f)),
+        Vertex(glm::vec3(-halfW, -halfH, 0.0f), glm::vec2(0.0f, 1.0f))
     };
 
     mesh.indices = {0, 1, 2, 0, 2, 3};
@@ -278,9 +278,9 @@ Mesh Mesh::CreateTriangle(const float size) {
     float halfSize = size * 0.5f;
 
     mesh.vertices = {
-        Vertex(Vector3(0.0f,  halfSize, 0.0f), Vector2(0.5f, 0.0f)),
-        Vertex(Vector3(-halfSize, -halfSize, 0.0f), Vector2(0.0f, 1.0f)),
-        Vertex(Vector3( halfSize, -halfSize, 0.0f), Vector2(1.0f, 1.0f))
+        Vertex(glm::vec3(0.0f,  halfSize, 0.0f), glm::vec2(0.5f, 0.0f)),
+        Vertex(glm::vec3(-halfSize, -halfSize, 0.0f), glm::vec2(0.0f, 1.0f)),
+        Vertex(glm::vec3( halfSize, -halfSize, 0.0f), glm::vec2(1.0f, 1.0f))
     };
 
     mesh.indices = {0, 1, 2};
