@@ -27,7 +27,6 @@ struct AppState
 };
 
 bool LoadTextureFromFile(AppState* appState, const std::string& texturePath) {
-    // Release old texture if it exists
     if (appState->texture) {
         SDL_ReleaseGPUTexture(appState->device, appState->texture);
         appState->texture = nullptr;
@@ -37,131 +36,35 @@ bool LoadTextureFromFile(AppState* appState, const std::string& texturePath) {
         appState->sampler = nullptr;
     }
 
-    // Load image
-    SDL_Surface* surface = IMG_Load(texturePath.c_str());
-    if (!surface) {
-        SDL_Log("Couldn't load texture %s: %s", texturePath.c_str(), SDL_GetError());
-        return false;
-    }
-
-    // Convert to RGBA32 format for consistent GPU upload
-    SDL_Surface* rgbaSurface = SDL_ConvertSurface(surface, SDL_PIXELFORMAT_RGBA32);
-    SDL_DestroySurface(surface);
-
-    if (!rgbaSurface) {
-        SDL_Log("Couldn't convert surface to RGBA32: %s", SDL_GetError());
-        return false;
-    }
-
-    // Create RGBA pixels and log
-    // const auto pixels = static_cast<uint8_t *>(rgbaSurface->pixels);
-    // for (int i = 0; i < 16; i++) {
-    //     SDL_Log("byte[%d]: %d", i, pixels[i]);
-    // }
-
-    // Create GPU texture
-    SDL_GPUTextureCreateInfo texInfo = {
-        .type = SDL_GPU_TEXTURETYPE_2D,
-        .format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM,
-        .usage = SDL_GPU_TEXTUREUSAGE_SAMPLER,
-        .width = static_cast<Uint32>(rgbaSurface->w),
-        .height = static_cast<Uint32>(rgbaSurface->h),
-        .layer_count_or_depth = 1,
-        .num_levels = 1,
-        .sample_count = SDL_GPU_SAMPLECOUNT_1,
-    };
-
-    appState->texture = SDL_CreateGPUTexture(appState->device, &texInfo);
-    if (!appState->texture) {
-        SDL_Log("Couldn't create GPU texture: %s", SDL_GetError());
-        SDL_DestroySurface(rgbaSurface);
-        return false;
-    }
-
-    // Create transfer buffer for texture data
-    Uint32 dataSize = rgbaSurface->w * rgbaSurface->h * 4; // 4 bytes / RGBA
-    SDL_GPUTransferBufferCreateInfo transferInfo = {
-        .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
-        .size = dataSize,
-    };
-
-    SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(appState->device, &transferInfo);
-    if (!transferBuffer) {
-        SDL_Log("Couldn't create transfer buffer: %s", SDL_GetError());
-        SDL_ReleaseGPUTexture(appState->device, appState->texture);
-        appState->texture = nullptr;
-        SDL_DestroySurface(rgbaSurface);
-        return false;
-    }
-
-    // Map and copy texture data
-    void* transferData = SDL_MapGPUTransferBuffer(appState->device, transferBuffer, false);
-    if (!transferData) {
-        SDL_Log("Couldn't map transfer buffer: %s", SDL_GetError());
-        SDL_ReleaseGPUTransferBuffer(appState->device, transferBuffer);
-        SDL_ReleaseGPUTexture(appState->device, appState->texture);
-        appState->texture = nullptr;
-        SDL_DestroySurface(rgbaSurface);
-        return false;
-    }
-
-    SDL_memcpy(transferData, rgbaSurface->pixels, dataSize);
-    SDL_UnmapGPUTransferBuffer(appState->device, transferBuffer);
-
-    // Upload to GPU
     SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(appState->device);
     if (!uploadCmdBuf) {
         SDL_Log("Couldn't acquire command buffer: %s", SDL_GetError());
-        SDL_ReleaseGPUTransferBuffer(appState->device, transferBuffer);
-        SDL_ReleaseGPUTexture(appState->device, appState->texture);
-        appState->texture = nullptr;
-        SDL_DestroySurface(rgbaSurface);
         return false;
     }
 
     SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
 
-    SDL_GPUTextureTransferInfo transferInfo2 = {
-        .transfer_buffer = transferBuffer,
-        .offset = 0,
-        .pixels_per_row = static_cast<Uint32>(rgbaSurface->w), // or rgbaSurface->w
-        .rows_per_layer = static_cast<Uint32>(rgbaSurface->h), // or rgbaSurface->h
-    };
+    // Load image
+    appState->texture = IMG_LoadGPUTexture(appState->device, copyPass, texturePath.c_str(), nullptr, nullptr);
 
-    SDL_GPUTextureRegion textureRegion = {
-        .texture = appState->texture,
-        .w = static_cast<Uint32>(rgbaSurface->w),
-        .h = static_cast<Uint32>(rgbaSurface->h),
-        .d = 1,
-    };
-
-    SDL_UploadToGPUTexture(copyPass, &transferInfo2, &textureRegion, false);
+    // End the copy pass
     SDL_EndGPUCopyPass(copyPass);
+    // Submit the command buffer
     SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
 
-    SDL_WaitForGPUIdle(appState->device);
+    if (!appState->texture) {
+        return false;
+    }
 
-    SDL_Log("Upload command buffer submitted");
-
-    // Create sampler for the texture
     SDL_GPUSamplerCreateInfo samplerInfo = {
         .min_filter = SDL_GPU_FILTER_LINEAR,
         .mag_filter = SDL_GPU_FILTER_LINEAR,
-        .mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_NEAREST,
+        .mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_LINEAR,
         .address_mode_u = SDL_GPU_SAMPLERADDRESSMODE_REPEAT,
         .address_mode_v = SDL_GPU_SAMPLERADDRESSMODE_REPEAT,
         .address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_REPEAT,
     };
-
     appState->sampler = SDL_CreateGPUSampler(appState->device, &samplerInfo);
-    if (!appState->sampler) {
-        SDL_Log("Couldn't create sampler: %s", SDL_GetError());
-    }
-    SDL_Log("Successfully loaded texture: %s (%dx%d)", texturePath.c_str(), rgbaSurface->w, rgbaSurface->h);
-
-    // Cleanup
-    SDL_DestroySurface(rgbaSurface);
-    SDL_ReleaseGPUTransferBuffer(appState->device, transferBuffer);
 
     return true;
 }
@@ -319,10 +222,6 @@ bool CreatePipeline(AppState* appState) {
         SDL_Log("Couldn't create graphics pipeline! %s", SDL_GetError());
         return false;
     }
-
-    // In CreatePipeline, after loading shaders
-    SDL_Log("Vertex shader loaded: %p", static_cast<void *>(vertexShader));
-    SDL_Log("Fragment shader loaded: %p", static_cast<void *>(fragmentShader));
 
     SDL_ReleaseGPUShader(appState->device, vertexShader);
     SDL_ReleaseGPUShader(appState->device, fragmentShader);
@@ -530,12 +429,10 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     // Load texture before the pipeline uses it
     std::filesystem::path texturePath = std::filesystem::path(SDL_GetBasePath()) / "textures" / "missing.png";
     if (!LoadTextureFromFile(appState, texturePath.string())) {
-        SDL_Log("Warning: Couldn't create test texture");
+        SDL_Log("Couldn't load texture.");
     }
 
-    if (appState->texture && appState->sampler) {
-        SDL_Log("Texture and sampler created successfully in init");
-    } else {
+    if (!appState->texture || !appState->sampler) {
         SDL_Log("Texture or sampler is null after loading!");
     }
 
@@ -626,14 +523,11 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         SDL_BindGPUIndexBuffer(renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
 
         // Bind texture and sampler (if they exist)
-        SDL_GPUTextureSamplerBinding bindings[1] = {
-            { appState->texture, appState->sampler }
+        SDL_GPUTextureSamplerBinding textureBinding = {
+            .texture = appState->texture,
+            .sampler = appState->sampler
         };
-
-        SDL_BindGPUFragmentSamplers(renderPass, 0, bindings, 1);
-
-        SDL_Log("Texture ptr: %p", appState->texture);
-        SDL_Log("Sampler ptr: %p", appState->sampler);
+        SDL_BindGPUFragmentSamplers(renderPass, 0, &textureBinding, 1);
 
         // Draw stuff
         SDL_DrawGPUIndexedPrimitives(renderPass, appState->numIndices, 1, 0, 0, 0);

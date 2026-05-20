@@ -5,7 +5,6 @@
 #include "Mesh.h"
 #include <tiny_gltf.h>
 #include <stdexcept>
-#include <iostream>
 #include <cstring>
 #include <vector>
 #include <string>
@@ -60,17 +59,13 @@ Mesh Mesh::LoadGLB(const std::string& filepath) {
 
     // Check if there's warnings with the file / how TinyGLTF reads it
     if (!warn.empty()) {
-        std::cout << "GLTF Warning: " << warn << std::endl;
+        SDL_Log("GLTF Error: %s", warn.c_str());
     }
-
-    // Check if there's errors
     if (!err.empty()) {
-        throw std::runtime_error("GLTF Error: " + err);
+        SDL_Log("GLTF Warning: %s", err.c_str());
     }
-
-    // I guess just even more errors? idk why there's this many things to check for
     if (!success) {
-        throw std::runtime_error("Failed to load GLB file: " + filepath);
+        SDL_Log("Failed to load GLB file: %s", filepath.c_str());
     }
 
     Mesh result;
@@ -157,10 +152,10 @@ Mesh Mesh::LoadGLB(const std::string& filepath) {
         }
     }
 
-    SDL_Log("Mesh has %zu vertices", result.vertices.size());
-    for (size_t i = 0; i < std::min(result.vertices.size(), static_cast<size_t>(5)); i++) {
-        SDL_Log("Vertex %zu: UV=(%f, %f)", i, result.vertices[i].uv.x, result.vertices[i].uv.y);
-    }
+    // SDL_Log("Mesh has %zu vertices", result.vertices.size());
+    // for (size_t i = 0; i < std::min(result.vertices.size(), static_cast<size_t>(5)); i++) {
+    //     SDL_Log("Vertex %zu: UV=(%f, %f)", i, result.vertices[i].uv.x, result.vertices[i].uv.y);
+    // }
 
     return result;
 }
@@ -174,15 +169,13 @@ Mesh Mesh::LoadGLBFromMemory(const std::vector<uint8_t>& data) {
     bool success = loader.LoadBinaryFromMemory(&model, &err, &warn, data.data(), data.size());
 
     if (!warn.empty()) {
-        std::cout << "GLTF Warning: " << warn << std::endl;
+        SDL_Log("GLTF Error: %s", warn.c_str());
     }
-
     if (!err.empty()) {
-        throw std::runtime_error("GLTF Error: " + err);
+        SDL_Log("GLTF Warning: %s", err.c_str());
     }
-
     if (!success) {
-        throw std::runtime_error("Failed to load GLB from memory");
+        SDL_Log("Failed to load GLB from memory");
     }
 
     // Reuse the same processing logic
