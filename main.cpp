@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 
 #include "Mesh.h"
 #include "Node.h"
@@ -20,7 +21,150 @@ struct AppState
     SDL_GPUBuffer* indexBuffer = nullptr;
     Uint32 numVertexes = 0;
     Uint32 numIndices = 0;
+
+    SDL_GPUTexture* texture = nullptr;
+    SDL_GPUSampler* sampler = nullptr;
 };
+
+bool LoadTextureFromFile(AppState* appState, const std::string& texturePath) {
+    // Release old texture if it exists
+    if (appState->texture) {
+        SDL_ReleaseGPUTexture(appState->device, appState->texture);
+        appState->texture = nullptr;
+    }
+    if (appState->sampler) {
+        SDL_ReleaseGPUSampler(appState->device, appState->sampler);
+        appState->sampler = nullptr;
+    }
+
+    // Load image
+    SDL_Surface* surface = IMG_Load(texturePath.c_str());
+    if (!surface) {
+        SDL_Log("Couldn't load texture %s: %s", texturePath.c_str(), SDL_GetError());
+        return false;
+    }
+
+    // Convert to RGBA32 format for consistent GPU upload
+    SDL_Surface* rgbaSurface = SDL_ConvertSurface(surface, SDL_PIXELFORMAT_RGBA32);
+    SDL_DestroySurface(surface);
+
+    if (!rgbaSurface) {
+        SDL_Log("Couldn't convert surface to RGBA32: %s", SDL_GetError());
+        return false;
+    }
+
+    // Create RGBA pixels and log
+    // const auto pixels = static_cast<uint8_t *>(rgbaSurface->pixels);
+    // for (int i = 0; i < 16; i++) {
+    //     SDL_Log("byte[%d]: %d", i, pixels[i]);
+    // }
+
+    // Create GPU texture
+    SDL_GPUTextureCreateInfo texInfo = {
+        .type = SDL_GPU_TEXTURETYPE_2D,
+        .format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM,
+        .usage = SDL_GPU_TEXTUREUSAGE_SAMPLER,
+        .width = static_cast<Uint32>(rgbaSurface->w),
+        .height = static_cast<Uint32>(rgbaSurface->h),
+        .layer_count_or_depth = 1,
+        .num_levels = 1,
+        .sample_count = SDL_GPU_SAMPLECOUNT_1,
+    };
+
+    appState->texture = SDL_CreateGPUTexture(appState->device, &texInfo);
+    if (!appState->texture) {
+        SDL_Log("Couldn't create GPU texture: %s", SDL_GetError());
+        SDL_DestroySurface(rgbaSurface);
+        return false;
+    }
+
+    // Create transfer buffer for texture data
+    Uint32 dataSize = rgbaSurface->w * rgbaSurface->h * 4; // 4 bytes / RGBA
+    SDL_GPUTransferBufferCreateInfo transferInfo = {
+        .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
+        .size = dataSize,
+    };
+
+    SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(appState->device, &transferInfo);
+    if (!transferBuffer) {
+        SDL_Log("Couldn't create transfer buffer: %s", SDL_GetError());
+        SDL_ReleaseGPUTexture(appState->device, appState->texture);
+        appState->texture = nullptr;
+        SDL_DestroySurface(rgbaSurface);
+        return false;
+    }
+
+    // Map and copy texture data
+    void* transferData = SDL_MapGPUTransferBuffer(appState->device, transferBuffer, false);
+    if (!transferData) {
+        SDL_Log("Couldn't map transfer buffer: %s", SDL_GetError());
+        SDL_ReleaseGPUTransferBuffer(appState->device, transferBuffer);
+        SDL_ReleaseGPUTexture(appState->device, appState->texture);
+        appState->texture = nullptr;
+        SDL_DestroySurface(rgbaSurface);
+        return false;
+    }
+
+    SDL_memcpy(transferData, rgbaSurface->pixels, dataSize);
+    SDL_UnmapGPUTransferBuffer(appState->device, transferBuffer);
+
+    // Upload to GPU
+    SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(appState->device);
+    if (!uploadCmdBuf) {
+        SDL_Log("Couldn't acquire command buffer: %s", SDL_GetError());
+        SDL_ReleaseGPUTransferBuffer(appState->device, transferBuffer);
+        SDL_ReleaseGPUTexture(appState->device, appState->texture);
+        appState->texture = nullptr;
+        SDL_DestroySurface(rgbaSurface);
+        return false;
+    }
+
+    SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
+
+    SDL_GPUTextureTransferInfo transferInfo2 = {
+        .transfer_buffer = transferBuffer,
+        .offset = 0,
+        .pixels_per_row = static_cast<Uint32>(rgbaSurface->w), // or rgbaSurface->w
+        .rows_per_layer = static_cast<Uint32>(rgbaSurface->h), // or rgbaSurface->h
+    };
+
+    SDL_GPUTextureRegion textureRegion = {
+        .texture = appState->texture,
+        .w = static_cast<Uint32>(rgbaSurface->w),
+        .h = static_cast<Uint32>(rgbaSurface->h),
+        .d = 1,
+    };
+
+    SDL_UploadToGPUTexture(copyPass, &transferInfo2, &textureRegion, false);
+    SDL_EndGPUCopyPass(copyPass);
+    SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
+
+    SDL_WaitForGPUIdle(appState->device);
+
+    SDL_Log("Upload command buffer submitted");
+
+    // Create sampler for the texture
+    SDL_GPUSamplerCreateInfo samplerInfo = {
+        .min_filter = SDL_GPU_FILTER_LINEAR,
+        .mag_filter = SDL_GPU_FILTER_LINEAR,
+        .mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_NEAREST,
+        .address_mode_u = SDL_GPU_SAMPLERADDRESSMODE_REPEAT,
+        .address_mode_v = SDL_GPU_SAMPLERADDRESSMODE_REPEAT,
+        .address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_REPEAT,
+    };
+
+    appState->sampler = SDL_CreateGPUSampler(appState->device, &samplerInfo);
+    if (!appState->sampler) {
+        SDL_Log("Couldn't create sampler: %s", SDL_GetError());
+    }
+    SDL_Log("Successfully loaded texture: %s (%dx%d)", texturePath.c_str(), rgbaSurface->w, rgbaSurface->h);
+
+    // Cleanup
+    SDL_DestroySurface(rgbaSurface);
+    SDL_ReleaseGPUTransferBuffer(appState->device, transferBuffer);
+
+    return true;
+}
 
 SDL_GPUShader* LoadShader(SDL_GPUDevice* device, const std::string& shaderFilename) {
     SDL_GPUShaderStage stage;
@@ -84,7 +228,15 @@ SDL_GPUShader* LoadShader(SDL_GPUDevice* device, const std::string& shaderFilena
         .entrypoint = entrypoint,
         .format = format,
         .stage = stage,
+
+        .num_samplers =
+            stage == SDL_GPU_SHADERSTAGE_FRAGMENT ? 1u : 0u,
+
+        .num_storage_textures = 0u,
+        .num_storage_buffers = 0u,
+        .num_uniform_buffers = 0u,
     };
+
     SDL_GPUShader* shader = SDL_CreateGPUShader(device, &shaderInfo);
     if (shader == nullptr)
     {
@@ -96,14 +248,15 @@ SDL_GPUShader* LoadShader(SDL_GPUDevice* device, const std::string& shaderFilena
 }
 
 bool CreatePipeline(AppState* appState) {
-    SDL_GPUShader* vertexShader = LoadShader(appState->device, "OnlyPosition.vert");
+    SDL_GPUShader* vertexShader = LoadShader(appState->device, "Textured.vert");
     if (vertexShader == nullptr)
     {
         SDL_Log("Couldn't create vertex shader!");
         return false;
     }
 
-    SDL_GPUShader* fragmentShader = LoadShader(appState->device, "SolidColor.frag");
+    SDL_GPUShader* fragmentShader = LoadShader(appState->device, "Textured.frag");
+    // SDL_GPUShader* fragmentShader = LoadShader(appState->device, "UVs.frag");
     if (fragmentShader == nullptr)
     {
         SDL_Log("Couldn't create fragment shader!");
@@ -123,21 +276,15 @@ bool CreatePipeline(AppState* appState) {
         SDL_GPUVertexAttribute{
             .location = 0,
             .buffer_slot = 0,
-            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT,
-            .offset = 0 * sizeof(float),
+            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
+            .offset = offsetof(Vertex, position),
         },
         SDL_GPUVertexAttribute{
             .location = 1,
             .buffer_slot = 0,
-            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT,
-            .offset = 1 * sizeof(float),
-        },
-        SDL_GPUVertexAttribute{
-            .location = 2,
-            .buffer_slot = 0,
-            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT,
-            .offset = 2 * sizeof(float),
-        },
+            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2,
+            .offset = offsetof(Vertex, uv),
+        }
     };
 
     const std::array colorTargetDescriptions{
@@ -157,8 +304,8 @@ bool CreatePipeline(AppState* appState) {
         },
         .primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
         .rasterizer_state = SDL_GPURasterizerState{
-            .fill_mode = SDL_GPU_FILLMODE_LINE,
-            //.cull_mode = SDL_GPU_CULLMODE_BACK,
+            .fill_mode = SDL_GPU_FILLMODE_FILL,
+            .cull_mode = SDL_GPU_CULLMODE_BACK,
             .front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE,
         },
         .target_info = SDL_GPUGraphicsPipelineTargetInfo{
@@ -172,6 +319,10 @@ bool CreatePipeline(AppState* appState) {
         SDL_Log("Couldn't create graphics pipeline! %s", SDL_GetError());
         return false;
     }
+
+    // In CreatePipeline, after loading shaders
+    SDL_Log("Vertex shader loaded: %p", static_cast<void *>(vertexShader));
+    SDL_Log("Fragment shader loaded: %p", static_cast<void *>(fragmentShader));
 
     SDL_ReleaseGPUShader(appState->device, vertexShader);
     SDL_ReleaseGPUShader(appState->device, fragmentShader);
@@ -355,7 +506,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     auto* appState = new AppState();
     *appstate = appState;
 
-    appState->window = SDL_CreateWindow("FigmentEngine", 1280, 720, 0);
+    appState->window = SDL_CreateWindow("FigmentEngine", 720, 720, 0);
     if (appState->window == nullptr)
     {
         SDL_Log("Couldn't create window: %s", SDL_GetError());
@@ -376,13 +527,31 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
 
+    // Load texture before the pipeline uses it
+    std::filesystem::path texturePath = std::filesystem::path(SDL_GetBasePath()) / "textures" / "missing.png";
+    if (!LoadTextureFromFile(appState, texturePath.string())) {
+        SDL_Log("Warning: Couldn't create test texture");
+    }
+
+    if (appState->texture && appState->sampler) {
+        SDL_Log("Texture and sampler created successfully in init");
+    } else {
+        SDL_Log("Texture or sampler is null after loading!");
+    }
+
     if (!CreatePipeline(appState))
     {
         return SDL_APP_FAILURE;
     }
 
-    Mesh quad = Mesh::CreateQuad(1.6f, 1.6f);
-    if (!LoadMeshToGPU(appState, quad)) {
+    try {
+        Mesh model = Mesh::LoadGLB(std::filesystem::path(SDL_GetBasePath()) / "models/sword_placeholder.glb");
+
+        if (!LoadMeshToGPU(appState, model)) {
+            return SDL_APP_FAILURE;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Failed to load model: " << e.what() << std::endl;
         return SDL_APP_FAILURE;
     }
 
@@ -456,6 +625,16 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         };
         SDL_BindGPUIndexBuffer(renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
 
+        // Bind texture and sampler (if they exist)
+        SDL_GPUTextureSamplerBinding bindings[1] = {
+            { appState->texture, appState->sampler }
+        };
+
+        SDL_BindGPUFragmentSamplers(renderPass, 0, bindings, 1);
+
+        SDL_Log("Texture ptr: %p", appState->texture);
+        SDL_Log("Sampler ptr: %p", appState->sampler);
+
         // Draw stuff
         SDL_DrawGPUIndexedPrimitives(renderPass, appState->numIndices, 1, 0, 0, 0);
 
@@ -471,6 +650,12 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {
     const AppState* appState = static_cast<AppState*>(appstate);
+
+    if (appState->sampler) SDL_ReleaseGPUSampler(appState->device, appState->sampler);
+    if (appState->texture) SDL_ReleaseGPUTexture(appState->device, appState->texture);
+    if (appState->indexBuffer) SDL_ReleaseGPUBuffer(appState->device, appState->indexBuffer);
+    if (appState->vertexBuffer) SDL_ReleaseGPUBuffer(appState->device, appState->vertexBuffer);
+    if (appState->pipeline) SDL_ReleaseGPUGraphicsPipeline(appState->device, appState->pipeline);
 
     SDL_ReleaseWindowFromGPUDevice(appState->device, appState->window);
     // hehehe kill rog astral 5090 with hammers

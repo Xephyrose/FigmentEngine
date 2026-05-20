@@ -9,6 +9,7 @@
 #include <cstring>
 #include <vector>
 #include <string>
+#include <SDL3/SDL_log.h>
 
 static std::vector<float> ReadAttributeData(const tinygltf::Model& model, int accessorIdx) {
     std::vector<float> result;
@@ -54,31 +55,32 @@ Mesh Mesh::LoadGLB(const std::string& filepath) {
     tinygltf::TinyGLTF loader;
     std::string err, warn;
 
-    // Load binary GLB file
+    // Actually load the file
     bool success = loader.LoadBinaryFromFile(&model, &err, &warn, filepath);
 
-    // Print warnings
+    // Check if there's warnings with the file / how TinyGLTF reads it
     if (!warn.empty()) {
         std::cout << "GLTF Warning: " << warn << std::endl;
     }
 
-    // Check for errors
+    // Check if there's errors
     if (!err.empty()) {
         throw std::runtime_error("GLTF Error: " + err);
     }
 
+    // I guess just even more errors? idk why there's this many things to check for
     if (!success) {
         throw std::runtime_error("Failed to load GLB file: " + filepath);
     }
 
     Mesh result;
 
-    // Process all meshes in the GLB
+    // Process all meshes
     for (const auto& gltfMesh : model.meshes) {
         for (const auto& primitive : gltfMesh.primitives) {
             size_t startVertex = result.vertices.size();
 
-            // 1. Read POSITION attribute
+            // Read POSITION attribute
             auto posIt = primitive.attributes.find("POSITION");
             if (posIt != primitive.attributes.end()) {
                 std::vector<float> positions;
@@ -87,14 +89,14 @@ Mesh Mesh::LoadGLB(const std::string& filepath) {
                 size_t vertexCount = positions.size() / 3;
                 result.vertices.resize(startVertex + vertexCount);
 
-                // Fill positions using Vector3
+                // Convert positions to Vector3
                 for (size_t i = 0; i < vertexCount; i++) {
                     result.vertices[startVertex + i].position = Vector3(
                         positions[i * 3],
                         positions[i * 3 + 1],
                         positions[i * 3 + 2]
                     );
-                    // Initialize UV to default (will be overwritten if present)
+                    // Set UVs
                     result.vertices[startVertex + i].uv = Vector2(0.0f, 0.0f);
                 }
             }
@@ -153,6 +155,11 @@ Mesh Mesh::LoadGLB(const std::string& filepath) {
                 }
             }
         }
+    }
+
+    SDL_Log("Mesh has %zu vertices", result.vertices.size());
+    for (size_t i = 0; i < std::min(result.vertices.size(), static_cast<size_t>(5)); i++) {
+        SDL_Log("Vertex %zu: UV=(%f, %f)", i, result.vertices[i].uv.x, result.vertices[i].uv.y);
     }
 
     return result;
