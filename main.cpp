@@ -18,6 +18,7 @@ struct AppState
     SDL_GPUDevice* device = nullptr;
     SDL_GPUGraphicsPipeline* pipeline = nullptr;
 
+    SDL_GPUTexture* depthTexture = nullptr;
     SDL_GPUBuffer* vertexBuffer = nullptr;
     SDL_GPUBuffer* indexBuffer = nullptr;
     Uint32 numVertexes = 0;
@@ -33,15 +34,12 @@ struct AppState
 };
 
 void UpdateAndUploadMVP(AppState* appState, SDL_GPUCommandBuffer* cmdBuf) {
-    // Get matrices
     glm::mat4 model = appState->modelTransform.GetModelMatrix();
     glm::mat4 view = appState->camera.GetViewMatrix();
+    // No hacks — just use the matrices as-is
     glm::mat4 projection = appState->camera.GetProjectionMatrix(appState->currentAspectRatio);
-
-    // Combine into MVP
     glm::mat4 mvp = projection * view * model;
 
-    // Push to GPU (slot 0, matching b0 in space1)
     SDL_PushGPUVertexUniformData(cmdBuf, 0, &mvp[0][0], sizeof(glm::mat4));
 }
 
@@ -230,9 +228,15 @@ bool CreatePipeline(AppState* appState) {
             .cull_mode = SDL_GPU_CULLMODE_BACK,
             .front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE,
         },
+        .depth_stencil_state = SDL_GPUDepthStencilState{
+            .compare_op = SDL_GPU_COMPAREOP_LESS,
+            .enable_depth_test = true,
+            .enable_depth_write = true,
+        },
         .target_info = SDL_GPUGraphicsPipelineTargetInfo{
             .color_target_descriptions = colorTargetDescriptions.data(),
             .num_color_targets = colorTargetDescriptions.size(),
+            .depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D24_UNORM,
         },
     };
     appState->pipeline = SDL_CreateGPUGraphicsPipeline(appState->device, &pipelineCreateInfo);
@@ -445,8 +449,19 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
 
+    SDL_GPUTextureCreateInfo depthInfo = {
+        .type = SDL_GPU_TEXTURETYPE_2D,
+        .format = SDL_GPU_TEXTUREFORMAT_D24_UNORM,
+        .usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET,
+        .width = 720,
+        .height = 720,
+        .layer_count_or_depth = 1,
+        .num_levels = 1,
+    };
+    appState->depthTexture = SDL_CreateGPUTexture(appState->device, &depthInfo);
+
     // Load texture before the pipeline uses it
-    std::filesystem::path texturePath = std::filesystem::path(SDL_GetBasePath()) / "textures" / "missing.png";
+    std::filesystem::path texturePath = std::filesystem::path(SDL_GetBasePath()) / "textures" / "dev.png";
     if (!LoadTextureFromFile(appState, texturePath.string())) {
         SDL_Log("Couldn't load texture.");
     }
@@ -461,7 +476,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     }
 
     try {
-        Mesh model = Mesh::LoadGLB(std::filesystem::path(SDL_GetBasePath()) / "models/sword_placeholder.glb");
+        Mesh model = Mesh::LoadGLB(std::filesystem::path(SDL_GetBasePath()) / "models/placeholder.glb");
 
         if (!LoadMeshToGPU(appState, model)) {
             return SDL_APP_FAILURE;
@@ -471,7 +486,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
 
-    appState->camera.transform.position = glm::vec3(0.0f, 0.0f, -2.0f);
+    appState->camera.transform.position = glm::vec3(0.0f, 0.0f, -1.5f);
 
     return SDL_APP_CONTINUE;
 }
@@ -496,7 +511,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     AppState* appState = static_cast<AppState*>(appstate);
 
     //appState->camera.transform.position += glm::vec3(0.0f, 0.0f, -0.1f);
-    appState->modelTransform.rotation *= glm::angleAxis(0.01f, glm::vec3(0.25f, 0.5f, 0.1));
+    appState->modelTransform.rotation *= glm::angleAxis(0.01f, glm::vec3(0.25f, 0.5f, 0.1f));
 
     // Here's where we store the commands that will be eventually sent to the GPU
     SDL_GPUCommandBuffer* commandBuffer = SDL_AcquireGPUCommandBuffer(appState->device);
@@ -523,8 +538,16 @@ SDL_AppResult SDL_AppIterate(void* appstate)
             .store_op = SDL_GPU_STOREOP_STORE,
         };
 
+        SDL_GPUDepthStencilTargetInfo depthTarget = {
+            .texture = appState->depthTexture,
+            .clear_depth = 1.0f,
+            .load_op = SDL_GPU_LOADOP_CLEAR,
+            .store_op = SDL_GPU_STOREOP_STORE,
+            .cycle = false,
+        };
+
         // now we actually define the render pass, by passing &colorTargetInfo, which modified our swapchainTexture to become cleared
-        SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(commandBuffer, &colorTargetInfo, 1, nullptr);
+        SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(commandBuffer, &colorTargetInfo, 1, &depthTarget);
 
         // Define the pipeline we'll use
         SDL_BindGPUGraphicsPipeline(renderPass, appState->pipeline);
@@ -573,6 +596,7 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
 
     if (appState->sampler) SDL_ReleaseGPUSampler(appState->device, appState->sampler);
     if (appState->texture) SDL_ReleaseGPUTexture(appState->device, appState->texture);
+    if (appState->depthTexture) SDL_ReleaseGPUTexture(appState->device, appState->depthTexture);
     if (appState->indexBuffer) SDL_ReleaseGPUBuffer(appState->device, appState->indexBuffer);
     if (appState->vertexBuffer) SDL_ReleaseGPUBuffer(appState->device, appState->vertexBuffer);
     if (appState->pipeline) SDL_ReleaseGPUGraphicsPipeline(appState->device, appState->pipeline);

@@ -251,6 +251,14 @@ Mesh Mesh::LoadGLBFromMemory(const std::vector<uint8_t>& data) {
         }
     }
 
+    SDL_Log("Model loaded: %zu vertices, %zu indices", result.vertices.size(), result.indices.size());
+    if (result.vertices.size() >= 3) {
+        SDL_Log("First vertex: pos(%f, %f, %f)",
+            result.vertices[0].position.x,
+            result.vertices[0].position.y,
+            result.vertices[0].position.z);
+    }
+
     return result;
 }
 
