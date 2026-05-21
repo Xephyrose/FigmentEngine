@@ -4,12 +4,12 @@
 
 class Camera3D : public Node3D {
 public:
-    float fov = 70.0f;
+    float fov = 60.0f;
     float nearPlane = 0.1f;
     float farPlane = 100.0f;
 
-    glm::mat4 GetViewMatrix() const;
-    glm::mat4 GetProjectionMatrix(float aspectRatio) const;
+    [[nodiscard]] glm::mat4 GetViewMatrix() const;
+    [[nodiscard]] glm::mat4 GetProjectionMatrix(float aspectRatio) const;
 };
 
 

@@ -33,11 +33,11 @@ struct AppState
     float currentAspectRatio = 720.0f / 720.0f;
 };
 
-void UpdateAndUploadMVP(AppState* appState, SDL_GPUCommandBuffer* cmdBuf) {
-    glm::mat4 model = appState->modelTransform.GetModelMatrix();
-    glm::mat4 view = appState->camera.GetViewMatrix();
-    // No hacks — just use the matrices as-is
-    glm::mat4 projection = appState->camera.GetProjectionMatrix(appState->currentAspectRatio);
+void UpdateAndUploadMVP(const AppState* appState, SDL_GPUCommandBuffer* cmdBuf) {
+    const glm::mat4 model = appState->modelTransform.GetModelMatrix();
+    const glm::mat4 view = appState->camera.GetViewMatrix();
+    const glm::mat4 projection = appState->camera.GetProjectionMatrix(appState->currentAspectRatio);
+
     glm::mat4 mvp = projection * view * model;
 
     SDL_PushGPUVertexUniformData(cmdBuf, 0, &mvp[0][0], sizeof(glm::mat4));
@@ -236,7 +236,8 @@ bool CreatePipeline(AppState* appState) {
         .target_info = SDL_GPUGraphicsPipelineTargetInfo{
             .color_target_descriptions = colorTargetDescriptions.data(),
             .num_color_targets = colorTargetDescriptions.size(),
-            .depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D24_UNORM,
+            .depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT_S8_UINT,
+            .has_depth_stencil_target = true
         },
     };
     appState->pipeline = SDL_CreateGPUGraphicsPipeline(appState->device, &pipelineCreateInfo);
@@ -451,12 +452,13 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     SDL_GPUTextureCreateInfo depthInfo = {
         .type = SDL_GPU_TEXTURETYPE_2D,
-        .format = SDL_GPU_TEXTUREFORMAT_D24_UNORM,
+        .format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT_S8_UINT,
         .usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET,
         .width = 720,
         .height = 720,
         .layer_count_or_depth = 1,
         .num_levels = 1,
+        .sample_count = SDL_GPU_SAMPLECOUNT_1
     };
     appState->depthTexture = SDL_CreateGPUTexture(appState->device, &depthInfo);
 
@@ -538,12 +540,14 @@ SDL_AppResult SDL_AppIterate(void* appstate)
             .store_op = SDL_GPU_STOREOP_STORE,
         };
 
-        SDL_GPUDepthStencilTargetInfo depthTarget = {
+        const SDL_GPUDepthStencilTargetInfo depthTarget = {
             .texture = appState->depthTexture,
             .clear_depth = 1.0f,
             .load_op = SDL_GPU_LOADOP_CLEAR,
-            .store_op = SDL_GPU_STOREOP_STORE,
-            .cycle = false,
+            .store_op = SDL_GPU_STOREOP_DONT_CARE,
+            .stencil_load_op = SDL_GPU_LOADOP_CLEAR,
+            .stencil_store_op = SDL_GPU_STOREOP_DONT_CARE,
+            .cycle = true
         };
 
         // now we actually define the render pass, by passing &colorTargetInfo, which modified our swapchainTexture to become cleared

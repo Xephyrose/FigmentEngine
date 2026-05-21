@@ -5,5 +5,5 @@ glm::mat4 Camera3D::GetViewMatrix() const {
 }
 
 glm::mat4 Camera3D::GetProjectionMatrix(const float aspectRatio) const {
-    return glm::perspectiveRH_ZO(glm::radians(fov), aspectRatio, nearPlane, farPlane);
+    return glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
 }
