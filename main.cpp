@@ -84,7 +84,7 @@ SDL_GPUShader* LoadShader(SDL_GPUDevice* device, const std::string& shaderFilena
         return nullptr;
     }
 
-    std::filesystem::path fullPath = std::filesystem::path(SDL_GetBasePath()) / "shaders";
+    std::filesystem::path fullPath = std::filesystem::path(SDL_GetBasePath()) / "assets" / "shaders";
     // Starts as invalid so we don't assume
     SDL_GPUShaderFormat format = SDL_GPU_SHADERFORMAT_INVALID;
     // Different shaer formats have different entrypoint names
@@ -465,7 +465,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->depthTexture = SDL_CreateGPUTexture(appState->device, &depthInfo);
 
     // Load texture before the pipeline uses it
-    std::filesystem::path texturePath = std::filesystem::path(SDL_GetBasePath()) / "textures" / "dev.png";
+    std::filesystem::path texturePath = std::filesystem::path(SDL_GetBasePath()) / "assets" / "textures" / "dev.png";
     if (!LoadTextureFromFile(appState, texturePath.string())) {
         SDL_Log("Couldn't load texture.");
     }
@@ -480,7 +480,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     }
 
     try {
-        Mesh model = Mesh::LoadGLB(std::filesystem::path(SDL_GetBasePath()) / "models/zulu.glb");
+        Mesh model = Mesh::LoadGLB(std::filesystem::path(SDL_GetBasePath()) / "assets" / "models" / "zulu.glb");
 
         if (!LoadMeshToGPU(appState, model)) {
             return SDL_APP_FAILURE;
