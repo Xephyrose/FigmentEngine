@@ -4,6 +4,7 @@
 #include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL_video.h>
 
+#include "Material.h"
 #include "Transform3D.h"
 
 class Node;
@@ -35,6 +36,14 @@ struct AppState {
     float sensitivity = 0.05f;
 
     float currentAspectRatio = static_cast<float>(window_width) / static_cast<float>(window_height);
+
+    std::unordered_map<std::string, SDL_GPUTexture*> textures;
+    std::unordered_map<std::string, SDL_GPUSampler*> samplers;
+    std::unordered_map<std::string, SDL_GPUGraphicsPipeline*> pipelines;
+
+    std::unordered_map<std::string, Material> materials;
+
+    bool LoadTextureFromFile(const std::string& texturePath);
 };
 
 

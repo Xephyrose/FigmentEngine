@@ -6,6 +6,7 @@
   <component name="BackendCodeEditorMiscSettings">
     <option name="/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexedValue" value="true" type="bool" />
     <option name="/Default/Housekeeping/OptionsDialog/SelectedPageId/@EntryValue" value="InlayHintsGeneralOptionsPageId" type="string" />
+    <option name="/Default/Housekeeping/RefactoringsMru/RenameRefactoring/DoSearchForTextInStrings/@EntryValue" value="true" type="bool" />
   </component>
   <component name="CMakePresetLoader">{
   &quot;useNewFormat&quot;: true
@@ -19,12 +20,11 @@
   <component name="CMakeRunConfigurationManager">
     <generated>
       <config projectName="FigmentEngine" targetName="FigmentEngine" />
-      <config projectName="FigmentEngine" targetName="Compile_SolidColor_frag" />
+      <config projectName="FigmentEngine" targetName="Compile_UnlitTextured_frag" />
+      <config projectName="FigmentEngine" targetName="Compile_UnlitColor_frag" />
       <config projectName="FigmentEngine" targetName="CompileShaders" />
-      <config projectName="FigmentEngine" targetName="Compile_OnlyPosition_vert" />
-      <config projectName="FigmentEngine" targetName="Compile_Textured_vert" />
-      <config projectName="FigmentEngine" targetName="Compile_Textured_frag" />
-      <config projectName="FigmentEngine" targetName="Compile_UVs_frag" />
+      <config projectName="FigmentEngine" targetName="Compile_UnlitTextured_vert" />
+      <config projectName="FigmentEngine" targetName="Compile_UnlitUVs_frag" />
       <config projectName="FigmentEngine" targetName="CopyAssets" />
     </generated>
   </component>
@@ -35,64 +35,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5222af9d-b1fd-4aa6-bc40-7cc49bf34801" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/AppState.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Material.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MaterialUnlitTextured.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/AppState.h" beforeDir="false" afterPath="$PROJECT_DIR$/AppState.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/bin/shadercross" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/include/SDL3_shadercross/SDL_shadercross.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/cmake/SDL3_shadercross/FindDirectXShaderCompiler.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/cmake/SDL3_shadercross/SDL3_shadercross-shared-targets-release.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/cmake/SDL3_shadercross/SDL3_shadercross-shared-targets.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/cmake/SDL3_shadercross/SDL3_shadercross-static-targets-release.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/cmake/SDL3_shadercross/SDL3_shadercross-static-targets.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/cmake/SDL3_shadercross/SDL3_shadercrossConfig.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/cmake/SDL3_shadercross/SDL3_shadercrossConfigVersion.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/cmake/SDL3_shadercross/sdlcpu.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/libSDL3.so.0" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/libSDL3.so.0.5.0" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/libSDL3_shadercross.so.0" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/libSDL3_shadercross.so.0.0.0" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/libspirv-cross-c-shared.so.0" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/libspirv-cross-c-shared.so.0.64.0" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/libvkd3d-shader.so.1" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/libvkd3d-shader.so.1.17.0" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/libvkd3d-utils.so.1" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/libvkd3d-utils.so.1.6.5" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/libvkd3d.so.1" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/libvkd3d.so.1.19.0" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/lib/pkgconfig/sdl3-shadercross.pc" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/share/licenses/SDL3_shadercross/LICENSE.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/share/licenses/vkd3d/COPYING" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/share/man/man3/SDL_SHADERCROSS_MAJOR_VERSION.3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/share/man/man3/SDL_ShaderCross_CompileComputePipelineFromSPIRV.3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/share/man/man3/SDL_ShaderCross_CompileDXBCFromHLSL.3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/share/man/man3/SDL_ShaderCross_CompileDXBCFromSPIRV.3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/share/man/man3/SDL_ShaderCross_CompileDXILFromHLSL.3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/share/man/man3/SDL_ShaderCross_CompileDXILFromSPIRV.3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/share/man/man3/SDL_ShaderCross_CompileGraphicsShaderFromSPIRV.3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/share/man/man3/SDL_ShaderCross_CompileSPIRVFromHLSL.3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/share/man/man3/SDL_ShaderCross_GetHLSLShaderFormats.3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/share/man/man3/SDL_ShaderCross_GetSPIRVShaderFormats.3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/share/man/man3/SDL_ShaderCross_Init.3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/share/man/man3/SDL_ShaderCross_Quit.3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/share/man/man3/SDL_ShaderCross_ReflectComputeSPIRV.3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/share/man/man3/SDL_ShaderCross_ReflectGraphicsSPIRV.3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/share/man/man3/SDL_ShaderCross_TranspileHLSLFromSPIRV.3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDL3_shadercross-3.0.0-linux-x64/share/man/man3/SDL_ShaderCross_TranspileMSLFromSPIRV.3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/shaders/OnlyPosition.vert.dxil" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/shaders/OnlyPosition.vert.msl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/shaders/OnlyPosition.vert.spv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/shaders/SolidColor.frag.dxil" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/shaders/SolidColor.frag.msl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/shaders/SolidColor.frag.spv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/shaders/Textured.frag.dxil" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/shaders/Textured.frag.msl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/shaders/Textured.frag.spv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/shaders/Textured.vert.dxil" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/shaders/Textured.vert.msl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/shaders/Textured.vert.spv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/shaders/UVs.frag.dxil" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/shaders/UVs.frag.msl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/shaders/UVs.frag.spv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Mesh.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Mesh.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Mesh.h" beforeDir="false" afterPath="$PROJECT_DIR$/Mesh.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Node.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Node.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WorkingFiles/zulu.blend" beforeDir="false" afterPath="$PROJECT_DIR$/WorkingFiles/zulu.blend" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WorkingFiles/zulu.blend1" beforeDir="false" afterPath="$PROJECT_DIR$/WorkingFiles/zulu.blend1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/models/zulu.glb" beforeDir="false" afterPath="$PROJECT_DIR$/assets/models/zulu.glb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/shaders/OnlyPosition.vert.hlsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/shaders/SolidColor.frag.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/assets/shaders/UnlitColor.frag.hlsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/shaders/Textured.frag.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/assets/shaders/UnlitTextured.frag.hlsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/shaders/Textured.vert.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/assets/shaders/UnlitTextured.vert.hlsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/shaders/UVs.frag.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/assets/shaders/UnlitUVs.frag.hlsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -125,58 +84,58 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "CMake Application.FigmentEngine.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.RadMigrateCodeStyle": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "/home/max/Repos/ray_tracing_in_one_weekend-main",
-    "settings.editor.selected.configurable": "terminal"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;CMake Application.FigmentEngine.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.RadMigrateCodeStyle&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/max/Repos/ray_tracing_in_one_weekend-main&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;terminal&quot;
   },
-  "keyToStringList": {
-    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
-      "C++",
-      "TEXT"
+  &quot;keyToStringList&quot;: {
+    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
+      &quot;C++&quot;,
+      &quot;TEXT&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/cmake-build-debug/shaders" />
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.FigmentEngine">
-    <configuration name="Compile_OnlyPosition_vert" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="FigmentEngine" TARGET_NAME="Compile_OnlyPosition_vert" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Compile_SolidColor_frag" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="FigmentEngine" TARGET_NAME="Compile_SolidColor_frag" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Compile_Textured_frag" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="FigmentEngine" TARGET_NAME="Compile_Textured_frag" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Compile_Textured_vert" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="FigmentEngine" TARGET_NAME="Compile_Textured_vert" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Compile_UVs_frag" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="FigmentEngine" TARGET_NAME="Compile_UVs_frag" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Compile_UnlitColor_frag" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="FigmentEngine" TARGET_NAME="Compile_UnlitColor_frag" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Compile_UnlitTextured_frag" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="FigmentEngine" TARGET_NAME="Compile_UnlitTextured_frag" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Compile_UnlitTextured_vert" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="FigmentEngine" TARGET_NAME="Compile_UnlitTextured_vert" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Compile_UnlitUVs_frag" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="FigmentEngine" TARGET_NAME="Compile_UnlitUVs_frag" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -197,11 +156,11 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="CMake Application.Compile_OnlyPosition_vert" />
-      <item itemvalue="CMake Application.Compile_SolidColor_frag" />
-      <item itemvalue="CMake Application.Compile_Textured_frag" />
-      <item itemvalue="CMake Application.Compile_Textured_vert" />
       <item itemvalue="CMake Application.Compile_UVs_frag" />
+      <item itemvalue="CMake Application.Compile_UnlitColor_frag" />
+      <item itemvalue="CMake Application.Compile_UnlitTextured_frag" />
+      <item itemvalue="CMake Application.Compile_UnlitTextured_vert" />
+      <item itemvalue="CMake Application.Compile_UnlitUVs_frag" />
       <item itemvalue="CMake Application.CopyAssets" />
       <item itemvalue="CMake Application.FigmentEngine" />
     </list>
@@ -232,6 +191,8 @@
       <workItem from="1779427501024" duration="5278000" />
       <workItem from="1779472591425" duration="2627000" />
       <workItem from="1779475225340" duration="3844000" />
+      <workItem from="1779486113859" duration="6938000" />
+      <workItem from="1779493333753" duration="104000" />
     </task>
     <servers />
   </component>

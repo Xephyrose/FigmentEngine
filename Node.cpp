@@ -1,7 +1,5 @@
 #include "Node.h"
 
-#include <SDL3/SDL_log.h>
-
 Node::Node(const std::string &name) : name(name) {}
 Node::Node() : name("Node") {}
 

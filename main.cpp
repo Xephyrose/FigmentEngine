@@ -2,16 +2,15 @@
 #include <iostream>
 #include <vector>
 #include <SDL3/SDL.h>
-#include <SDL3_image/SDL_image.h>
 
 #include "Mesh.h"
 #include "Node.h"
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
 
-#include "AppState.h"
 #include "Camera3D.h"
 #include "FreeCam.h"
+#include "AppState.h"
 #include "tiny_gltf.h"
 #include "Vertex.h"
 
@@ -23,49 +22,6 @@ void UpdateAndUploadMVP(const AppState* appState, SDL_GPUCommandBuffer* cmdBuf) 
     glm::mat4 mvp = projection * view * model;
 
     SDL_PushGPUVertexUniformData(cmdBuf, 0, &mvp[0][0], sizeof(glm::mat4));
-}
-
-bool LoadTextureFromFile(AppState* appState, const std::string& texturePath) {
-    if (appState->texture) {
-        SDL_ReleaseGPUTexture(appState->device, appState->texture);
-        appState->texture = nullptr;
-    }
-    if (appState->sampler) {
-        SDL_ReleaseGPUSampler(appState->device, appState->sampler);
-        appState->sampler = nullptr;
-    }
-
-    SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(appState->device);
-    if (!uploadCmdBuf) {
-        SDL_Log("Couldn't acquire command buffer: %s", SDL_GetError());
-        return false;
-    }
-
-    SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
-
-    // Load image
-    appState->texture = IMG_LoadGPUTexture(appState->device, copyPass, texturePath.c_str(), nullptr, nullptr);
-
-    // End the copy pass
-    SDL_EndGPUCopyPass(copyPass);
-    // Submit the command buffer
-    SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
-
-    if (!appState->texture) {
-        return false;
-    }
-
-    SDL_GPUSamplerCreateInfo samplerInfo = {
-        .min_filter = SDL_GPU_FILTER_LINEAR,
-        .mag_filter = SDL_GPU_FILTER_LINEAR,
-        .mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_LINEAR,
-        .address_mode_u = SDL_GPU_SAMPLERADDRESSMODE_REPEAT,
-        .address_mode_v = SDL_GPU_SAMPLERADDRESSMODE_REPEAT,
-        .address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_REPEAT,
-    };
-    appState->sampler = SDL_CreateGPUSampler(appState->device, &samplerInfo);
-
-    return true;
 }
 
 SDL_GPUShader* LoadShader(SDL_GPUDevice* device, const std::string& shaderFilename) {
@@ -150,14 +106,14 @@ SDL_GPUShader* LoadShader(SDL_GPUDevice* device, const std::string& shaderFilena
 }
 
 bool CreatePipeline(AppState* appState) {
-    SDL_GPUShader* vertexShader = LoadShader(appState->device, "Textured.vert");
+    SDL_GPUShader* vertexShader = LoadShader(appState->device, "UnlitTextured.vert");
     if (vertexShader == nullptr)
     {
         SDL_Log("Couldn't create vertex shader!");
         return false;
     }
 
-    SDL_GPUShader* fragmentShader = LoadShader(appState->device, "Textured.frag");
+    SDL_GPUShader* fragmentShader = LoadShader(appState->device, "UnlitTextured.frag");
     // SDL_GPUShader* fragmentShader = LoadShader(appState->device, "UVs.frag");
     if (fragmentShader == nullptr)
     {
@@ -466,7 +422,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     // Load texture before the pipeline uses it
     std::filesystem::path texturePath = std::filesystem::path(SDL_GetBasePath()) / "assets" / "textures" / "dev.png";
-    if (!LoadTextureFromFile(appState, texturePath.string())) {
+    if (!appState->LoadTextureFromFile(texturePath.string())) {
         SDL_Log("Couldn't load texture.");
     }
 
@@ -480,7 +436,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     }
 
     try {
-        Mesh model = Mesh::LoadGLB(std::filesystem::path(SDL_GetBasePath()) / "assets" / "models" / "zulu.glb");
+        Mesh model = Mesh::LoadGLB(*appState, std::filesystem::path(SDL_GetBasePath()) / "assets" / "models" / "zulu.glb");
 
         if (!LoadMeshToGPU(appState, model)) {
             return SDL_APP_FAILURE;

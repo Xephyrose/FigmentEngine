@@ -1,18 +1,32 @@
 #ifndef FIGMENTENGINE_MESH_H
 #define FIGMENTENGINE_MESH_H
-#include <cstdint>
 #include <vector>
+
+#include "AppState.h"
 #include "Vertex.h"
+#include "Material.h"
+
+struct Submesh {
+    std::string name;
+    std::string meshName;
+    Material* material;
+    size_t startVertex;
+    size_t vertexCount;
+    size_t startIndex;
+    size_t indexCount;
+};
 
 struct Mesh {
     std::vector<Vertex> vertices;
     std::vector<uint16_t> indices;
+    std::vector<Submesh> submeshes;
 
-    static Mesh CreateQuad(const float width = 1.6f, const float height = 1.6f);
-    static Mesh CreateTriangle(const float size = 1.4f);
+    [[nodiscard]] const Submesh *GetSubmesh(const std::string &name) const;
 
-    static Mesh LoadGLB(const std::string& filepath);
-    static Mesh LoadGLBFromMemory(const std::vector<uint8_t>& data);
+    static Mesh CreateQuad(float width = 1.6f, float height = 1.6f);
+    static Mesh CreateTriangle(float size = 1.4f);
+
+    static Mesh LoadGLB(const AppState& appState, const std::string& filepath);
 };
 
 #endif //FIGMENTENGINE_MESH_H
