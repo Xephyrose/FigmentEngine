@@ -1,6 +1,7 @@
 #include "Transform3D.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+#include <SDL3/SDL_log.h>
 
 void Transform3D::updateQuaternion() {
     quaternion = glm::quat(glm::radians(rotation));
@@ -59,18 +60,13 @@ void Transform3D::rotateObjectLocal(const glm::vec3& eulerDegrees) {
 }
 
 glm::mat4 Transform3D::getMatrix() const {
-    printf("getMatrix: rotationDirty=%d, usingQuaternion=%d\n", rotationDirty, usingQuaternion);
-    printf("getMatrix: rotation=(%.2f, %.2f, %.2f)\n", rotation.x, rotation.y, rotation.z);
-    printf("getMatrix: quaternion=(%.2f, %.2f, %.2f, %.2f)\n", quaternion.x, quaternion.y, quaternion.z, quaternion.w);
 
     glm::mat4 mat(1.0f);
     mat = glm::translate(mat, position);
 
     if (!rotationDirty || usingQuaternion) {
-        printf("getMatrix: Using quaternion\n");
         mat = mat * glm::mat4_cast(quaternion);
     } else {
-        printf("getMatrix: Using euler\n");
         mat = mat * glm::mat4_cast(glm::quat(glm::radians(rotation)));
     }
 
@@ -102,4 +98,8 @@ void Transform3D::lookAt(const glm::vec3& target) {
     quaternion = glm::normalize(glm::quat_cast(glm::transpose(rotMat)));
     rotationDirty = true;
     usingQuaternion = true;
+}
+
+void Transform3D::move(glm::vec3 amt) {
+    position += amt;
 }

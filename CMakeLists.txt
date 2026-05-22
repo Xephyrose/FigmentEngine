@@ -18,6 +18,9 @@ add_executable(FigmentEngine
         Node3D.h
         Camera3D.cpp
         Camera3D.h
+        FreeCam.cpp
+        FreeCam.h
+        AppState.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

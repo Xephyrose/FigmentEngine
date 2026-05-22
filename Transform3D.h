@@ -32,6 +32,8 @@ struct Transform3D {
     [[nodiscard]] glm::vec3 getRight() const;
     [[nodiscard]] glm::vec3 getUp() const;
     void lookAt(const glm::vec3& target);
+
+    void move(glm::vec3 amt);
 };
 
 inline constexpr glm::vec3 ZERO = { 0, 0, 0 };

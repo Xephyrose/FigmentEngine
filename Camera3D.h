@@ -4,6 +4,7 @@
 
 class Camera3D : public Node3D {
 public:
+    explicit Camera3D(const AppState& appState);
     float fov = 90.0f;
     float nearPlane = 0.1f;
     float farPlane = 100.0f;

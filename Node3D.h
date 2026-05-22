@@ -5,7 +5,8 @@
 
 class Node3D : public Node {
 public:
-    Transform3D transform;
+    Transform3D localTransform;
+    Transform3D globalTransform;
 };
 
 

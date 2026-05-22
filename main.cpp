@@ -9,38 +9,16 @@
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
 
+#include "AppState.h"
 #include "Camera3D.h"
+#include "FreeCam.h"
+#include "tiny_gltf.h"
 #include "Vertex.h"
-
-struct AppState
-{
-    SDL_Window* window = nullptr;
-    SDL_GPUDevice* device = nullptr;
-    SDL_GPUGraphicsPipeline* pipeline = nullptr;
-
-    SDL_GPUTexture* depthTexture = nullptr;
-    SDL_GPUBuffer* vertexBuffer = nullptr;
-    SDL_GPUBuffer* indexBuffer = nullptr;
-    Uint32 numVertexes = 0;
-    Uint32 numIndices = 0;
-
-    SDL_GPUTexture* texture = nullptr;
-    SDL_GPUSampler* sampler = nullptr;
-
-
-
-    Camera3D camera;
-    Transform3D modelTransform;
-
-    glm::vec2 resolution = glm::vec2(1280, 720);
-
-    float currentAspectRatio = resolution.x / resolution.y;
-};
 
 void UpdateAndUploadMVP(const AppState* appState, SDL_GPUCommandBuffer* cmdBuf) {
     const glm::mat4 model = appState->modelTransform.getMatrix();
-    const glm::mat4 view = appState->camera.GetViewMatrix();
-    const glm::mat4 projection = appState->camera.GetProjectionMatrix(appState->currentAspectRatio);
+    const glm::mat4 view = appState->current_camera->GetViewMatrix();
+    const glm::mat4 projection = appState->current_camera->GetProjectionMatrix(appState->currentAspectRatio);
 
     glm::mat4 mvp = projection * view * model;
 
@@ -428,17 +406,37 @@ bool LoadMeshToGPU(AppState* appState, const Mesh& mesh) {
     return true;
 }
 
+void handle_mouse_motion(const AppState* appState, const SDL_Event* event) {
+    appState->current_camera->localTransform.rotate(glm::vec3(-event->motion.yrel * appState->sensitivity, -event->motion.xrel * appState->sensitivity, 0));
+}
+
+void HandleInput(const AppState* appState) {
+    for (int i = 0; i < appState->nodes.size(); i++) {
+        appState->nodes[i]->Input(*appState, SDL_GetKeyboardState(nullptr));
+    }
+}
+
+void HandleUpdate(const AppState* appState, float deltaTime) {
+    for (int i = 0; i < appState->nodes.size(); i++) {
+        appState->nodes[i]->Update(*appState, 1.0f);
+    }
+}
+
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
     auto* appState = new AppState();
     *appstate = appState;
 
-    appState->window = SDL_CreateWindow("FigmentEngine", appState->resolution.x, appState->resolution.y, 0);
+    auto* freeCam = new FreeCam(*appState);
+    appState->nodes.push_back(freeCam);
+
+    appState->window = SDL_CreateWindow("FigmentEngine", appState->window_width, appState->window_height, 0);
     if (appState->window == nullptr)
     {
         SDL_Log("Couldn't create window: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
+    SDL_SetWindowRelativeMouseMode(appState->window, true);
 
     constexpr SDL_GPUShaderFormat formatFlags = SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL;
     appState->device = SDL_CreateGPUDevice(formatFlags, true, nullptr);
@@ -454,12 +452,12 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
 
-    SDL_GPUTextureCreateInfo depthInfo = {
+    const SDL_GPUTextureCreateInfo depthInfo = {
         .type = SDL_GPU_TEXTURETYPE_2D,
         .format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT_S8_UINT,
         .usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET,
-        .width = static_cast<Uint32>(appState->resolution.x),
-        .height = static_cast<Uint32>(appState->resolution.y),
+        .width = static_cast<Uint32>(appState->window_width),
+        .height = static_cast<Uint32>(appState->window_height),
         .layer_count_or_depth = 1,
         .num_levels = 1,
         .sample_count = SDL_GPU_SAMPLECOUNT_1
@@ -492,18 +490,17 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
 
-    appState->camera.transform.position = glm::vec3(0.0f, 0.0f, 1.5f);
-
     return SDL_APP_CONTINUE;
 }
 
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 {
+    auto* appState = static_cast<AppState*>(appstate);
+
     switch (event->type)
     {
-        case SDL_EVENT_KEY_DOWN:
-        case SDL_EVENT_KEY_UP:
-
+        case SDL_EVENT_MOUSE_MOTION:
+            handle_mouse_motion(appState, event);
             return SDL_APP_CONTINUE;
         case SDL_EVENT_QUIT:
             return SDL_APP_SUCCESS;
@@ -516,7 +513,8 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 {
     auto* appState = static_cast<AppState*>(appstate);
 
-    appState->camera.transform.rotate(glm::vec3(0.25f, 0.025f, 0.025f));
+    HandleInput(appState);
+    HandleUpdate(appState, 1.0f); //TODO: Delta time
 
     // Here's where we store the commands that will be eventually sent to the GPU
     SDL_GPUCommandBuffer* commandBuffer = SDL_AcquireGPUCommandBuffer(appState->device);
@@ -576,6 +574,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         };
         SDL_BindGPUIndexBuffer(renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
 
+
         UpdateAndUploadMVP(appState, commandBuffer);
 
         // Bind texture and sampler (if they exist)
@@ -587,6 +586,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 
         // Draw stuff
         SDL_DrawGPUIndexedPrimitives(renderPass, appState->numIndices, 1, 0, 0, 0);
+
 
         // Finally, end the render pass
         SDL_EndGPURenderPass(renderPass);
@@ -600,6 +600,8 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {
     const AppState* appState = static_cast<AppState*>(appstate);
+
+    for (Node* node : appState->nodes) delete node;
 
     if (appState->sampler) SDL_ReleaseGPUSampler(appState->device, appState->sampler);
     if (appState->texture) SDL_ReleaseGPUTexture(appState->device, appState->texture);

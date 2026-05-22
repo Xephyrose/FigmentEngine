@@ -1,9 +1,14 @@
 #include "Camera3D.h"
 
+Camera3D::Camera3D(const AppState& appState) {
+    appState.current_camera = this;
+    name = "Camera";
+}
+
 glm::mat4 Camera3D::GetViewMatrix() const {
-    const glm::vec3 forward = transform.getForward();
-    const glm::vec3 target = transform.position + forward;
-    return glm::lookAt(transform.position, target, transform.getUp());
+    const glm::vec3 forward = localTransform.getForward();
+    const glm::vec3 target = localTransform.position + forward;
+    return glm::lookAt(localTransform.position, target, localTransform.getUp());
 }
 
 glm::mat4 Camera3D::GetProjectionMatrix(const float aspectRatio) const {
