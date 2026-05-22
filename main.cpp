@@ -27,14 +27,18 @@ struct AppState
     SDL_GPUTexture* texture = nullptr;
     SDL_GPUSampler* sampler = nullptr;
 
+
+
     Camera3D camera;
     Transform3D modelTransform;
 
-    float currentAspectRatio = 720.0f / 720.0f;
+    glm::vec2 resolution = glm::vec2(1280, 720);
+
+    float currentAspectRatio = resolution.x / resolution.y;
 };
 
 void UpdateAndUploadMVP(const AppState* appState, SDL_GPUCommandBuffer* cmdBuf) {
-    const glm::mat4 model = appState->modelTransform.GetModelMatrix();
+    const glm::mat4 model = appState->modelTransform.getMatrix();
     const glm::mat4 view = appState->camera.GetViewMatrix();
     const glm::mat4 projection = appState->camera.GetProjectionMatrix(appState->currentAspectRatio);
 
@@ -429,7 +433,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     auto* appState = new AppState();
     *appstate = appState;
 
-    appState->window = SDL_CreateWindow("FigmentEngine", 720, 720, 0);
+    appState->window = SDL_CreateWindow("FigmentEngine", appState->resolution.x, appState->resolution.y, 0);
     if (appState->window == nullptr)
     {
         SDL_Log("Couldn't create window: %s", SDL_GetError());
@@ -454,8 +458,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         .type = SDL_GPU_TEXTURETYPE_2D,
         .format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT_S8_UINT,
         .usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET,
-        .width = 720,
-        .height = 720,
+        .width = static_cast<Uint32>(appState->resolution.x),
+        .height = static_cast<Uint32>(appState->resolution.y),
         .layer_count_or_depth = 1,
         .num_levels = 1,
         .sample_count = SDL_GPU_SAMPLECOUNT_1
@@ -478,7 +482,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     }
 
     try {
-        Mesh model = Mesh::LoadGLB(std::filesystem::path(SDL_GetBasePath()) / "models/placeholder.glb");
+        Mesh model = Mesh::LoadGLB(std::filesystem::path(SDL_GetBasePath()) / "models/zulu.glb");
 
         if (!LoadMeshToGPU(appState, model)) {
             return SDL_APP_FAILURE;
@@ -488,7 +492,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
 
-    appState->camera.transform.position = glm::vec3(0.0f, 0.0f, -1.5f);
+    appState->camera.transform.position = glm::vec3(0.0f, 0.0f, 1.5f);
 
     return SDL_APP_CONTINUE;
 }
@@ -510,10 +514,9 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 
 SDL_AppResult SDL_AppIterate(void* appstate)
 {
-    AppState* appState = static_cast<AppState*>(appstate);
+    auto* appState = static_cast<AppState*>(appstate);
 
-    //appState->camera.transform.position += glm::vec3(0.0f, 0.0f, -0.1f);
-    appState->modelTransform.rotation *= glm::angleAxis(0.01f, glm::vec3(0.25f, 0.5f, 0.1f));
+    appState->camera.transform.rotate(glm::vec3(0.25f, 0.025f, 0.025f));
 
     // Here's where we store the commands that will be eventually sent to the GPU
     SDL_GPUCommandBuffer* commandBuffer = SDL_AcquireGPUCommandBuffer(appState->device);

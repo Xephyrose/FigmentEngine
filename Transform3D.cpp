@@ -2,10 +2,104 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
-glm::mat4 Transform3D::GetModelMatrix() const {
-    glm::mat4 model(1.0f);
-    model = glm::translate(model, position);
-    model = model * glm::toMat4(rotation);
-    model = glm::scale(model, scale);
-    return model;
+void Transform3D::updateQuaternion() {
+    quaternion = glm::quat(glm::radians(rotation));
+    rotationDirty = false;
+    usingQuaternion = false;
+}
+
+void Transform3D::updateEuler() {
+    rotation = glm::degrees(glm::eulerAngles(quaternion));
+    rotationDirty = false;
+    usingQuaternion = true;
+}
+
+void Transform3D::setRotation(const glm::vec3& eulerDegrees) {
+    rotation = eulerDegrees;
+    updateQuaternion();
+}
+
+void Transform3D::setQuaternion(const glm::quat& q) {
+    quaternion = glm::normalize(q);
+    rotationDirty = true;
+    usingQuaternion = true;
+}
+
+const glm::quat& Transform3D::getQuaternion() {
+    if (rotationDirty && !usingQuaternion) updateQuaternion();
+    else if (rotationDirty) updateEuler();
+    return quaternion;
+}
+
+const glm::vec3& Transform3D::getEuler() {
+    if (rotationDirty && usingQuaternion) updateEuler();
+    else if (rotationDirty) updateQuaternion();
+    return rotation;
+}
+
+void Transform3D::rotate(const glm::vec3& eulerDegrees) {
+    if (rotationDirty) updateEuler();
+    rotation += eulerDegrees;
+    updateQuaternion();
+}
+
+void Transform3D::rotateX(float degrees) { rotate(glm::vec3(degrees, 0, 0)); }
+void Transform3D::rotateY(float degrees) { rotate(glm::vec3(0, degrees, 0)); }
+void Transform3D::rotateZ(float degrees) { rotate(glm::vec3(0, 0, degrees)); }
+
+void Transform3D::rotateObjectLocal(const glm::vec3& eulerDegrees) {
+    if (rotationDirty) updateQuaternion();
+    glm::quat rotX = glm::angleAxis(glm::radians(eulerDegrees.x), glm::vec3(1, 0, 0));
+    glm::quat rotY = glm::angleAxis(glm::radians(eulerDegrees.y), glm::vec3(0, 1, 0));
+    glm::quat rotZ = glm::angleAxis(glm::radians(eulerDegrees.z), glm::vec3(0, 0, 1));
+
+    quaternion = glm::normalize(quaternion * rotX * rotY * rotZ);
+    rotationDirty = true;
+    usingQuaternion = true;
+}
+
+glm::mat4 Transform3D::getMatrix() const {
+    printf("getMatrix: rotationDirty=%d, usingQuaternion=%d\n", rotationDirty, usingQuaternion);
+    printf("getMatrix: rotation=(%.2f, %.2f, %.2f)\n", rotation.x, rotation.y, rotation.z);
+    printf("getMatrix: quaternion=(%.2f, %.2f, %.2f, %.2f)\n", quaternion.x, quaternion.y, quaternion.z, quaternion.w);
+
+    glm::mat4 mat(1.0f);
+    mat = glm::translate(mat, position);
+
+    if (!rotationDirty || usingQuaternion) {
+        printf("getMatrix: Using quaternion\n");
+        mat = mat * glm::mat4_cast(quaternion);
+    } else {
+        printf("getMatrix: Using euler\n");
+        mat = mat * glm::mat4_cast(glm::quat(glm::radians(rotation)));
+    }
+
+    mat = glm::scale(mat, scale);
+    return mat;
+}
+
+glm::vec3 Transform3D::getForward() const {
+    const glm::quat& q = (!rotationDirty || usingQuaternion) ?
+        quaternion : glm::quat(glm::radians(rotation));
+    return q * glm::vec3(0, 0, -1);
+}
+
+glm::vec3 Transform3D::getRight() const {
+    const glm::quat& q = (!rotationDirty || usingQuaternion) ?
+        quaternion : glm::quat(glm::radians(rotation));
+    return q * glm::vec3(1, 0, 0);
+}
+
+glm::vec3 Transform3D::getUp() const {
+    const glm::quat& q = (!rotationDirty || usingQuaternion) ?
+        quaternion : glm::quat(glm::radians(rotation));
+    return q * glm::vec3(0, 1, 0);
+}
+
+void Transform3D::lookAt(const glm::vec3& target) {
+    const glm::mat4 lookAtMat = glm::lookAt(position, target, UP);
+    const glm::mat3 rotMat(lookAtMat);
+    quaternion = glm::normalize(glm::quat_cast(glm::transpose(rotMat)));
+    rotationDirty = true;
+    usingQuaternion = true;
 }
