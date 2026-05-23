@@ -77,7 +77,8 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
         },
     };
 
-    pipelines[name] = SDL_CreateGPUGraphicsPipeline(device, &pipelineCreateInfo);
+    SDL_Log("Created pipeline with key %s", name.c_str());
+    pipelines.insert_or_assign(name, SDL_CreateGPUGraphicsPipeline(device, &pipelineCreateInfo));
     if (!pipelines[name]) {
         SDL_Log("Couldn't create graphics pipeline: %s", SDL_GetError());
         return false;
@@ -238,7 +239,6 @@ Material *AppState::GetMaterial(const std::string &key) const {
 }
 
 SDL_GPUGraphicsPipeline* AppState::GetPipeline(const std::string& type) const {
-    SDL_Log("pipeline: %s", type.c_str());
     return pipelines.at(type);
 }
 

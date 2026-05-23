@@ -174,6 +174,10 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 
         // now we actually define the render pass, by passing &colorTargetInfo, which modified our swapchainTexture to become cleared
         SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(commandBuffer, &colorTargetInfo, 1, &depthTarget);
+        if (!renderPass) {
+            SDL_Log("Couldn't begin render pass: %s", SDL_GetError());
+            return SDL_APP_FAILURE;
+        }
 
         UpdateAndUploadMVP(appState, commandBuffer);
 
@@ -192,31 +196,45 @@ SDL_AppResult SDL_AppIterate(void* appstate)
             }
 
             // Draw each submesh with its material
+            // Draw each submesh with its material
             for (const auto& submesh : mesh.submeshes) {
-                if (appState->GetMaterial(submesh.material) != nullptr) {
-                    // Bind the material's pipeline and textures
-                    appState->GetMaterial(submesh.material)->Bind(appState);
-
-                    // Draw the submesh
-                    if (!mesh.indices.empty()) {
-                        SDL_DrawGPUIndexedPrimitives(
-                            renderPass,
-                            submesh.indexCount,
-                            1,
-                            submesh.startIndex,
-                            submesh.startVertex,
-                            0
-                        );
-                    } else {
-                        SDL_DrawGPUPrimitives(
-                            renderPass,
-                            submesh.vertexCount,
-                            1,
-                            submesh.startVertex,
-                            0
-                        );
-                    }
+                if (submesh.material.empty()) {
+                    SDL_Log("Submesh '%s' has no material name!", submesh.name.c_str());
+                    continue;
                 }
+
+                Material* material = appState->GetMaterial(submesh.material);
+                if (!material) {
+                    SDL_Log("Material '%s' not found for submesh '%s'!", submesh.material.c_str(), submesh.name.c_str());
+                    continue;
+                }
+
+                SDL_Log("Binding material: %s", submesh.material.c_str());
+                material->Bind(appState);
+                SDL_Log("Material bound successfully");
+
+                // Draw the submesh
+                if (!mesh.indices.empty()) {
+                    SDL_Log("Drawing indexed primitives: count=%u, startIndex=%u, startVertex=%u",
+                            submesh.indexCount, submesh.startIndex, submesh.startVertex);
+                    SDL_DrawGPUIndexedPrimitives(
+                        renderPass,
+                        submesh.indexCount,
+                        1,
+                        submesh.startIndex,
+                        submesh.startVertex,
+                        0
+                    );
+                } else {
+                    SDL_DrawGPUPrimitives(
+                        renderPass,
+                        submesh.vertexCount,
+                        1,
+                        submesh.startVertex,
+                        0
+                    );
+                }
+                SDL_Log("Draw completed");
             }
         }
 

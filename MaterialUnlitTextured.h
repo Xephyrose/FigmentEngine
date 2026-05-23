@@ -10,21 +10,8 @@ struct MaterialUnlitTextured : public Material {
     MaterialUnlitTextured(const std::string &name, const std::string &pipeline, const std::string& sampler, const std::string &textureAlbedo);
     std::string textureAlbedo;
 
-    void Bind(AppState* appState) const override {
-        SDL_BindGPUGraphicsPipeline(appState->renderPass, appState->GetPipeline(pipeline));
-        BindTextures(appState);
-    }
-
-    void BindTextures(AppState* appState) const override {
-        SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
-        SDL_GPUSampler* getSampler = appState->GetSampler(sampler);
-
-
-        if (getAlbedo && getSampler) {
-            const SDL_GPUTextureSamplerBinding binding = {getAlbedo, getSampler};
-            SDL_BindGPUFragmentSamplers(appState->renderPass, 0, &binding, 1);
-        }
-    }
+    void Bind(AppState* appState) const override;
+    void BindTextures(AppState* appState) const override;
 };
 
 #endif //FIGMENTENGINE_MATERIAL_UNLIT_TEXTURED_H
