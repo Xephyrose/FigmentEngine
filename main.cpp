@@ -89,7 +89,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         SDL_Log("Couldn't load default textures.");
         return SDL_APP_FAILURE;
     }
-
     appState->CreateDefaultMaterials();
     appState->CreateDefaultSamplers();
     appState->CreateDefaultPipelines();

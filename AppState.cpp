@@ -89,7 +89,7 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
 }
 
 bool AppState::LoadTexture(std::string path) {
-    path = std::filesystem::path(SDL_GetBasePath()) / "assets" / "textures" / path;
+    std::string fullPath = std::filesystem::path(SDL_GetBasePath()) / "assets" / "textures" / path;
     SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(device);
     if (!uploadCmdBuf) {
         SDL_Log("Couldn't acquire command buffer: %s", SDL_GetError());
@@ -104,7 +104,7 @@ bool AppState::LoadTexture(std::string path) {
     }
 
     // Load image
-    SDL_GPUTexture* texture = IMG_LoadGPUTexture(device, copyPass, path.c_str(), nullptr, nullptr);
+    SDL_GPUTexture* texture = IMG_LoadGPUTexture(device, copyPass, fullPath.c_str(), nullptr, nullptr);
 
     // End the copy pass
     SDL_EndGPUCopyPass(copyPass);
@@ -220,14 +220,13 @@ SDL_GPUShader* AppState::GetShader(const std::string& path) {
 }
 
 SDL_GPUTexture *AppState::GetTexture(const std::string &path) {
+
     if (!textures.contains(path)) {
-    SDL_Log("test 2 %s", path.c_str());
         if (LoadTexture(path) == false) {
             SDL_Log("Couldn't load shader %s: %s", path.c_str(), SDL_GetError());
             return nullptr;
         }
     }
-    SDL_Log("test 2 %s", path.c_str());
     return textures.at(path);
 }
 
@@ -239,6 +238,7 @@ Material *AppState::GetMaterial(const std::string &key) const {
 }
 
 SDL_GPUGraphicsPipeline* AppState::GetPipeline(const std::string& type) const {
+    SDL_Log("pipeline: %s", type.c_str());
     return pipelines.at(type);
 }
 
@@ -249,7 +249,7 @@ SDL_GPUSampler* AppState::GetSampler(const std::string& type) const {
 void AppState::CreateDefaultMaterials() {
     // concrete_bricks
     GetTexture("concrete_bricks.png");
-    auto* material = new MaterialUnlitTextured("concrete_bricks", "UnlitTextured", "concrete_bricks.png");
+    auto* material = new MaterialUnlitTextured("concrete_bricks", "UnlitTextured", "anisotropic_repeat", "concrete_bricks.png");
     materials.insert_or_assign("concrete_bricks", material);
 }
 

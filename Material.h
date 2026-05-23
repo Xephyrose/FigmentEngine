@@ -7,6 +7,7 @@
 struct Material {
     std::pmr::string name;
     std::string pipeline;
+    std::string sampler;
 
     virtual ~Material() = default;
     virtual void Bind(AppState* appState) const = 0;

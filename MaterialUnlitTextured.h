@@ -7,19 +7,17 @@
 #include "Material.h"
 
 struct MaterialUnlitTextured : public Material {
-    MaterialUnlitTextured(const std::string &name, const std::string &pipeline, const std::string &textureAlbedo);
+    MaterialUnlitTextured(const std::string &name, const std::string &pipeline, const std::string& sampler, const std::string &textureAlbedo);
     std::string textureAlbedo;
 
     void Bind(AppState* appState) const override {
-        SDL_Log("test");
         SDL_BindGPUGraphicsPipeline(appState->renderPass, appState->GetPipeline(pipeline));
-        SDL_Log("test 2");
         BindTextures(appState);
     }
 
     void BindTextures(AppState* appState) const override {
         SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
-        SDL_GPUSampler* getSampler = appState->GetSampler(textureAlbedo);
+        SDL_GPUSampler* getSampler = appState->GetSampler(sampler);
 
 
         if (getAlbedo && getSampler) {
