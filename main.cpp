@@ -6,11 +6,13 @@
 #include "Mesh.h"
 #include "Node.h"
 #define SDL_MAIN_USE_CALLBACKS
+#include <ranges>
 #include <SDL3/SDL_main.h>
 
 #include "Camera3D.h"
 #include "FreeCam.h"
 #include "AppState.h"
+#include "Material.h"
 #include "tiny_gltf.h"
 #include "Vertex.h"
 
@@ -22,262 +24,6 @@ void UpdateAndUploadMVP(const AppState* appState, SDL_GPUCommandBuffer* cmdBuf) 
     glm::mat4 mvp = projection * view * model;
 
     SDL_PushGPUVertexUniformData(cmdBuf, 0, &mvp[0][0], sizeof(glm::mat4));
-}
-
-bool CreatePipeline(AppState* appState) {
-    SDL_GPUShader* vertexShader = appState->GetShader("UnlitTextured.vert");
-    if (vertexShader == nullptr)
-    {
-        SDL_Log("Couldn't create vertex shader!");
-        return false;
-    }
-
-    SDL_GPUShader* fragmentShader = appState->GetShader("UnlitTextured.frag");
-    if (fragmentShader == nullptr)
-    {
-        SDL_Log("Couldn't create fragment shader!");
-        return false;
-    }
-
-    constexpr std::array vertexBufferDescriptions{
-        SDL_GPUVertexBufferDescription{
-            .slot = 0,
-            .pitch = sizeof(Vertex),
-            .input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX,
-            .instance_step_rate = 0,
-        },
-    };
-
-    constexpr std::array vertexAttributes{
-        SDL_GPUVertexAttribute{
-            .location = 0,
-            .buffer_slot = 0,
-            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
-            .offset = offsetof(Vertex, position),
-        },
-        SDL_GPUVertexAttribute{
-            .location = 1,
-            .buffer_slot = 0,
-            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2,
-            .offset = offsetof(Vertex, uv),
-        }
-    };
-
-    const std::array colorTargetDescriptions{
-        SDL_GPUColorTargetDescription{
-            .format = SDL_GetGPUSwapchainTextureFormat(appState->device, appState->window)
-        }
-    };
-
-    const auto pipelineCreateInfo = SDL_GPUGraphicsPipelineCreateInfo{
-        .vertex_shader = vertexShader,
-        .fragment_shader = fragmentShader,
-        .vertex_input_state = SDL_GPUVertexInputState{
-            .vertex_buffer_descriptions = vertexBufferDescriptions.data(),
-            .num_vertex_buffers = vertexBufferDescriptions.size(),
-            .vertex_attributes = vertexAttributes.data(),
-            .num_vertex_attributes = vertexAttributes.size(),
-        },
-        .primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
-        .rasterizer_state = SDL_GPURasterizerState{
-            .fill_mode = SDL_GPU_FILLMODE_FILL,
-            .cull_mode = SDL_GPU_CULLMODE_BACK,
-            .front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE,
-        },
-        .depth_stencil_state = SDL_GPUDepthStencilState{
-            .compare_op = SDL_GPU_COMPAREOP_LESS,
-            .enable_depth_test = true,
-            .enable_depth_write = true,
-        },
-        .target_info = SDL_GPUGraphicsPipelineTargetInfo{
-            .color_target_descriptions = colorTargetDescriptions.data(),
-            .num_color_targets = colorTargetDescriptions.size(),
-            .depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT_S8_UINT,
-            .has_depth_stencil_target = true
-        },
-    };
-    appState->pipeline = SDL_CreateGPUGraphicsPipeline(appState->device, &pipelineCreateInfo);
-    if (appState->pipeline == nullptr)
-    {
-        SDL_Log("Couldn't create graphics pipeline! %s", SDL_GetError());
-        return false;
-    }
-
-    SDL_ReleaseGPUShader(appState->device, vertexShader);
-    SDL_ReleaseGPUShader(appState->device, fragmentShader);
-    return true;
-}
-
-bool CreateVertexBuffer(AppState* myAppState, const std::span<const Vertex> vertexes) {
-    // Allocate memory for whatever number of vertexes we need
-    myAppState->numVertexes = vertexes.size();
-    const Uint32 vertexSize = myAppState->numVertexes * sizeof(Vertex);
-
-    // Create buffer to store vertexes
-    const auto vertexBufferCreateInfo = SDL_GPUBufferCreateInfo{
-        .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
-        .size = vertexSize,
-    };
-    myAppState->vertexBuffer = SDL_CreateGPUBuffer(myAppState->device, &vertexBufferCreateInfo);
-    if (myAppState->vertexBuffer == nullptr)
-    {
-        SDL_Log("Couldn't create vertex buffer: %s", SDL_GetError());
-        return false;
-    }
-
-    // Create a buffer that will upload the data to our GPU
-    const auto transferBufferCreateInfo = SDL_GPUTransferBufferCreateInfo{
-        .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
-        .size = vertexSize,
-    };
-    SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(myAppState->device, &transferBufferCreateInfo);
-    if (transferBuffer == nullptr)
-    {
-        SDL_Log("Couldn't create transfer buffer: %s", SDL_GetError());
-        return false;
-    }
-
-    // Use SDL_MapGPUTransferBuffer to find the first area in our memory that is large enough to store this data
-    auto* transferData = static_cast<Vertex*>(SDL_MapGPUTransferBuffer(myAppState->device, transferBuffer, false));
-    if (transferData == nullptr)
-    {
-        SDL_Log("Couldn't map transfer buffer: %s", SDL_GetError());
-        SDL_ReleaseGPUTransferBuffer(myAppState->device, transferBuffer);
-        return false;
-    }
-
-    // Copy the vertexes into memory
-    SDL_memcpy(transferData, vertexes.data(), vertexSize);
-    // unmap the transfer buffer, as we've used it for its purpose
-    SDL_UnmapGPUTransferBuffer(myAppState->device, transferBuffer);
-
-    // Now, we need to use the transfer buffer to upload data to the vertex buffer.
-    // I think this will allow us to store our vertexes in memory directly without needing to transfer data all wonky-like
-    SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(myAppState->device);
-    if (uploadCmdBuf == nullptr)
-    {
-        SDL_Log("Couldn't acquire GPU command buffer: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
-    }
-
-    SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
-
-    // Decide the source of our upload
-    const auto bufferLocation = SDL_GPUTransferBufferLocation{
-        .transfer_buffer = transferBuffer,
-        .offset = 0,
-    };
-
-    // Decide the destination of our upload
-    const auto bufferRegion = SDL_GPUBufferRegion{
-        .buffer = myAppState->vertexBuffer,
-        .offset = 0,
-        .size = vertexSize,
-    };
-
-    // Create the instruction that will upload our data
-    SDL_UploadToGPUBuffer(copyPass, &bufferLocation, &bufferRegion, false);
-
-    // End the copy pass, as it is done, and then submit the command
-    SDL_EndGPUCopyPass(copyPass);
-    if (!SDL_SubmitGPUCommandBuffer(uploadCmdBuf))
-    {
-        SDL_Log("Couldn't submit GPU command buffer: %s", SDL_GetError());
-        return false;
-    }
-
-    // Release the transfer buffer, as we're done with it too
-    SDL_ReleaseGPUTransferBuffer(myAppState->device, transferBuffer);
-    return true;
-}
-
-bool CreateIndexBuffer(AppState* myAppState, const std::span<const uint16_t> indices) {
-    myAppState->numIndices = indices.size();
-    const Uint32 indexSize = indices.size() * sizeof(uint16_t);
-
-    const auto indexBufferCreateInfo = SDL_GPUBufferCreateInfo{
-        .usage = SDL_GPU_BUFFERUSAGE_INDEX,
-        .size = indexSize,
-    };
-    myAppState->indexBuffer = SDL_CreateGPUBuffer(myAppState->device, &indexBufferCreateInfo);
-    if (myAppState->indexBuffer == nullptr) {
-        SDL_Log("Couldn't create index buffer: %s", SDL_GetError());
-        return false;
-    }
-
-    // Create transfer buffer
-    const auto transferBufferCreateInfo = SDL_GPUTransferBufferCreateInfo{
-        .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
-        .size = indexSize,
-    };
-    SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(myAppState->device, &transferBufferCreateInfo);
-    if (transferBuffer == nullptr) {
-        SDL_Log("Couldn't create transfer buffer: %s", SDL_GetError());
-        return false;
-    }
-
-    // Map and copy
-    auto* transferData = static_cast<uint16_t*>(SDL_MapGPUTransferBuffer(myAppState->device, transferBuffer, false));
-    if (transferData == nullptr) {
-        SDL_Log("Couldn't map transfer buffer: %s", SDL_GetError());
-        SDL_ReleaseGPUTransferBuffer(myAppState->device, transferBuffer);
-        return false;
-    }
-
-    SDL_memcpy(transferData, indices.data(), indexSize);
-    SDL_UnmapGPUTransferBuffer(myAppState->device, transferBuffer);
-
-    // Upload to index buffer
-    SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(myAppState->device);
-    if (uploadCmdBuf == nullptr) {
-        SDL_Log("Couldn't acquire GPU command buffer: %s", SDL_GetError());
-        return false;
-    }
-
-    SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
-
-    const auto bufferLocation = SDL_GPUTransferBufferLocation{
-        .transfer_buffer = transferBuffer,
-        .offset = 0,
-    };
-
-    const auto bufferRegion = SDL_GPUBufferRegion{
-        .buffer = myAppState->indexBuffer,
-        .offset = 0,
-        .size = indexSize,
-    };
-
-    SDL_UploadToGPUBuffer(copyPass, &bufferLocation, &bufferRegion, false);
-    SDL_EndGPUCopyPass(copyPass);
-
-    if (!SDL_SubmitGPUCommandBuffer(uploadCmdBuf)) {
-        SDL_Log("Couldn't submit GPU command buffer: %s", SDL_GetError());
-        return false;
-    }
-
-    SDL_ReleaseGPUTransferBuffer(myAppState->device, transferBuffer);
-    return true;
-}
-
-bool LoadMeshToGPU(AppState* appState, const Mesh& mesh) {
-    // Release old buffers if they exist
-    if (appState->vertexBuffer) {
-        SDL_ReleaseGPUBuffer(appState->device, appState->vertexBuffer);
-    }
-    if (appState->indexBuffer) {
-        SDL_ReleaseGPUBuffer(appState->device, appState->indexBuffer);
-    }
-
-    // Create new buffers
-    if (!CreateVertexBuffer(appState, mesh.vertices)) {
-        return false;
-    }
-
-    if (!CreateIndexBuffer(appState, mesh.indices)) {
-        return false;
-    }
-
-    return true;
 }
 
 void handle_mouse_motion(const AppState* appState, const SDL_Event* event) {
@@ -304,7 +50,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     auto* freeCam = new FreeCam(*appState);
     appState->nodes.push_back(freeCam);
 
-    appState->window = SDL_CreateWindow("FigmentEngine", appState->window_width, appState->window_height, 0);
+    appState->window = SDL_CreateWindow("FigmentEngine", appState->windowWidth, appState->windowHeight, 0);
     if (appState->window == nullptr)
     {
         SDL_Log("Couldn't create window: %s", SDL_GetError());
@@ -330,8 +76,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         .type = SDL_GPU_TEXTURETYPE_2D,
         .format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT_S8_UINT,
         .usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET,
-        .width = static_cast<Uint32>(appState->window_width),
-        .height = static_cast<Uint32>(appState->window_height),
+        .width = static_cast<Uint32>(appState->windowWidth),
+        .height = static_cast<Uint32>(appState->windowHeight),
         .layer_count_or_depth = 1,
         .num_levels = 1,
         .sample_count = SDL_GPU_SAMPLECOUNT_1
@@ -339,28 +85,26 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->depthTexture = SDL_CreateGPUTexture(appState->device, &depthInfo);
 
     // Load texture before the pipeline uses it
-    std::filesystem::path texturePath = std::filesystem::path(SDL_GetBasePath()) / "assets" / "textures" / "dev.png";
-    if (!appState->LoadTexture(texturePath.string())) {
-        SDL_Log("Couldn't load texture.");
-    }
-
-    if (!appState->texture || !appState->sampler) {
-        SDL_Log("Texture or sampler is null after loading!");
-    }
-
-    if (!CreatePipeline(appState))
-    {
+    if (!appState->CreateDefaultTextures()) {
+        SDL_Log("Couldn't load default textures.");
         return SDL_APP_FAILURE;
     }
+
+    appState->CreateDefaultMaterials();
+    appState->CreateDefaultSamplers();
+    appState->CreateDefaultPipelines();
 
     try {
         Mesh model = Mesh::LoadGLB(*appState, "zulu.glb");
 
-        if (!LoadMeshToGPU(appState, model)) {
-            return SDL_APP_FAILURE;
-        }
+        // Upload to GPU using the Mesh's own method
+        model.UploadToGPU(*appState);
+
+        // Store the mesh in appState (you'll need to add this member)
+        appState->meshes.push_back(std::move(model));
+
     } catch (const std::exception& e) {
-        std::cerr << "Failed to load model: " << e.what() << std::endl;
+        SDL_Log("Failed to load model: %s", e.what());
         return SDL_APP_FAILURE;
     }
 
@@ -432,39 +176,51 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         // now we actually define the render pass, by passing &colorTargetInfo, which modified our swapchainTexture to become cleared
         SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(commandBuffer, &colorTargetInfo, 1, &depthTarget);
 
-        // Define the pipeline we'll use
-        SDL_BindGPUGraphicsPipeline(renderPass, appState->pipeline);
-
-        // Define which vertex buffers we'll be using (in this case, just the one)
-        const std::array vertexBuffers{
-            SDL_GPUBufferBinding{
-                .buffer = appState->vertexBuffer,
-                .offset = 0,
-            },
-        };
-        // Bind our vertex buffer to the render pass
-        SDL_BindGPUVertexBuffers(renderPass, 0, vertexBuffers.data(), vertexBuffers.size());
-
-        // Index, too
-        const SDL_GPUBufferBinding indexBinding = {
-            .buffer = appState->indexBuffer,
-            .offset = 0
-        };
-        SDL_BindGPUIndexBuffer(renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
-
         UpdateAndUploadMVP(appState, commandBuffer);
 
-        // Bind texture and sampler (if they exist)
-        SDL_GPUTextureSamplerBinding textureBinding = {
-            .texture = appState->texture,
-            .sampler = appState->sampler
-        };
-        SDL_BindGPUFragmentSamplers(renderPass, 0, &textureBinding, 1);
+        // Draw all meshes
+        for (const auto& mesh : appState->meshes) {
+            if (!mesh.isOnGPU) continue;
 
-        // Draw stuff
-        SDL_DrawGPUIndexedPrimitives(renderPass, appState->numIndices, 1, 0, 0, 0);
+            // Bind mesh's vertex buffer
+            SDL_GPUBufferBinding vertexBinding = { .buffer = mesh.vertexBuffer, .offset = 0 };
+            SDL_BindGPUVertexBuffers(renderPass, 0, &vertexBinding, 1);
 
-        // Finally, end the render pass
+            // Bind mesh's index buffer if it has indices
+            if (!mesh.indices.empty()) {
+                SDL_GPUBufferBinding indexBinding = { .buffer = mesh.indexBuffer, .offset = 0 };
+                SDL_BindGPUIndexBuffer(renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+            }
+
+            // Draw each submesh with its material
+            for (const auto& submesh : mesh.submeshes) {
+                if (appState->GetMaterial(submesh.material) != nullptr) {
+                    // Bind the material's pipeline and textures
+                    appState->GetMaterial(submesh.material)->Bind(appState);
+
+                    // Draw the submesh
+                    if (!mesh.indices.empty()) {
+                        SDL_DrawGPUIndexedPrimitives(
+                            renderPass,
+                            submesh.indexCount,
+                            1,
+                            submesh.startIndex,
+                            submesh.startVertex,
+                            0
+                        );
+                    } else {
+                        SDL_DrawGPUPrimitives(
+                            renderPass,
+                            submesh.vertexCount,
+                            1,
+                            submesh.startVertex,
+                            0
+                        );
+                    }
+                }
+            }
+        }
+
         SDL_EndGPURenderPass(renderPass);
     }
     // Send the command buffer to the GPU for drawing
@@ -475,16 +231,44 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 
 void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {
-    const AppState* appState = static_cast<AppState*>(appstate);
+    const auto appState = static_cast<AppState*>(appstate);
 
-    for (Node* node : appState->nodes) delete node;
+    for (const Node* node : appState->nodes) delete node;
+    appState->nodes.clear();
+    appState->meshes.clear();
 
-    if (appState->sampler) SDL_ReleaseGPUSampler(appState->device, appState->sampler);
-    if (appState->texture) SDL_ReleaseGPUTexture(appState->device, appState->texture);
-    if (appState->depthTexture) SDL_ReleaseGPUTexture(appState->device, appState->depthTexture);
-    if (appState->indexBuffer) SDL_ReleaseGPUBuffer(appState->device, appState->indexBuffer);
-    if (appState->vertexBuffer) SDL_ReleaseGPUBuffer(appState->device, appState->vertexBuffer);
-    if (appState->pipeline) SDL_ReleaseGPUGraphicsPipeline(appState->device, appState->pipeline);
+    for (const auto &material: appState->materials | std::views::values) {delete material;}
+    appState->materials.clear();
+
+    for (const auto &texture: appState->textures | std::views::values) {
+        if (texture) {
+            SDL_ReleaseGPUTexture(appState->device, texture);
+        }
+    }
+    appState->textures.clear();
+
+    for (const auto &sampler: appState->samplers | std::views::values) {
+        if (sampler) {
+            SDL_ReleaseGPUSampler(appState->device, sampler);
+        }
+    }
+    appState->samplers.clear();
+
+    for (const auto &pipeline: appState->pipelines | std::views::values) {
+        if (pipeline) {
+            SDL_ReleaseGPUGraphicsPipeline(appState->device, pipeline);
+        }
+    }
+    appState->pipelines.clear();
+
+    for (const auto &shader: appState->shaders | std::views::values) {
+        if (shader) {
+            SDL_ReleaseGPUShader(appState->device, shader);
+        }
+    }
+    appState->shaders.clear();
+
+    if (appState->depthTexture) {SDL_ReleaseGPUTexture(appState->device, appState->depthTexture);}
 
     SDL_ReleaseWindowFromGPUDevice(appState->device, appState->window);
     // hehehe kill rog astral 5090 with hammers

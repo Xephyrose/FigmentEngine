@@ -21,9 +21,13 @@ add_executable(FigmentEngine
         FreeCam.cpp
         FreeCam.h
         AppState.h
+        MaterialUnlitTextured.cpp
         MaterialUnlitTextured.h
         Material.h
         AppState.cpp
+        MaterialPBR.h
+        MaterialPBR.cpp
+        MaterialUnlitTextured.cpp
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

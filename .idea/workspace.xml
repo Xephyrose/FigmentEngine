@@ -35,15 +35,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5222af9d-b1fd-4aa6-bc40-7cc49bf34801" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/MaterialPBR.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MaterialPBR.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MaterialUnlitTextured.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/editor.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/AppState.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/AppState.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/AppState.h" beforeDir="false" afterPath="$PROJECT_DIR$/AppState.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FreeCam.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/FreeCam.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Material.h" beforeDir="false" afterPath="$PROJECT_DIR$/Material.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MaterialUnlitTextured.h" beforeDir="false" afterPath="$PROJECT_DIR$/MaterialUnlitTextured.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Mesh.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Mesh.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Mesh.h" beforeDir="false" afterPath="$PROJECT_DIR$/Mesh.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Node.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Node.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Node.h" beforeDir="false" afterPath="$PROJECT_DIR$/Node.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WorkingFiles/zulu.blend" beforeDir="false" afterPath="$PROJECT_DIR$/WorkingFiles/zulu.blend" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WorkingFiles/zulu.blend1" beforeDir="false" afterPath="$PROJECT_DIR$/WorkingFiles/zulu.blend1" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/assets/models/zulu.glb" beforeDir="false" afterPath="$PROJECT_DIR$/assets/models/zulu.glb" afterDir="false" />
@@ -145,6 +148,11 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <list>
       <item itemvalue="CMake Application.Compile_UVs_frag" />
       <item itemvalue="CMake Application.Compile_UnlitColor_frag" />
@@ -183,7 +191,8 @@
       <workItem from="1779475225340" duration="3844000" />
       <workItem from="1779486113859" duration="6938000" />
       <workItem from="1779493333753" duration="104000" />
-      <workItem from="1779494800537" duration="9382000" />
+      <workItem from="1779494800537" duration="10992000" />
+      <workItem from="1779505942925" duration="15124000" />
     </task>
     <servers />
   </component>

@@ -4,22 +4,35 @@
 
 #include "AppState.h"
 #include "Vertex.h"
-#include "Material.h"
 
 struct Submesh {
     std::string name;
     std::string meshName;
-    SDL_GPUGraphicsPipeline* pipeline = nullptr;
+    std::string material;
     size_t startVertex;
     size_t vertexCount;
     size_t startIndex;
     size_t indexCount;
+
+    SDL_GPUBuffer* vertexBuffer = nullptr;
+    SDL_GPUBuffer* indexBuffer = nullptr;
 };
 
 struct Mesh {
     std::vector<Vertex> vertices;
     std::vector<uint16_t> indices;
     std::vector<Submesh> submeshes;
+
+    SDL_GPUBuffer* vertexBuffer = nullptr;
+    SDL_GPUBuffer* indexBuffer = nullptr;
+    bool isOnGPU = false;
+
+    void UploadToGPU(const AppState& appState);
+    void ReleaseGPUResources(const AppState* appState);
+
+    // Drawing
+    void DrawSubmesh(AppState* appState, const Submesh &submesh) const;
+    void DrawAllSubmeshes(AppState* appState) const;
 
     [[nodiscard]] const Submesh *GetSubmesh(const std::string &name) const;
 
