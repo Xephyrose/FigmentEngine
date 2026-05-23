@@ -37,14 +37,24 @@ struct AppState {
 
     float currentAspectRatio = static_cast<float>(window_width) / static_cast<float>(window_height);
 
+    std::unordered_map<std::string, SDL_GPUShader*> shaders;
     std::unordered_map<std::string, SDL_GPUTexture*> textures;
-    std::unordered_map<std::string, SDL_GPUSampler*> samplers;
     std::unordered_map<std::string, SDL_GPUGraphicsPipeline*> pipelines;
 
     std::unordered_map<std::string, Material> materials;
 
-    bool LoadTextureFromFile(const std::string& texturePath);
+    Uint64 currentTime = 0;
+    Uint64 lastTime = 0;
+    Uint64 delta = 0;
+
+    bool LoadShader(const std::string& shaderFilename);
+    bool LoadTexture(const std::string& texturePath);
+
+    SDL_GPUShader* GetShader(const std::string& shaderFilename);
+    SDL_GPUTexture* GetTexture(const std::string& shaderFilename);
 };
+
+
 
 
 #endif //FIGMENTENGINE_APPSTATE_H

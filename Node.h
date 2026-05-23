@@ -12,7 +12,7 @@ public:
     explicit Node(const std::string &name);
 
     std::string name;
-    virtual void Update(const AppState& appState, float delta);
+    virtual void Update(const AppState& appState);
     virtual void Draw(const AppState& appState);
     virtual void Free(const AppState& appState);
     virtual void Input(const AppState& appState, const bool* isKeyDown); // TODO: Add input handling that can be passed into Input()

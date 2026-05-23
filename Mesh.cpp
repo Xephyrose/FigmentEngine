@@ -8,6 +8,7 @@
 #include <cstring>
 #include <vector>
 #include <string>
+#include <SDL3/SDL_filesystem.h>
 #include <SDL3/SDL_log.h>
 
 static std::vector<float> ReadAttributeData(const tinygltf::Model& model, const int accessorIdx) {
@@ -58,7 +59,8 @@ const Submesh *Mesh::GetSubmesh(const std::string &name) const {
     return nullptr;
 }
 
-Mesh Mesh::LoadGLB(const AppState& appState, const std::string& filepath) {
+Mesh Mesh::LoadGLB(const AppState& appState, std::string filepath) {
+    filepath = std::filesystem::path(SDL_GetBasePath()) / "assets" / "models" / filepath;
     tinygltf::Model model;
     tinygltf::TinyGLTF loader;
     std::string err, warn;

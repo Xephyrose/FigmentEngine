@@ -9,7 +9,7 @@
 struct Submesh {
     std::string name;
     std::string meshName;
-    Material* material;
+    SDL_GPUGraphicsPipeline* pipeline = nullptr;
     size_t startVertex;
     size_t vertexCount;
     size_t startIndex;
@@ -26,7 +26,7 @@ struct Mesh {
     static Mesh CreateQuad(float width = 1.6f, float height = 1.6f);
     static Mesh CreateTriangle(float size = 1.4f);
 
-    static Mesh LoadGLB(const AppState& appState, const std::string& filepath);
+    static Mesh LoadGLB(const AppState& appState, std::string filepath);
 };
 
 #endif //FIGMENTENGINE_MESH_H

@@ -24,97 +24,15 @@ void UpdateAndUploadMVP(const AppState* appState, SDL_GPUCommandBuffer* cmdBuf) 
     SDL_PushGPUVertexUniformData(cmdBuf, 0, &mvp[0][0], sizeof(glm::mat4));
 }
 
-SDL_GPUShader* LoadShader(SDL_GPUDevice* device, const std::string& shaderFilename) {
-    SDL_GPUShaderStage stage;
-    if (shaderFilename.contains(".vert"))
-    {
-        stage = SDL_GPU_SHADERSTAGE_VERTEX;
-    }
-    else if (shaderFilename.contains(".frag"))
-    {
-        stage = SDL_GPU_SHADERSTAGE_FRAGMENT;
-    }
-    else
-    {
-        SDL_Log("Couldn't deduce shader stage from file name: %s", shaderFilename.c_str());
-        return nullptr;
-    }
-
-    std::filesystem::path fullPath = std::filesystem::path(SDL_GetBasePath()) / "assets" / "shaders";
-    // Starts as invalid so we don't assume
-    SDL_GPUShaderFormat format = SDL_GPU_SHADERFORMAT_INVALID;
-    // Different shaer formats have different entrypoint names
-    const char* entrypoint;
-
-    SDL_GPUShaderFormat backendFormats = SDL_GetGPUShaderFormats(device);
-    if (backendFormats & SDL_GPU_SHADERFORMAT_SPIRV)
-    {
-        fullPath /= shaderFilename + ".spv";
-        format = SDL_GPU_SHADERFORMAT_SPIRV;
-        entrypoint = "main";
-    }
-    else if (backendFormats & SDL_GPU_SHADERFORMAT_MSL)
-    {
-        fullPath /= shaderFilename + ".msl";
-        format = SDL_GPU_SHADERFORMAT_MSL;
-        entrypoint = "main0";
-    }
-    else if (backendFormats & SDL_GPU_SHADERFORMAT_DXIL)
-    {
-        fullPath /= shaderFilename + ".dxil";
-        format = SDL_GPU_SHADERFORMAT_DXIL;
-        entrypoint = "main";
-    }
-    else
-    {
-        SDL_Log("Couldn't find a supported shader format for backend %s!", SDL_GetGPUDeviceDriver(device));
-        return nullptr;
-    }
-
-    // Store the size of the data we're loading, to be reused later
-    size_t fileSize;
-    void* code = SDL_LoadFile(fullPath.string().c_str(), &fileSize);
-    if (code == nullptr)
-    {
-        SDL_Log("Couldn't load shader file from disk!\n\t%s", SDL_GetError());
-        return nullptr;
-    }
-
-    const auto shaderInfo = SDL_GPUShaderCreateInfo{
-        .code_size = fileSize,
-        .code = static_cast<Uint8*>(code),
-        .entrypoint = entrypoint,
-        .format = format,
-        .stage = stage,
-
-        .num_samplers =
-            stage == SDL_GPU_SHADERSTAGE_FRAGMENT ? 1u : 0u,
-
-        .num_storage_textures = 0u,
-        .num_storage_buffers = 0u,
-        .num_uniform_buffers = stage == SDL_GPU_SHADERSTAGE_VERTEX ? 1u : 0u,
-    };
-
-    SDL_GPUShader* shader = SDL_CreateGPUShader(device, &shaderInfo);
-    if (shader == nullptr)
-    {
-        SDL_Log("Couldn't create shader from file %s: %s", fullPath.c_str(), SDL_GetError());
-        SDL_free(code);
-        return nullptr;
-    }
-    return shader;
-}
-
 bool CreatePipeline(AppState* appState) {
-    SDL_GPUShader* vertexShader = LoadShader(appState->device, "UnlitTextured.vert");
+    SDL_GPUShader* vertexShader = appState->GetShader("UnlitTextured.vert");
     if (vertexShader == nullptr)
     {
         SDL_Log("Couldn't create vertex shader!");
         return false;
     }
 
-    SDL_GPUShader* fragmentShader = LoadShader(appState->device, "UnlitTextured.frag");
-    // SDL_GPUShader* fragmentShader = LoadShader(appState->device, "UVs.frag");
+    SDL_GPUShader* fragmentShader = appState->GetShader("UnlitTextured.frag");
     if (fragmentShader == nullptr)
     {
         SDL_Log("Couldn't create fragment shader!");
@@ -372,9 +290,9 @@ void HandleInput(const AppState* appState) {
     }
 }
 
-void HandleUpdate(const AppState* appState, float deltaTime) {
+void HandleUpdate(const AppState* appState) {
     for (int i = 0; i < appState->nodes.size(); i++) {
-        appState->nodes[i]->Update(*appState, 1.0f);
+        appState->nodes[i]->Update(*appState);
     }
 }
 
@@ -422,7 +340,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     // Load texture before the pipeline uses it
     std::filesystem::path texturePath = std::filesystem::path(SDL_GetBasePath()) / "assets" / "textures" / "dev.png";
-    if (!appState->LoadTextureFromFile(texturePath.string())) {
+    if (!appState->LoadTexture(texturePath.string())) {
         SDL_Log("Couldn't load texture.");
     }
 
@@ -436,7 +354,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     }
 
     try {
-        Mesh model = Mesh::LoadGLB(*appState, std::filesystem::path(SDL_GetBasePath()) / "assets" / "models" / "zulu.glb");
+        Mesh model = Mesh::LoadGLB(*appState, "zulu.glb");
 
         if (!LoadMeshToGPU(appState, model)) {
             return SDL_APP_FAILURE;
@@ -469,8 +387,12 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 {
     auto* appState = static_cast<AppState*>(appstate);
 
+    appState->lastTime = appState->currentTime;
+    appState->currentTime = SDL_GetTicks();
+    appState->delta = appState->currentTime - appState->lastTime;
+
     HandleInput(appState);
-    HandleUpdate(appState, 1.0f); //TODO: Delta time
+    HandleUpdate(appState);
 
     // Here's where we store the commands that will be eventually sent to the GPU
     SDL_GPUCommandBuffer* commandBuffer = SDL_AcquireGPUCommandBuffer(appState->device);
@@ -530,7 +452,6 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         };
         SDL_BindGPUIndexBuffer(renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
 
-
         UpdateAndUploadMVP(appState, commandBuffer);
 
         // Bind texture and sampler (if they exist)
@@ -542,7 +463,6 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 
         // Draw stuff
         SDL_DrawGPUIndexedPrimitives(renderPass, appState->numIndices, 1, 0, 0, 0);
-
 
         // Finally, end the render pass
         SDL_EndGPURenderPass(renderPass);
