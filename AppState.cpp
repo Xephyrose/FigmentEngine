@@ -89,7 +89,7 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
     return true;
 }
 
-bool AppState::LoadTexture(std::string path) {
+bool AppState::LoadTexture(const std::string& path) {
     std::string fullPath = std::filesystem::path(SDL_GetBasePath()) / "assets" / "textures" / path;
     SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(device);
     if (!uploadCmdBuf) {
@@ -125,7 +125,7 @@ bool AppState::LoadTexture(std::string path) {
     return true;
 }
 
-bool AppState::LoadShader(std::string path) {
+bool AppState::LoadShader(const std::string& path) {
     const std::string fullPath = std::filesystem::path(SDL_GetBasePath()) / "assets" / "shaders" / path;
     SDL_GPUShaderStage stage;
     if (fullPath.contains(".vert"))
@@ -247,10 +247,8 @@ SDL_GPUSampler* AppState::GetSampler(const std::string& type) const {
 }
 
 void AppState::CreateDefaultMaterials() {
-    // concrete_bricks
-    GetTexture("concrete_bricks.png");
-    auto* material = new MaterialUnlitTextured("concrete_bricks", "UnlitTextured", "anisotropic_repeat", "concrete_bricks.png");
-    materials.insert_or_assign("concrete_bricks", material);
+    new MaterialUnlitTextured(this, "concrete_bricks", "UnlitTextured", "anisotropic_repeat", "concrete_bricks.png");
+    new MaterialUnlitTextured(this, "missing", "UnlitTextured", "anisotropic_repeat", "missing.png");
 }
 
 void AppState::CreateDefaultPipelines() {
@@ -352,6 +350,6 @@ void AppState::CreateDefaultSamplers() {
     }
 }
 
-bool AppState::CreateDefaultTextures() {
-    return LoadTexture("missing.png");
+void AppState::CreateDefaultTextures() {
+    LoadTexture("missing.png");
 }

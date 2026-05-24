@@ -7,7 +7,7 @@
 #include "Material.h"
 
 struct MaterialUnlitTextured : public Material {
-    MaterialUnlitTextured(const std::string &name, const std::string &pipeline, const std::string& sampler, const std::string &textureAlbedo);
+    MaterialUnlitTextured(AppState* appState, const std::string &name, const std::string &pipeline, const std::string& sampler, const std::string &textureAlbedo);
     std::string textureAlbedo;
 
     void Bind(AppState* appState) const override;

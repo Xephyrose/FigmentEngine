@@ -85,10 +85,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->depthTexture = SDL_CreateGPUTexture(appState->device, &depthInfo);
 
     // Load texture before the pipeline uses it
-    if (!appState->CreateDefaultTextures()) {
-        SDL_Log("Couldn't load default textures.");
-        return SDL_APP_FAILURE;
-    }
+
+    appState->CreateDefaultTextures();
     appState->CreateDefaultMaterials();
     appState->CreateDefaultSamplers();
     appState->CreateDefaultPipelines();
@@ -173,8 +171,8 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         };
 
         // now we actually define the render pass, by passing &colorTargetInfo, which modified our swapchainTexture to become cleared
-        SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(commandBuffer, &colorTargetInfo, 1, &depthTarget);
-        if (!renderPass) {
+        appState->renderPass = SDL_BeginGPURenderPass(commandBuffer, &colorTargetInfo, 1, &depthTarget);
+        if (!appState->renderPass) {
             SDL_Log("Couldn't begin render pass: %s", SDL_GetError());
             return SDL_APP_FAILURE;
         }
@@ -187,58 +185,57 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 
             // Bind mesh's vertex buffer
             SDL_GPUBufferBinding vertexBinding = { .buffer = mesh.vertexBuffer, .offset = 0 };
-            SDL_BindGPUVertexBuffers(renderPass, 0, &vertexBinding, 1);
+            SDL_BindGPUVertexBuffers(appState->renderPass, 0, &vertexBinding, 1);
 
             // Bind mesh's index buffer if it has indices
             if (!mesh.indices.empty()) {
                 SDL_GPUBufferBinding indexBinding = { .buffer = mesh.indexBuffer, .offset = 0 };
-                SDL_BindGPUIndexBuffer(renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+                SDL_BindGPUIndexBuffer(appState->renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
             }
 
-            // Draw each submesh with its material
-            // Draw each submesh with its material
             for (const auto& submesh : mesh.submeshes) {
+                const Material* material = nullptr;
                 if (submesh.material.empty()) {
-                    SDL_Log("Submesh '%s' has no material name!", submesh.name.c_str());
-                    continue;
+                    material = appState->materials.at("missing");
+                }
+                else if (!appState->materials.contains(submesh.material)) {
+                    SDL_Log("AppState's materials does not contain %s, setting to missing...", submesh.material.c_str());
+                    material = appState->GetMaterial("missing");
+                }
+                else {
+                    material = appState->GetMaterial(submesh.material);
                 }
 
-                Material* material = appState->GetMaterial(submesh.material);
                 if (!material) {
-                    SDL_Log("Material '%s' not found for submesh '%s'!", submesh.material.c_str(), submesh.name.c_str());
                     continue;
                 }
 
-                SDL_Log("Binding material: %s", submesh.material.c_str());
                 material->Bind(appState);
-                SDL_Log("Material bound successfully");
 
                 // Draw the submesh
                 if (!mesh.indices.empty()) {
-                    SDL_Log("Drawing indexed primitives: count=%u, startIndex=%u, startVertex=%u",
-                            submesh.indexCount, submesh.startIndex, submesh.startVertex);
                     SDL_DrawGPUIndexedPrimitives(
-                        renderPass,
+                        appState->renderPass,
                         submesh.indexCount,
                         1,
                         submesh.startIndex,
-                        submesh.startVertex,
+                        0,
                         0
                     );
                 } else {
                     SDL_DrawGPUPrimitives(
-                        renderPass,
+                        appState->renderPass,
                         submesh.vertexCount,
                         1,
                         submesh.startVertex,
                         0
                     );
                 }
-                SDL_Log("Draw completed");
             }
         }
 
-        SDL_EndGPURenderPass(renderPass);
+        SDL_EndGPURenderPass(appState->renderPass);
+        appState->renderPass = nullptr;
     }
     // Send the command buffer to the GPU for drawing
     SDL_SubmitGPUCommandBuffer(commandBuffer);

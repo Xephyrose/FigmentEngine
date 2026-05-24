@@ -46,8 +46,8 @@ struct AppState {
 
     bool CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader);
 
-    bool LoadShader(const std::string path);
-    bool LoadTexture(const std::string path);
+    bool LoadShader(const std::string& path);
+    bool LoadTexture(const std::string& path);
 
     SDL_GPUShader* GetShader(const std::string& path);
     SDL_GPUTexture* GetTexture(const std::string& path);
@@ -58,7 +58,7 @@ struct AppState {
 
     void CreateDefaultMaterials();
     void CreateDefaultSamplers();
-    bool CreateDefaultTextures();
+    void CreateDefaultTextures();
     void CreateDefaultPipelines();
 };
 

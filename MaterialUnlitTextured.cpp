@@ -1,9 +1,12 @@
 #include "MaterialUnlitTextured.h"
 
-MaterialUnlitTextured::MaterialUnlitTextured(const std::string &name, const std::string &pipeline, const std::string& sampler, const std::string &textureAlbedo) : textureAlbedo(textureAlbedo) {
+MaterialUnlitTextured::MaterialUnlitTextured(AppState* appState, const std::string &name, const std::string &pipeline, const std::string& sampler, const std::string &textureAlbedo) {
     this->name = name;
     this->pipeline = pipeline;
     this->sampler = sampler;
+    appState->LoadTexture(textureAlbedo);
+    this->textureAlbedo = textureAlbedo;
+    appState->materials.insert_or_assign(name, this);
 }
 
 void MaterialUnlitTextured::Bind(AppState *appState) const {
@@ -14,7 +17,6 @@ void MaterialUnlitTextured::Bind(AppState *appState) const {
     }
 
     SDL_BindGPUGraphicsPipeline(appState->renderPass, gotPipeline);
-    SDL_Log("SUCCESS: Pipeline '%s' bound to render pass", pipeline.c_str());
 
     BindTextures(appState);
 }
