@@ -1,12 +1,14 @@
 #include "AppState.h"
 
+#include <tiny_gltf.h>
 #include <filesystem>
 #include <SDL3_image/SDL_image.h>
 
 #include "MaterialUnlitTextured.h"
+#include "Mesh.h"
 #include "Vertex.h"
 
-bool AppState::CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader) {
+bool AppState::CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader, const std::string& rasterizerState) {
     SDL_GPUShader* vertexShader = GetShader(vertShader + ".vert");
     if (!vertexShader) {
         SDL_Log("Couldn't create vertex shader: %s", vertShader.c_str());
@@ -59,11 +61,7 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
             .num_vertex_attributes = vertexAttributes.size(),
         },
         .primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
-        .rasterizer_state = SDL_GPURasterizerState{
-            .fill_mode = SDL_GPU_FILLMODE_FILL,
-            .cull_mode = SDL_GPU_CULLMODE_BACK,
-            .front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE,
-        },
+        .rasterizer_state = GetRasterizerState(rasterizerState),
         .depth_stencil_state = SDL_GPUDepthStencilState{
             .compare_op = SDL_GPU_COMPAREOP_LESS,
             .enable_depth_test = true,
@@ -77,7 +75,6 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
         },
     };
 
-    SDL_Log("Created pipeline with key %s", name.c_str());
     pipelines.insert_or_assign(name, SDL_CreateGPUGraphicsPipeline(device, &pipelineCreateInfo));
     if (!pipelines[name]) {
         SDL_Log("Couldn't create graphics pipeline: %s", SDL_GetError());
@@ -89,38 +86,201 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
     return true;
 }
 
-bool AppState::LoadTexture(const std::string& path) {
-    std::string fullPath = std::filesystem::path(SDL_GetBasePath()) / "assets" / "textures" / path;
-    SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(device);
-    if (!uploadCmdBuf) {
-        SDL_Log("Couldn't acquire command buffer: %s", SDL_GetError());
-        return false;
+static std::vector<float> ReadAttributeData(const tinygltf::Model& model, const int accessorIdx) {
+    std::vector<float> result;
+
+    if (accessorIdx < 0) return result;
+
+    const tinygltf::Accessor& accessor = model.accessors[accessorIdx];
+    const tinygltf::BufferView& bufferView = model.bufferViews[accessor.bufferView];
+    const tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
+
+    const unsigned char* dataPtr = buffer.data.data() + bufferView.byteOffset + accessor.byteOffset;
+
+    size_t vertexCount = accessor.count;
+    int numComponents = tinygltf::GetNumComponentsInType(accessor.type);
+
+    result.resize(vertexCount * numComponents);
+
+    // Handle different component types
+    if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+        const auto* floatData = reinterpret_cast<const float*>(dataPtr);
+        for (size_t i = 0; i < vertexCount * numComponents; i++) {
+            result[i] = floatData[i];
+        }
+    }
+    else if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
+        const auto* shortData = reinterpret_cast<const uint16_t*>(dataPtr);
+        for (size_t i = 0; i < vertexCount * numComponents; i++) {
+            result[i] = static_cast<float>(shortData[i]);
+        }
+    }
+    else if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE) {
+        const auto* byteData = reinterpret_cast<const uint8_t*>(dataPtr);
+        for (size_t i = 0; i < vertexCount * numComponents; i++) {
+            result[i] = static_cast<float>(byteData[i]) / 255.0f;
+        }
     }
 
-    SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
-    if (!copyPass) {
-        SDL_Log("Couldn't begin copy pass: %s", SDL_GetError());
-        SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
-        return false;
+    return result;
+}
+
+bool AppState::LoadMesh(const std::string& path) {
+    std::string fullPath = std::filesystem::path(SDL_GetBasePath()) / "assets" / "meshes" / path;
+    tinygltf::Model model;
+    tinygltf::TinyGLTF loader;
+    std::string err, warn;
+
+    bool success = loader.LoadBinaryFromFile(&model, &err, &warn, fullPath);
+
+    if (!warn.empty()) {
+        SDL_Log("GLTF Warning: %s", warn.c_str());
+    }
+    if (!err.empty()) {
+        SDL_Log("GLTF Error: %s", err.c_str());
+    }
+    if (!success) {
+        SDL_Log("Failed to load GLB file: %s", fullPath.c_str());
+        return {};
     }
 
-    // Load image
-    SDL_GPUTexture* texture = IMG_LoadGPUTexture(device, copyPass, fullPath.c_str(), nullptr, nullptr);
+    Mesh result;
 
-    // End the copy pass
-    SDL_EndGPUCopyPass(copyPass);
+    // NEW: Build node-to-mesh mapping
+    std::vector<std::pair<int, std::string>> meshToNodeName; // meshIndex -> (nodeIndex, nodeName)
 
-    if (!texture) {
-        SDL_Log("Couldn't load texture: %s", path.c_str());
-        SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
-        return false;
+    for (const auto & node : model.nodes) {
+        if (node.mesh >= 0) {
+            meshToNodeName.emplace_back(node.mesh, node.name);
+            // SDL_Log("Node[%zu]: name='%s' -> mesh=%d", nodeIdx, node.name.c_str(), node.mesh);
+        }
     }
 
-    textures.insert_or_assign(path, texture);
+    // Process all meshes
+    for (int meshIdx = 0; meshIdx < static_cast<int>(model.meshes.size()); meshIdx++) {
+        const auto& gltfMesh = model.meshes[meshIdx];
 
-    SDL_GPUFence* fence = SDL_SubmitGPUCommandBufferAndAcquireFence(uploadCmdBuf);
-    SDL_WaitForGPUFences(device, true, &fence, 1);
-    SDL_ReleaseGPUFence(device, fence);
+        // Find which node(s) use this mesh
+        std::string objectName = "Unnamed";
+        for (const auto& mapping : meshToNodeName) {
+            if (mapping.first == meshIdx) {
+                objectName = mapping.second;
+                break;
+            }
+        }
+
+        // SDL_Log("Processing mesh %d: name='%s' (object: '%s')", meshIdx, gltfMesh.name.c_str(), objectName.c_str());
+
+        for (const auto& primitive : gltfMesh.primitives) {
+            Submesh submesh;
+            submesh.name = objectName;
+            submesh.meshName = gltfMesh.name;
+            submesh.startVertex = result.vertices.size();
+            submesh.startIndex = result.indices.size();
+
+            size_t startVertex = result.vertices.size();
+
+            // Read POSITION attribute
+            auto posIt = primitive.attributes.find("POSITION");
+            if (posIt != primitive.attributes.end()) {
+                std::vector<float> positions = ReadAttributeData(model, posIt->second);
+                size_t vertexCount = positions.size() / 3;
+                result.vertices.resize(startVertex + vertexCount);
+
+                for (size_t i = 0; i < vertexCount; i++) {
+                    result.vertices[startVertex + i].position = glm::vec3(
+                        positions[i * 3],
+                        positions[i * 3 + 1],
+                        positions[i * 3 + 2]
+                    );
+                    result.vertices[startVertex + i].uv = glm::vec2(0.0f, 0.0f);
+                }
+                submesh.vertexCount = vertexCount;
+            }
+
+            // Read NORMAL attribute (add this for better lighting)
+            auto normIt = primitive.attributes.find("NORMAL");
+            if (normIt != primitive.attributes.end()) {
+                std::vector<float> normals = ReadAttributeData(model, normIt->second);
+                size_t vertexCount = normals.size() / 3;
+                for (size_t i = 0; i < vertexCount && i < submesh.vertexCount; i++) {
+                    // You'll need to add a 'normal' member to your Vertex struct
+                    // result.vertices[startVertex + i].normal = glm::vec3(
+                    //     normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]
+                    // );
+                }
+            }
+
+            // Read TEXCOORD_0 attribute (UVs)
+            auto uvIt = primitive.attributes.find("TEXCOORD_0");
+            if (uvIt != primitive.attributes.end()) {
+                std::vector<float> uvs = ReadAttributeData(model, uvIt->second);
+                size_t vertexCount = uvs.size() / 2;
+                for (size_t i = 0; i < vertexCount && i < submesh.vertexCount; i++) {
+                    result.vertices[startVertex + i].uv = glm::vec2(uvs[i * 2], uvs[i * 2 + 1]);
+                }
+            }
+
+            // Read indices
+            if (primitive.indices >= 0) {
+                const tinygltf::Accessor& indexAccessor = model.accessors[primitive.indices];
+                const tinygltf::BufferView& bufferView = model.bufferViews[indexAccessor.bufferView];
+                const tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
+
+                const unsigned char* dataPtr = buffer.data.data() + bufferView.byteOffset + indexAccessor.byteOffset;
+                size_t indexCount = indexAccessor.count;
+
+                result.indices.reserve(result.indices.size() + indexCount);
+
+                if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
+                    const auto* indices16 = reinterpret_cast<const uint16_t*>(dataPtr);
+                    for (size_t i = 0; i < indexCount; i++) {
+                        result.indices.push_back(static_cast<uint16_t>(indices16[i] + startVertex));
+                    }
+                }
+                else if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT) {
+                    const auto* indices32 = reinterpret_cast<const uint32_t*>(dataPtr);
+                    for (size_t i = 0; i < indexCount; i++) {
+                        if (indices32[i] + startVertex > 65535) {
+                            throw std::runtime_error("Model has more than 65535 vertices. Consider using uint32_t for indices.");
+                        }
+                        result.indices.push_back(static_cast<uint16_t>(indices32[i] + startVertex));
+                    }
+                }
+                else if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE) {
+                    const auto* indices8 = reinterpret_cast<const uint8_t*>(dataPtr);
+                    for (size_t i = 0; i < indexCount; i++) {
+                        result.indices.push_back(static_cast<uint16_t>(indices8[i] + startVertex));
+                    }
+                }
+
+                submesh.indexCount = indexCount;
+            }
+
+            submesh.material = model.materials[primitive.material].name;
+
+            result.submeshes.push_back(submesh);
+            // SDL_Log("  Added submesh '%s' - vertices: %zu, indices: %zu", submesh.name.c_str(), submesh.vertexCount, submesh.indexCount);
+        }
+    }
+
+    // SDL_Log("=== Mesh Loading Complete ===");
+    // SDL_Log("Total vertices: %zu", result.vertices.size());
+    // SDL_Log("Total indices: %zu", result.indices.size());
+    // SDL_Log("Submeshes found: %zu", result.submeshes.size());
+
+    // for (const auto& submesh : result.submeshes) {
+    //     SDL_Log("  - Object: '%s' (Mesh: '%s') vtx[%zu-%zu] idx[%zu-%zu]",
+    //             submesh.name.c_str(),
+    //             submesh.meshName.c_str(),
+    //             submesh.startVertex,
+    //             submesh.startVertex + submesh.vertexCount - 1,
+    //             submesh.startIndex,
+    //             submesh.startIndex + submesh.indexCount - 1);
+    // }
+
+    meshes.insert_or_assign(path, result);
+    result.UploadToGPU(*this);
 
     return true;
 }
@@ -210,6 +370,59 @@ bool AppState::LoadShader(const std::string& path) {
     return true;
 }
 
+bool AppState::LoadTexture(const std::string& path) {
+    std::string fullPath = std::filesystem::path(SDL_GetBasePath()) / "assets" / "textures" / path;
+    SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(device);
+    if (!uploadCmdBuf) {
+        SDL_Log("Couldn't acquire command buffer: %s", SDL_GetError());
+        return false;
+    }
+
+    SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
+    if (!copyPass) {
+        SDL_Log("Couldn't begin copy pass: %s", SDL_GetError());
+        SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
+        return false;
+    }
+
+    // Load image
+    SDL_GPUTexture* texture = IMG_LoadGPUTexture(device, copyPass, fullPath.c_str(), nullptr, nullptr);
+
+    // End the copy pass
+    SDL_EndGPUCopyPass(copyPass);
+
+    if (!texture) {
+        SDL_Log("Couldn't load texture: %s", path.c_str());
+        SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
+        return false;
+    }
+
+    textures.insert_or_assign(path, texture);
+
+    SDL_GPUFence* fence = SDL_SubmitGPUCommandBufferAndAcquireFence(uploadCmdBuf);
+    SDL_WaitForGPUFences(device, true, &fence, 1);
+    SDL_ReleaseGPUFence(device, fence);
+
+    return true;
+}
+
+Mesh* AppState::GetMesh(const std::string& path) {
+    if (!meshes.contains(path)) {
+        if (!LoadMesh(path)) {
+            SDL_Log("Couldn't load shader %s: %s", path.c_str(), SDL_GetError());
+            return nullptr;
+        }
+    }
+    return &meshes.at(path);
+}
+
+Material* AppState::GetMaterial(const std::string& key) const {
+    if (!materials.contains(key)) {
+        return nullptr;
+    }
+    return materials.at(key);
+}
+
 SDL_GPUShader* AppState::GetShader(const std::string& path) {
     if (!shaders.contains(path)) {
         if (!LoadShader(path)) {
@@ -220,10 +433,13 @@ SDL_GPUShader* AppState::GetShader(const std::string& path) {
     return shaders.at(path);
 }
 
-SDL_GPUTexture *AppState::GetTexture(const std::string &path) {
+SDL_GPUSampler* AppState::GetSampler(const std::string& key) const {
+    return samplers.at(key);
+}
 
+SDL_GPUTexture* AppState::GetTexture(const std::string &path) {
     if (!textures.contains(path)) {
-        if (LoadTexture(path) == false) {
+        if (!LoadTexture(path)) {
             SDL_Log("Couldn't load shader %s: %s", path.c_str(), SDL_GetError());
             return nullptr;
         }
@@ -231,32 +447,27 @@ SDL_GPUTexture *AppState::GetTexture(const std::string &path) {
     return textures.at(path);
 }
 
-Material *AppState::GetMaterial(const std::string &key) const {
-    if (!materials.contains(key)) {
-        return nullptr;
-    }
-    return materials.at(key);
+SDL_GPUGraphicsPipeline* AppState::GetPipeline(const std::string& key) const {
+    return pipelines.at(key);
 }
 
-SDL_GPUGraphicsPipeline* AppState::GetPipeline(const std::string& type) const {
-    return pipelines.at(type);
+SDL_GPURasterizerState AppState::GetRasterizerState(const std::string &key) const {
+    return rasterizerStates.at(key);
 }
 
-SDL_GPUSampler* AppState::GetSampler(const std::string& type) const {
-    return samplers.at(type);
+void AppState::CreateDefaultMeshes() {
+    LoadMesh("zulu.glb");
 }
 
 void AppState::CreateDefaultMaterials() {
-    new MaterialUnlitTextured(this, "concrete_bricks", "UnlitTextured", "anisotropic_repeat", "concrete_bricks.png");
+    SDL_Log("Creating default materials...");
     new MaterialUnlitTextured(this, "missing", "UnlitTextured", "anisotropic_repeat", "missing.png");
-}
-
-void AppState::CreateDefaultPipelines() {
-    CreatePipeline("UnlitTextured", "UnlitTextured", "UnlitTextured");
-    CreatePipeline("UnlitUVs", "UnlitTextured", "UnlitUVs");
+    new MaterialUnlitTextured(this, "line", "Line", "anisotropic_repeat", "missing.png");
+    new MaterialUnlitTextured(this, "concrete_bricks", "UnlitTextured", "anisotropic_repeat", "concrete_bricks.png");
 }
 
 void AppState::CreateDefaultSamplers() {
+    SDL_Log("Creating default samplers...");
     // Linear sampler (for most 3D textures, smooth scaling)
     constexpr SDL_GPUSamplerCreateInfo linearSamplerInfo = {
         .min_filter = SDL_GPU_FILTER_LINEAR,
@@ -351,5 +562,27 @@ void AppState::CreateDefaultSamplers() {
 }
 
 void AppState::CreateDefaultTextures() {
+    SDL_Log("Creating default textures...");
     LoadTexture("missing.png");
+}
+
+void AppState::CreateDefaultPipelines() {
+    SDL_Log("Creating default pipelines...");
+    CreatePipeline("Line", "UnlitTextured", "UnlitTextured", "Line");
+    CreatePipeline("UnlitTextured", "UnlitTextured", "UnlitTextured", "Fill");
+    CreatePipeline("UnlitUVs", "UnlitTextured", "UnlitUVs", "Fill");
+}
+
+void AppState::CreateDefaultRasterizerStates() {
+    SDL_Log("Creating default rasterizer states...");
+    SDL_GPURasterizerState fill{};
+    fill.fill_mode = SDL_GPU_FILLMODE_FILL;
+    fill.cull_mode = SDL_GPU_CULLMODE_BACK;
+    fill.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
+    rasterizerStates.insert_or_assign("Fill", fill);
+    auto line = SDL_GPURasterizerState {};
+    line.fill_mode = SDL_GPU_FILLMODE_LINE;
+    line.cull_mode = SDL_GPU_CULLMODE_BACK;
+    line.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
+    rasterizerStates.insert_or_assign("Line", line);
 }

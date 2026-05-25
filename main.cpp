@@ -1,4 +1,3 @@
-#include <filesystem>
 #include <iostream>
 #include <vector>
 #include <SDL3/SDL.h>
@@ -86,31 +85,19 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     // Load texture before the pipeline uses it
 
+    appState->CreateDefaultMeshes();
     appState->CreateDefaultTextures();
     appState->CreateDefaultMaterials();
     appState->CreateDefaultSamplers();
+    appState->CreateDefaultRasterizerStates();
     appState->CreateDefaultPipelines();
-
-    try {
-        Mesh model = Mesh::LoadGLB(*appState, "zulu.glb");
-
-        // Upload to GPU using the Mesh's own method
-        model.UploadToGPU(*appState);
-
-        // Store the mesh in appState (you'll need to add this member)
-        appState->meshes.push_back(std::move(model));
-
-    } catch (const std::exception& e) {
-        SDL_Log("Failed to load model: %s", e.what());
-        return SDL_APP_FAILURE;
-    }
 
     return SDL_APP_CONTINUE;
 }
 
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 {
-    auto* appState = static_cast<AppState*>(appstate);
+    const auto* appState = static_cast<AppState*>(appstate);
 
     switch (event->type)
     {
@@ -180,7 +167,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         UpdateAndUploadMVP(appState, commandBuffer);
 
         // Draw all meshes
-        for (const auto& mesh : appState->meshes) {
+        for (const auto &mesh: appState->meshes | std::views::values) {
             if (!mesh.isOnGPU) continue;
 
             // Bind mesh's vertex buffer
@@ -195,7 +182,10 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 
             for (const auto& submesh : mesh.submeshes) {
                 const Material* material = nullptr;
-                if (submesh.material.empty()) {
+                if (!appState->material_override.empty()) {
+                    material = appState->GetMaterial(appState->material_override);
+                }
+                else if (submesh.material.empty()) {
                     material = appState->materials.at("missing");
                 }
                 else if (!appState->materials.contains(submesh.material)) {
@@ -207,6 +197,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
                 }
 
                 if (!material) {
+                    SDL_Log("!material");
                     continue;
                 }
 
@@ -249,7 +240,6 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
 
     for (const Node* node : appState->nodes) delete node;
     appState->nodes.clear();
-    appState->meshes.clear();
 
     for (const auto &material: appState->materials | std::views::values) {delete material;}
     appState->materials.clear();

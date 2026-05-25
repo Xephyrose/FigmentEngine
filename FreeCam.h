@@ -2,8 +2,7 @@
 #define FIGMENTENGINE_FREECAM_H
 #include "Camera3D.h"
 
-class FreeCam : public Camera3D {
-public:
+struct FreeCam : public Camera3D {
     using Camera3D::Camera3D;
     void Input(const AppState& appState, const bool* isKeyDown) override;
 };

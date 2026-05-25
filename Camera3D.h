@@ -2,7 +2,7 @@
 #define FIGMENTENGINE_CAMERA3D_H
 #include "Node3D.h"
 
-class Camera3D : public Node3D {
+struct Camera3D : public Node3D {
 public:
     explicit Camera3D(const AppState& appState);
     float fov = 90.0f;

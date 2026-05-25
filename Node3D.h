@@ -3,8 +3,7 @@
 #include "Node.h"
 #include "Transform3D.h"
 
-class Node3D : public Node {
-public:
+struct Node3D : public Node {
     Transform3D localTransform;
     Transform3D globalTransform;
 };

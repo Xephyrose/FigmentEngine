@@ -1,5 +1,7 @@
 #include "MaterialUnlitTextured.h"
 
+#include <SDL3/SDL_log.h>
+
 MaterialUnlitTextured::MaterialUnlitTextured(AppState* appState, const std::string &name, const std::string &pipeline, const std::string& sampler, const std::string &textureAlbedo) {
     this->name = name;
     this->pipeline = pipeline;

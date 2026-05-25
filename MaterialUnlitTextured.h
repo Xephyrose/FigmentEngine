@@ -1,9 +1,6 @@
 #ifndef FIGMENTENGINE_MATERIAL_UNLIT_TEXTURED_H
 #define FIGMENTENGINE_MATERIAL_UNLIT_TEXTURED_H
 
-#include <SDL3/SDL_gpu.h>
-#include <SDL3/SDL_log.h>
-
 #include "Material.h"
 
 struct MaterialUnlitTextured : public Material {

@@ -28,6 +28,8 @@ add_executable(FigmentEngine
         MaterialPBR.h
         MaterialPBR.cpp
         MaterialUnlitTextured.cpp
+        MeshInstance3D.cpp
+        MeshInstance3D.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

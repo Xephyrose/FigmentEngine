@@ -4,8 +4,7 @@
 
 #include "AppState.h"
 
-class Node {
-public:
+struct Node {
     virtual ~Node() = default;
     Node();
 

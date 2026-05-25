@@ -5,7 +5,7 @@
 struct Vertex {
     glm::vec3 position;   // x, y, z
     glm::vec2 uv;         // u, v
-    Vertex(float x = 0, float y = 0, float z = 0, float u = 0, float v = 0);
+    explicit Vertex(float x = 0, float y = 0, float z = 0, float u = 0, float v = 0);
     Vertex(const glm::vec3 &position, const glm::vec2 &uv);
 };
 
