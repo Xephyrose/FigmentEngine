@@ -463,7 +463,22 @@ void AppState::CreateDefaultMaterials() {
     SDL_Log("Creating default materials...");
     new MaterialUnlitTextured(this, "missing", "UnlitTextured", "anisotropic_repeat", "missing.png");
     new MaterialUnlitTextured(this, "line", "Line", "anisotropic_repeat", "missing.png");
-    new MaterialUnlitTextured(this, "concrete_bricks", "UnlitTextured", "anisotropic_repeat", "concrete_bricks.png");
+    new MaterialUnlitTextured(this, "concrete_bricks", "UnlitTextured", "anisotropic_repeat", "brick_concrete_albedo.png");
+    new MaterialUnlitTextured(this, "concrete_bricks_with_specks", "UnlitTextured", "anisotropic_repeat", "brick_concrete_specks_albedo.png");
+    new MaterialUnlitTextured(this, "plaster", "UnlitTextured", "anisotropic_repeat", "plaster_albedo.png");
+    new MaterialUnlitTextured(this, "reinforced_glass", "UnlitTextured", "anisotropic_repeat", "reinforced_glass_albedo.png");
+    new MaterialUnlitTextured(this, "fence", "UnlitTextured", "anisotropic_repeat", "fence_albedo.png");
+    new MaterialUnlitTextured(this, "asphalt", "UnlitTextured", "anisotropic_repeat", "asphalt_albedo.png");
+    new MaterialUnlitTextured(this, "asphalt_2", "UnlitTextured", "anisotropic_repeat", "asphalt_2_albedo.png");
+    new MaterialUnlitTextured(this, "concrete", "UnlitTextured", "anisotropic_repeat", "concrete_albedo.png");
+    new MaterialUnlitTextured(this, "concrete_with_specks", "UnlitTextured", "anisotropic_repeat", "concrete_specks_albedo.png");
+    new MaterialUnlitTextured(this, "hardwood_dark", "UnlitTextured", "anisotropic_repeat", "hardwood_dark_albedo.png");
+    new MaterialUnlitTextured(this, "hardwood_light", "UnlitTextured", "anisotropic_repeat", "hardwood_light_albedo.png");
+    new MaterialUnlitTextured(this, "pine_end", "UnlitTextured", "anisotropic_repeat", "pine_end_albedo.png");
+    new MaterialUnlitTextured(this, "pine_wood_dark", "UnlitTextured", "anisotropic_repeat", "pine_wood_dark_albedo.png");
+    new MaterialUnlitTextured(this, "pine_wood_light", "UnlitTextured", "anisotropic_repeat", "pine_wood_light_albedo.png");
+    new MaterialUnlitTextured(this, "roof_tile", "UnlitTextured", "anisotropic_repeat", "roof_tile_albedo.png");
+    new MaterialUnlitTextured(this, "wood_plank", "UnlitTextured", "anisotropic_repeat", "wood_plank_albedo.png");
 }
 
 void AppState::CreateDefaultSamplers() {

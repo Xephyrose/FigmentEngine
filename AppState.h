@@ -41,7 +41,7 @@ struct AppState {
     Uint64 lastTime = 0;
     Uint64 delta = 0;
 
-    std::string material_override = "line";
+    std::string material_override;
 
     bool CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader, const std::string& rasterizerState);
 
