@@ -35,23 +35,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5222af9d-b1fd-4aa6-bc40-7cc49bf34801" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/MeshInstance3D.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/MeshInstance3D.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/AppState.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/AppState.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AppState.h" beforeDir="false" afterPath="$PROJECT_DIR$/AppState.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Camera3D.h" beforeDir="false" afterPath="$PROJECT_DIR$/Camera3D.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FreeCam.h" beforeDir="false" afterPath="$PROJECT_DIR$/FreeCam.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MaterialUnlitTextured.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/MaterialUnlitTextured.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MaterialUnlitTextured.h" beforeDir="false" afterPath="$PROJECT_DIR$/MaterialUnlitTextured.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Mesh.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Mesh.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Mesh.h" beforeDir="false" afterPath="$PROJECT_DIR$/Mesh.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Node.h" beforeDir="false" afterPath="$PROJECT_DIR$/Node.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Node3D.h" beforeDir="false" afterPath="$PROJECT_DIR$/Node3D.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Vertex.h" beforeDir="false" afterPath="$PROJECT_DIR$/Vertex.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/models/placeholder.glb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/models/zulu.glb" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -203,7 +188,7 @@
       <workItem from="1779727984078" duration="3523000" />
       <workItem from="1779735561106" duration="602000" />
       <workItem from="1779743977438" duration="8463000" />
-      <workItem from="1779752468649" duration="49000" />
+      <workItem from="1779752468649" duration="3672000" />
     </task>
     <servers />
   </component>

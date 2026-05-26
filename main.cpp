@@ -3,7 +3,7 @@
 #include <SDL3/SDL.h>
 
 #include "Mesh.h"
-#include "Node.h"
+#include "MeshInstance3D.h"
 #define SDL_MAIN_USE_CALLBACKS
 #include <ranges>
 #include <SDL3/SDL_main.h>
@@ -92,6 +92,12 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->CreateDefaultRasterizerStates();
     appState->CreateDefaultPipelines();
 
+    auto* meshInstance = new MeshInstance3D();
+    meshInstance->mesh = "zulu.glb";
+    meshInstance->globalTransform.position = glm::vec3(0, 0, 0);
+    meshInstance->globalTransform.scale = glm::vec3(1, 1, 1);
+    appState->nodes.push_back(meshInstance);
+
     return SDL_APP_CONTINUE;
 }
 
@@ -164,23 +170,28 @@ SDL_AppResult SDL_AppIterate(void* appstate)
             return SDL_APP_FAILURE;
         }
 
-        UpdateAndUploadMVP(appState, commandBuffer);
+        for (Node* node : appState->nodes) {
+            const auto* instance = dynamic_cast<MeshInstance3D*>(node);
+            if (!instance) continue;
 
-        // Draw all meshes
-        for (const auto &mesh: appState->meshes | std::views::values) {
-            if (!mesh.isOnGPU) continue;
+            Mesh* mesh = appState->GetMesh(instance->mesh);
+            if (!mesh || !mesh->isOnGPU) continue;
 
-            // Bind mesh's vertex buffer
-            SDL_GPUBufferBinding vertexBinding = { .buffer = mesh.vertexBuffer, .offset = 0 };
+            // Bind this mesh's vertex/index buffers (same buffers for all instances)
+            SDL_GPUBufferBinding vertexBinding = { .buffer = mesh->vertexBuffer, .offset = 0 };
             SDL_BindGPUVertexBuffers(appState->renderPass, 0, &vertexBinding, 1);
-
-            // Bind mesh's index buffer if it has indices
-            if (!mesh.indices.empty()) {
-                SDL_GPUBufferBinding indexBinding = { .buffer = mesh.indexBuffer, .offset = 0 };
+            if (!mesh->indices.empty()) {
+                SDL_GPUBufferBinding indexBinding = { .buffer = mesh->indexBuffer, .offset = 0 };
                 SDL_BindGPUIndexBuffer(appState->renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
             }
 
-            for (const auto& submesh : mesh.submeshes) {
+            glm::mat4 model = instance->globalTransform.getMatrix();
+            glm::mat4 view = appState->current_camera->GetViewMatrix();
+            glm::mat4 proj = appState->current_camera->GetProjectionMatrix(appState->currentAspectRatio);
+            glm::mat4 mvp = proj * view * model;
+            SDL_PushGPUVertexUniformData(commandBuffer, 0, &mvp, sizeof(mvp));
+
+            for (const auto& submesh : mesh->submeshes) {
                 const Material* material = nullptr;
                 if (!appState->material_override.empty()) {
                     material = appState->GetMaterial(appState->material_override);
@@ -195,35 +206,73 @@ SDL_AppResult SDL_AppIterate(void* appstate)
                 else {
                     material = appState->GetMaterial(submesh.material);
                 }
-
-                if (!material) {
-                    SDL_Log("!material");
-                    continue;
-                }
-
                 material->Bind(appState);
-
-                // Draw the submesh
-                if (!mesh.indices.empty()) {
-                    SDL_DrawGPUIndexedPrimitives(
-                        appState->renderPass,
-                        submesh.indexCount,
-                        1,
-                        submesh.startIndex,
-                        0,
-                        0
-                    );
+                if (!mesh->indices.empty()) {
+                    SDL_DrawGPUIndexedPrimitives(appState->renderPass, submesh.indexCount, 1, submesh.startIndex, 0, 0);
                 } else {
-                    SDL_DrawGPUPrimitives(
-                        appState->renderPass,
-                        submesh.vertexCount,
-                        1,
-                        submesh.startVertex,
-                        0
-                    );
+                    SDL_DrawGPUPrimitives(appState->renderPass, submesh.vertexCount, 1, submesh.startVertex, 0);
                 }
             }
         }
+
+        // Draw all meshes
+        // for (const auto &mesh: appState->meshes | std::views::values) {
+        //     if (!mesh.isOnGPU) continue;
+        //
+        //     // Bind mesh's vertex buffer
+        //     SDL_GPUBufferBinding vertexBinding = { .buffer = mesh.vertexBuffer, .offset = 0 };
+        //     SDL_BindGPUVertexBuffers(appState->renderPass, 0, &vertexBinding, 1);
+        //
+        //     // Bind mesh's index buffer if it has indices
+        //     if (!mesh.indices.empty()) {
+        //         SDL_GPUBufferBinding indexBinding = { .buffer = mesh.indexBuffer, .offset = 0 };
+        //         SDL_BindGPUIndexBuffer(appState->renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+        //     }
+        //
+        //     for (const auto& submesh : mesh.submeshes) {
+        //         const Material* material = nullptr;
+        //         if (!appState->material_override.empty()) {
+        //             material = appState->GetMaterial(appState->material_override);
+        //         }
+        //         else if (submesh.material.empty()) {
+        //             material = appState->materials.at("missing");
+        //         }
+        //         else if (!appState->materials.contains(submesh.material)) {
+        //             SDL_Log("AppState's materials does not contain %s, setting to missing...", submesh.material.c_str());
+        //             material = appState->GetMaterial("missing");
+        //         }
+        //         else {
+        //             material = appState->GetMaterial(submesh.material);
+        //         }
+        //
+        //         if (!material) {
+        //             SDL_Log("!material");
+        //             continue;
+        //         }
+        //
+        //         material->Bind(appState);
+        //
+        //         // Draw the submesh
+        //         if (!mesh.indices.empty()) {
+        //             SDL_DrawGPUIndexedPrimitives(
+        //                 appState->renderPass,
+        //                 submesh.indexCount,
+        //                 1,
+        //                 submesh.startIndex,
+        //                 0,
+        //                 0
+        //             );
+        //         } else {
+        //             SDL_DrawGPUPrimitives(
+        //                 appState->renderPass,
+        //                 submesh.vertexCount,
+        //                 1,
+        //                 submesh.startVertex,
+        //                 0
+        //             );
+        //         }
+        //     }
+        // }
 
         SDL_EndGPURenderPass(appState->renderPass);
         appState->renderPass = nullptr;

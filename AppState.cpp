@@ -280,7 +280,7 @@ bool AppState::LoadMesh(const std::string& path) {
     // }
 
     meshes.insert_or_assign(path, result);
-    result.UploadToGPU(*this);
+    meshes.at(path).UploadToGPU(*this);
 
     return true;
 }
