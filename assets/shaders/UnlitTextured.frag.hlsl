@@ -1,13 +1,17 @@
-Texture2D MyTexture : register(t0, space2);
-SamplerState MySampler : register(s0, space2);
+Texture2D g_texture : register(t0, space2);
+SamplerState g_sampler : register(s0, space2);
 
 struct PSInput
 {
-    float4 Position : SV_POSITION;
-    float2 UV : TEXCOORD1;
+    float2 uv : TEXCOORD1;
+};
+
+cbuffer PushConstants : register(b0, space1) {
+    float4 color;
 };
 
 float4 main(PSInput input) : SV_TARGET
 {
-    return MyTexture.Sample(MySampler, input.UV);
+    float4 texColor = g_texture.Sample(g_sampler, input.uv);
+    return texColor;// * color;
 }

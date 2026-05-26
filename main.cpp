@@ -206,7 +206,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
                 else {
                     material = appState->GetMaterial(submesh.material);
                 }
-                material->Bind(appState);
+                material->Bind(appState, commandBuffer);
                 if (!mesh->indices.empty()) {
                     SDL_DrawGPUIndexedPrimitives(appState->renderPass, submesh.indexCount, 1, submesh.startIndex, 0, 0);
                 } else {
@@ -214,65 +214,6 @@ SDL_AppResult SDL_AppIterate(void* appstate)
                 }
             }
         }
-
-        // Draw all meshes
-        // for (const auto &mesh: appState->meshes | std::views::values) {
-        //     if (!mesh.isOnGPU) continue;
-        //
-        //     // Bind mesh's vertex buffer
-        //     SDL_GPUBufferBinding vertexBinding = { .buffer = mesh.vertexBuffer, .offset = 0 };
-        //     SDL_BindGPUVertexBuffers(appState->renderPass, 0, &vertexBinding, 1);
-        //
-        //     // Bind mesh's index buffer if it has indices
-        //     if (!mesh.indices.empty()) {
-        //         SDL_GPUBufferBinding indexBinding = { .buffer = mesh.indexBuffer, .offset = 0 };
-        //         SDL_BindGPUIndexBuffer(appState->renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
-        //     }
-        //
-        //     for (const auto& submesh : mesh.submeshes) {
-        //         const Material* material = nullptr;
-        //         if (!appState->material_override.empty()) {
-        //             material = appState->GetMaterial(appState->material_override);
-        //         }
-        //         else if (submesh.material.empty()) {
-        //             material = appState->materials.at("missing");
-        //         }
-        //         else if (!appState->materials.contains(submesh.material)) {
-        //             SDL_Log("AppState's materials does not contain %s, setting to missing...", submesh.material.c_str());
-        //             material = appState->GetMaterial("missing");
-        //         }
-        //         else {
-        //             material = appState->GetMaterial(submesh.material);
-        //         }
-        //
-        //         if (!material) {
-        //             SDL_Log("!material");
-        //             continue;
-        //         }
-        //
-        //         material->Bind(appState);
-        //
-        //         // Draw the submesh
-        //         if (!mesh.indices.empty()) {
-        //             SDL_DrawGPUIndexedPrimitives(
-        //                 appState->renderPass,
-        //                 submesh.indexCount,
-        //                 1,
-        //                 submesh.startIndex,
-        //                 0,
-        //                 0
-        //             );
-        //         } else {
-        //             SDL_DrawGPUPrimitives(
-        //                 appState->renderPass,
-        //                 submesh.vertexCount,
-        //                 1,
-        //                 submesh.startVertex,
-        //                 0
-        //             );
-        //         }
-        //     }
-        // }
 
         SDL_EndGPURenderPass(appState->renderPass);
         appState->renderPass = nullptr;

@@ -11,7 +11,7 @@ MaterialUnlitTextured::MaterialUnlitTextured(AppState* appState, const std::stri
     appState->materials.insert_or_assign(name, this);
 }
 
-void MaterialUnlitTextured::Bind(AppState *appState) const {
+void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* commandBuffer) const {
     SDL_GPUGraphicsPipeline* gotPipeline = appState->GetPipeline(pipeline);
     if (!gotPipeline) {
         SDL_Log("ERROR: Pipeline '%s' not found!", pipeline.c_str());
@@ -20,16 +20,13 @@ void MaterialUnlitTextured::Bind(AppState *appState) const {
 
     SDL_BindGPUGraphicsPipeline(appState->renderPass, gotPipeline);
 
-    BindTextures(appState);
-}
-
-void MaterialUnlitTextured::BindTextures(AppState *appState) const {
     SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
     SDL_GPUSampler* getSampler = appState->GetSampler(sampler);
-
 
     if (getAlbedo && getSampler) {
         const SDL_GPUTextureSamplerBinding binding = {getAlbedo, getSampler};
         SDL_BindGPUFragmentSamplers(appState->renderPass, 0, &binding, 1);
     }
+
+    SDL_PushGPUFragmentUniformData(commandBuffer, 1, &colorAlbedo, sizeof(glm::vec4));
 }

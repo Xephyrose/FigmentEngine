@@ -30,10 +30,6 @@ struct Mesh {
     void UploadToGPU(const AppState& appState);
     void ReleaseGPUResources(const AppState* appState);
 
-    // Drawing
-    void DrawSubmesh(AppState* appState, const Submesh &submesh) const;
-    void DrawAllSubmeshes(AppState* appState) const;
-
     [[nodiscard]] const Submesh *GetSubmesh(const std::string &name) const;
 
     static Mesh CreateQuad(float width = 1.6f, float height = 1.6f);

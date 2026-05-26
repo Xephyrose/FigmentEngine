@@ -10,8 +10,7 @@ struct Material {
     std::string sampler;
 
     virtual ~Material() = default;
-    virtual void Bind(AppState* appState) const = 0;
-    virtual void BindTextures(AppState* appState) const = 0;
+    virtual void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer) const = 0;
 };
 
 #endif //FIGMENTENGINE_MATERIAL_H
