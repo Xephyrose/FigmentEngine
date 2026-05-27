@@ -1,5 +1,7 @@
 #ifndef FIGMENTENGINE_APPSTATE_H
 #define FIGMENTENGINE_APPSTATE_H
+#include <string>
+#include <unordered_map>
 #include <vector>
 #include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL_video.h>

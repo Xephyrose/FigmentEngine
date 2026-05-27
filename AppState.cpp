@@ -7,6 +7,7 @@
 #include "MaterialUnlitTextured.h"
 #include "Mesh.h"
 #include "Vertex.h"
+#include "SDL3/SDL_log.h"
 
 bool AppState::CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader, const std::string& rasterizerState) {
     SDL_GPUShader* vertexShader = GetShader(vertShader + ".vert");
@@ -126,7 +127,7 @@ static std::vector<float> ReadAttributeData(const tinygltf::Model& model, const 
 }
 
 bool AppState::LoadMesh(const std::string& path) {
-    std::string fullPath = std::filesystem::path(SDL_GetBasePath()) / "assets" / "meshes" / path;
+    std::string fullPath = (std::filesystem::path(SDL_GetBasePath()) / "assets" / "meshes" / path).string();
     tinygltf::Model model;
     tinygltf::TinyGLTF loader;
     std::string err, warn;
@@ -286,7 +287,7 @@ bool AppState::LoadMesh(const std::string& path) {
 }
 
 bool AppState::LoadShader(const std::string& path) {
-    const std::string fullPath = std::filesystem::path(SDL_GetBasePath()) / "assets" / "shaders" / path;
+    const std::string fullPath = (std::filesystem::path(SDL_GetBasePath()) / "assets" / "shaders" / path).string();
     SDL_GPUShaderStage stage;
     if (fullPath.contains(".vert"))
     {
@@ -371,7 +372,7 @@ bool AppState::LoadShader(const std::string& path) {
 }
 
 bool AppState::LoadTexture(const std::string& path) {
-    std::string fullPath = std::filesystem::path(SDL_GetBasePath()) / "assets" / "textures" / path;
+    std::string fullPath = (std::filesystem::path(SDL_GetBasePath()) / "assets" / "textures" / path).string();
     SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(device);
     if (!uploadCmdBuf) {
         SDL_Log("Couldn't acquire command buffer: %s", SDL_GetError());

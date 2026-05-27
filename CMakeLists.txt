@@ -3,9 +3,39 @@ project(FigmentEngine)
 
 set(CMAKE_CXX_STANDARD 26)
 
-find_package(SDL3 CONFIG REQUIRED)
+include(FetchContent)
 
-find_package(SDL3_image REQUIRED)
+FetchContent_Declare(
+        glm
+        GIT_REPOSITORY https://github.com/g-truc/glm.git
+        GIT_TAG master
+        GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(glm)
+
+FetchContent_Declare(
+        SDL3
+        GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+        GIT_TAG main
+        GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(SDL3)
+
+FetchContent_Declare(
+        SDL3_image
+        GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+        GIT_TAG main
+        GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(SDL3_image)
+
+FetchContent_Declare(
+    shadercross
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_shadercross.git
+    GIT_TAG main
+    GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(SDL3_image)
 
 add_executable(FigmentEngine
         main.cpp
@@ -37,6 +67,7 @@ target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(FigmentEngine PRIVATE
         SDL3::SDL3
         SDL3_image::SDL3_image
+        glm::glm
         ${CMAKE_DL_LIBS}
         pthread
 )
@@ -98,10 +129,10 @@ if(SHADERCROSS_EXECUTABLE)
 
         add_custom_command(
                 OUTPUT ${OUTPUTS}
-                COMMAND ${SHADERCROSS_EXECUTABLE} ${SHADERS_BINARY_DIR}/${SHADER_FULLNAME} --stage ${SHADER_STAGE} -o ${SHADERS_BINARY_DIR}/${SHADER_NAME}.spv
-                COMMAND ${SHADERCROSS_EXECUTABLE} ${SHADERS_BINARY_DIR}/${SHADER_FULLNAME} --stage ${SHADER_STAGE} -o ${SHADERS_BINARY_DIR}/${SHADER_NAME}.dxil
-                COMMAND ${SHADERCROSS_EXECUTABLE} ${SHADERS_BINARY_DIR}/${SHADER_FULLNAME} --stage ${SHADER_STAGE} -o ${SHADERS_BINARY_DIR}/${SHADER_NAME}.msl
-                DEPENDS ${SHADERS_BINARY_DIR}/${SHADER_FULLNAME} CopyAssets
+                COMMAND ${SHADERCROSS_EXECUTABLE} "$<GENEX_EVAL:${SHADERS_BINARY_DIR}/${SHADER_FULLNAME}>" --stage ${SHADER_STAGE} -o ${SHADERS_BINARY_DIR}/${SHADER_NAME}.spv
+                COMMAND ${SHADERCROSS_EXECUTABLE} "$<GENEX_EVAL:${SHADERS_BINARY_DIR}/${SHADER_FULLNAME}>" --stage ${SHADER_STAGE} -o ${SHADERS_BINARY_DIR}/${SHADER_NAME}.dxil
+                COMMAND ${SHADERCROSS_EXECUTABLE} "$<GENEX_EVAL:${SHADERS_BINARY_DIR}/${SHADER_FULLNAME}>" --stage ${SHADER_STAGE} -o ${SHADERS_BINARY_DIR}/${SHADER_NAME}.msl
+                DEPENDS CopyAssets
                 COMMENT "Compiling ${SHADER_FULLNAME} (${SHADER_STAGE}) to spv, dxil, and msl"
         )
 
