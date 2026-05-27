@@ -6,14 +6,6 @@ set(CMAKE_CXX_STANDARD 26)
 include(FetchContent)
 
 FetchContent_Declare(
-        glm
-        GIT_REPOSITORY https://github.com/g-truc/glm.git
-        GIT_TAG master
-        GIT_SHALLOW TRUE
-)
-FetchContent_MakeAvailable(glm)
-
-FetchContent_Declare(
         SDL3
         GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
         GIT_TAG main
@@ -67,7 +59,6 @@ target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(FigmentEngine PRIVATE
         SDL3::SDL3
         SDL3_image::SDL3_image
-        glm::glm
         ${CMAKE_DL_LIBS}
         pthread
 )
@@ -83,7 +74,7 @@ endif()
 find_program(SHADERCROSS_EXECUTABLE
         NAMES shadercross
         PATHS ${SHADERCROSS_HINT_PATH}
-        NO_DEFAULT_PATH # Overrides PATH just to be safe
+        NO_DEFAULT_PATH
         DOC "Path to the SDL shadercross CLI tool"
 )
 
