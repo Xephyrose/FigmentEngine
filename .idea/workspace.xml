@@ -7,6 +7,7 @@
     <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="31" type="long" />
     <option name="/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexedValue" value="true" type="bool" />
     <option name="/Default/Housekeeping/GlobalSettingsUpgraded/IsUpgraded/@EntryValue" value="true" type="bool" />
+    <option name="/Default/Housekeeping/LiveTemplatesHousekeeping/HotspotSessionHintIsShown/@EntryValue" value="true" type="bool" />
     <option name="/Default/Housekeeping/OptionsDialog/SelectedPageId/@EntryValue" value="InlayHintsGeneralOptionsPageId" type="string" />
   </component>
   <component name="CMakePresetLoader">{
@@ -42,8 +43,13 @@
     <list default="true" id="5222af9d-b1fd-4aa6-bc40-7cc49bf34801" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/AppState.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/AppState.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MaterialUnlitTextured.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/MaterialUnlitTextured.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/shaders/UnlitTextured.frag.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/assets/shaders/UnlitTextured.frag.hlsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MaterialUnlitTextured.h" beforeDir="false" afterPath="$PROJECT_DIR$/MaterialUnlitTextured.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MeshInstance3D.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/MeshInstance3D.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MeshInstance3D.h" beforeDir="false" afterPath="$PROJECT_DIR$/MeshInstance3D.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Node.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Node.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Node.h" beforeDir="false" afterPath="$PROJECT_DIR$/Node.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WorkingFiles/zulu.blend" beforeDir="false" afterPath="$PROJECT_DIR$/WorkingFiles/zulu.blend" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WorkingFiles/zulu.blend1" beforeDir="false" afterPath="$PROJECT_DIR$/WorkingFiles/zulu.blend1" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -121,6 +127,11 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -170,6 +181,7 @@
       <workItem from="1779847939696" duration="1369000" />
       <workItem from="1780006028087" duration="3642000" />
       <workItem from="1780009874578" duration="4437000" />
+      <workItem from="1780074759635" duration="4440000" />
     </task>
     <servers />
   </component>

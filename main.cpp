@@ -15,6 +15,10 @@
 #include "tiny_gltf.h"
 #include "Vertex.h"
 
+#ifdef __linux__
+#include <dlfcn.h>
+#endif
+
 void UpdateAndUploadMVP(const AppState* appState, SDL_GPUCommandBuffer* cmdBuf) {
     const glm::mat4 model = appState->modelTransform.getMatrix();
     const glm::mat4 view = appState->current_camera->GetViewMatrix();
@@ -43,7 +47,13 @@ void HandleUpdate(const AppState* appState) {
 
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
-    SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "x11");
+    #ifdef __linux__
+        const void *rd = dlopen("librenderdoc.so", RTLD_NOW | RTLD_NOLOAD);
+        if (rd != nullptr) {
+            SDL_Log("librenderdoc.so loaded. Forcing X11.");
+            SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "x11");
+        }
+    #endif
     auto* appState = new AppState();
     *appstate = appState;
 
@@ -172,48 +182,10 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         }
 
         for (Node* node : appState->nodes) {
-            const auto* instance = dynamic_cast<MeshInstance3D*>(node);
+            auto* instance = dynamic_cast<MeshInstance3D*>(node);
             if (!instance) continue;
 
-            Mesh* mesh = appState->GetMesh(instance->mesh);
-            if (!mesh || !mesh->isOnGPU) continue;
-
-            // Bind this mesh's vertex/index buffers (same buffers for all instances)
-            SDL_GPUBufferBinding vertexBinding = { .buffer = mesh->vertexBuffer, .offset = 0 };
-            SDL_BindGPUVertexBuffers(appState->renderPass, 0, &vertexBinding, 1);
-            if (!mesh->indices.empty()) {
-                SDL_GPUBufferBinding indexBinding = { .buffer = mesh->indexBuffer, .offset = 0 };
-                SDL_BindGPUIndexBuffer(appState->renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
-            }
-
-            glm::mat4 model = instance->globalTransform.getMatrix();
-            glm::mat4 view = appState->current_camera->GetViewMatrix();
-            glm::mat4 proj = appState->current_camera->GetProjectionMatrix(appState->currentAspectRatio);
-            glm::mat4 mvp = proj * view * model;
-            SDL_PushGPUVertexUniformData(commandBuffer, 0, &mvp, sizeof(mvp));
-
-            for (const auto& submesh : mesh->submeshes) {
-                const Material* material = nullptr;
-                if (!appState->material_override.empty()) {
-                    material = appState->GetMaterial(appState->material_override);
-                }
-                else if (submesh.material.empty()) {
-                    material = appState->materials.at("missing");
-                }
-                else if (!appState->materials.contains(submesh.material)) {
-                    SDL_Log("AppState's materials does not contain %s, setting to missing...", submesh.material.c_str());
-                    material = appState->GetMaterial("missing");
-                }
-                else {
-                    material = appState->GetMaterial(submesh.material);
-                }
-                material->Bind(appState, commandBuffer);
-                if (!mesh->indices.empty()) {
-                    SDL_DrawGPUIndexedPrimitives(appState->renderPass, submesh.indexCount, 1, submesh.startIndex, 0, 0);
-                } else {
-                    SDL_DrawGPUPrimitives(appState->renderPass, submesh.vertexCount, 1, submesh.startVertex, 0);
-                }
-            }
+            instance->Draw(*appState, commandBuffer);
         }
 
         SDL_EndGPURenderPass(appState->renderPass);

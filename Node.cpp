@@ -5,7 +5,7 @@ Node::Node() : name("Node") {}
 
 void Node::Update(const AppState& appState) {}
 
-void Node::Draw(const AppState& appState) {}
+void Node::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) {}
 
 void Node::Free(const AppState& appState) {}
 

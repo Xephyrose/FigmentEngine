@@ -6,7 +6,7 @@
 struct MaterialUnlitTextured : public Material {
     MaterialUnlitTextured(AppState* appState, const std::string &name, const std::string &pipeline, const std::string& sampler, const std::string &textureAlbedo);
     std::string textureAlbedo;
-    glm::vec4 colorAlbedo = glm::vec4(0.5f);
+    glm::vec4 colorAlbedo = glm::vec4(1.0f);
 
     void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer) const override;
 };

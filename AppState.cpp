@@ -372,7 +372,7 @@ bool AppState::LoadShader(const std::string& path) {
 }
 
 bool AppState::LoadTexture(const std::string& path) {
-    std::string fullPath = (std::filesystem::path(SDL_GetBasePath()) / "assets" / "textures" / path).string();
+    const std::string fullPath = (std::filesystem::path(SDL_GetBasePath()) / "assets" / "textures" / path).string();
     SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(device);
     if (!uploadCmdBuf) {
         SDL_Log("Couldn't acquire command buffer: %s", SDL_GetError());
@@ -442,7 +442,7 @@ SDL_GPUTexture* AppState::GetTexture(const std::string &path) {
     if (!textures.contains(path)) {
         if (!LoadTexture(path)) {
             SDL_Log("Couldn't load shader %s: %s", path.c_str(), SDL_GetError());
-            return nullptr;
+            return textures.at("missing.png");
         }
     }
     return textures.at(path);

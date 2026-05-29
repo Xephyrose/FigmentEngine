@@ -4,6 +4,7 @@
 
 struct MeshInstance3D : public Node3D {
     std::string mesh;
+    void Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) override;
 };
 
 #endif //FIGMENTENGINE_MESHINSTANCE3D_H
