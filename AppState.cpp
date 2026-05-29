@@ -355,7 +355,7 @@ bool AppState::LoadShader(const std::string& path) {
 
         .num_storage_textures = 0u,
         .num_storage_buffers = 0u,
-        .num_uniform_buffers = stage == SDL_GPU_SHADERSTAGE_VERTEX ? 1u : 0u,
+        .num_uniform_buffers = 1u,
     };
 
     SDL_GPUShader* shader = SDL_CreateGPUShader(device, &shaderInfo);

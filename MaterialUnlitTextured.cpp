@@ -28,5 +28,5 @@ void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* comma
         SDL_BindGPUFragmentSamplers(appState->renderPass, 0, &binding, 1);
     }
 
-    SDL_PushGPUFragmentUniformData(commandBuffer, 1, &colorAlbedo, sizeof(glm::vec4));
+    SDL_PushGPUFragmentUniformData(commandBuffer, 0, &colorAlbedo, sizeof(glm::vec4));
 }

@@ -43,6 +43,7 @@ void HandleUpdate(const AppState* appState) {
 
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
+    SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "x11");
     auto* appState = new AppState();
     *appstate = appState;
 
