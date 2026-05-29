@@ -6,7 +6,9 @@ MaterialUnlitTextured::MaterialUnlitTextured(AppState* appState, const std::stri
     this->name = name;
     this->pipeline = pipeline;
     this->sampler = sampler;
-    appState->LoadTexture(textureAlbedo);
+    if (textureAlbedo != "none") {
+        appState->LoadTexture(textureAlbedo);
+    }
     this->textureAlbedo = textureAlbedo;
     appState->materials.insert_or_assign(name, this);
 }
@@ -20,13 +22,23 @@ void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* comma
 
     SDL_BindGPUGraphicsPipeline(appState->renderPass, gotPipeline);
 
-    SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
-    SDL_GPUSampler* getSampler = appState->GetSampler(sampler);
+    if (textureAlbedo != "none") {
+        SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
+        SDL_GPUSampler* getSampler = appState->GetSampler(sampler);
 
-    if (getAlbedo && getSampler) {
-        const SDL_GPUTextureSamplerBinding binding = {getAlbedo, getSampler};
-        SDL_BindGPUFragmentSamplers(appState->renderPass, 0, &binding, 1);
+        if (getAlbedo && getSampler) {
+            const SDL_GPUTextureSamplerBinding binding = {getAlbedo, getSampler};
+            SDL_BindGPUFragmentSamplers(appState->renderPass, 0, &binding, 1);
+        }
     }
 
-    SDL_PushGPUFragmentUniformData(commandBuffer, 0, &colorAlbedo, sizeof(glm::vec4));
+    struct PushData {
+        glm::vec4 colorAlbedo;
+        bool      useTexture;
+    };
+    PushData push{};
+    push.colorAlbedo = this->colorAlbedo;
+    push.useTexture = (this->textureAlbedo == "none" ? 0 : 1);
+
+    SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
 }

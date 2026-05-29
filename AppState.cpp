@@ -466,7 +466,7 @@ void AppState::CreateDefaultMaterials() {
     new MaterialUnlitTextured(this, "line", "Line", "anisotropic_repeat", "missing.png");
     new MaterialUnlitTextured(this, "concrete_bricks", "UnlitTextured", "anisotropic_repeat", "brick_concrete_albedo.png");
     new MaterialUnlitTextured(this, "concrete_bricks_with_specks", "UnlitTextured", "anisotropic_repeat", "brick_concrete_specks_albedo.png");
-    new MaterialUnlitTextured(this, "plaster", "UnlitTextured", "anisotropic_repeat", "plaster_albedo.png");
+    new MaterialUnlitTextured(this, "plaster", "UnlitTextured", "anisotropic_repeat", "none");
     new MaterialUnlitTextured(this, "reinforced_glass", "UnlitTextured", "anisotropic_repeat", "reinforced_glass_albedo.png");
     new MaterialUnlitTextured(this, "fence", "UnlitTextured", "anisotropic_repeat", "fence_albedo.png");
     new MaterialUnlitTextured(this, "asphalt", "UnlitTextured", "anisotropic_repeat", "asphalt_albedo.png");
