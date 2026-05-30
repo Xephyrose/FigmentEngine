@@ -9,7 +9,7 @@
 #include "Vertex.h"
 #include "SDL3/SDL_log.h"
 
-bool AppState::CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader, const std::string& rasterizerState) {
+bool AppState::CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader, const std::string& rasterizerState, const std::string &blendState) {
     SDL_GPUShader* vertexShader = GetShader(vertShader + ".vert");
     if (!vertexShader) {
         SDL_Log("Couldn't create vertex shader: %s", vertShader.c_str());
@@ -49,9 +49,11 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
     const std::array colorTargetDescriptions{
         SDL_GPUColorTargetDescription{
             .format = SDL_GetGPUSwapchainTextureFormat(device, window),
+            .blend_state = GetBlendState(blendState),
         }
     };
 
+    bool depth_write = blendState != "Alpha";
     const auto pipelineCreateInfo = SDL_GPUGraphicsPipelineCreateInfo{
         .vertex_shader = vertexShader,
         .fragment_shader = fragmentShader,
@@ -66,7 +68,7 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
         .depth_stencil_state = SDL_GPUDepthStencilState{
             .compare_op = SDL_GPU_COMPAREOP_LESS,
             .enable_depth_test = true,
-            .enable_depth_write = true,
+            .enable_depth_write = depth_write,
         },
         .target_info = SDL_GPUGraphicsPipelineTargetInfo{
             .color_target_descriptions = colorTargetDescriptions.data(),
@@ -480,10 +482,10 @@ void AppState::CreateDefaultMaterials() {
     concrete_bricks_with_specks->setSamplerAlbedo(this, "anisotropic_repeat");
     auto* plaster = new MaterialUnlitTextured(this, "plaster", "UnlitTextured");
     plaster->setSamplerAlbedo(this, "anisotropic_repeat");
-    auto* reinforced_glass = new MaterialUnlitTextured(this, "reinforced_glass", "UnlitTextured");
+    auto* reinforced_glass = new MaterialUnlitTextured(this, "reinforced_glass", "UnlitTexturedAlpha");
     reinforced_glass->setTextureAlbedo(this, "reinforced_glass_albedo.png");
     reinforced_glass->setSamplerAlbedo(this, "anisotropic_repeat");
-    auto* fence = new MaterialUnlitTextured(this, "fence", "UnlitTextured");
+    auto* fence = new MaterialUnlitTextured(this, "fence", "UnlitTexturedAlpha");
     fence->setTextureAlbedo(this, "fence_albedo.png");
     fence->setSamplerAlbedo(this, "anisotropic_repeat");
     auto* asphalt = new MaterialUnlitTextured(this, "asphalt", "UnlitTextured");
@@ -633,9 +635,10 @@ void AppState::CreateDefaultTextures() {
 
 void AppState::CreateDefaultPipelines() {
     SDL_Log("Creating default pipelines...");
-    CreatePipeline("Line", "UnlitTextured", "UnlitTextured", "Line");
-    CreatePipeline("UnlitTextured", "UnlitTextured", "UnlitTextured", "Fill");
-    CreatePipeline("UnlitUVs", "UnlitTextured", "UnlitUVs", "Fill");
+    CreatePipeline("Line", "UnlitTextured", "UnlitTextured", "Line", "Default");
+    CreatePipeline("UnlitTextured", "UnlitTextured", "UnlitTextured", "Fill", "Default");
+    CreatePipeline("UnlitTexturedAlpha", "UnlitTextured", "UnlitTextured", "FillNoBack", "Alpha");
+    CreatePipeline("UnlitUVs", "UnlitTextured", "UnlitUVs", "Fill", "Default");
 }
 
 void AppState::CreateDefaultRasterizerStates() {
@@ -645,6 +648,11 @@ void AppState::CreateDefaultRasterizerStates() {
     fill.cull_mode = SDL_GPU_CULLMODE_BACK;
     fill.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
     rasterizerStates.insert_or_assign("Fill", fill);
+    SDL_GPURasterizerState fillNoBack{};
+    fillNoBack.fill_mode = SDL_GPU_FILLMODE_FILL;
+    fillNoBack.cull_mode = SDL_GPU_CULLMODE_NONE;
+    fillNoBack.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
+    rasterizerStates.insert_or_assign("FillNoBack", fill);
     auto line = SDL_GPURasterizerState {};
     line.fill_mode = SDL_GPU_FILLMODE_LINE;
     line.cull_mode = SDL_GPU_CULLMODE_BACK;

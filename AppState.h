@@ -46,7 +46,8 @@ struct AppState {
 
     std::string material_override;
 
-    bool CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader, const std::string& rasterizerState);
+    bool CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader, const std::string& rasterizerState, const
+                        std::string &blendState);
 
     bool LoadMesh(const std::string& path);
     bool LoadShader(const std::string& path);

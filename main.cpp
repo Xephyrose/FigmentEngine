@@ -96,11 +96,11 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     // Load texture before the pipeline uses it
 
+    appState->CreateDefaultBlendStates();
     appState->CreateDefaultMeshes();
     appState->CreateDefaultTextures();
     appState->CreateDefaultMaterials();
     appState->CreateDefaultSamplers();
-    appState->CreateDefaultBlendStates();
     appState->CreateDefaultRasterizerStates();
     appState->CreateDefaultPipelines();
 
