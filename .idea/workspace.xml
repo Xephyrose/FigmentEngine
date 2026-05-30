@@ -43,8 +43,11 @@
     <list default="true" id="5222af9d-b1fd-4aa6-bc40-7cc49bf34801" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/AppState.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/AppState.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/AppState.h" beforeDir="false" afterPath="$PROJECT_DIR$/AppState.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Material.h" beforeDir="false" afterPath="$PROJECT_DIR$/Material.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MaterialUnlitTextured.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/MaterialUnlitTextured.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/shaders/UnlitTextured.frag.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/assets/shaders/UnlitTextured.frag.hlsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MaterialUnlitTextured.h" beforeDir="false" afterPath="$PROJECT_DIR$/MaterialUnlitTextured.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -174,6 +177,9 @@
       <workItem from="1780079264820" duration="1287000" />
       <workItem from="1780080568185" duration="38000" />
       <workItem from="1780080666122" duration="574000" />
+      <workItem from="1780083769182" duration="3000" />
+      <workItem from="1780085077678" duration="3075000" />
+      <workItem from="1780116611454" duration="3061000" />
     </task>
     <servers />
   </component>

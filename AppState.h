@@ -37,6 +37,7 @@ struct AppState {
     std::unordered_map<std::string, SDL_GPUSampler*> samplers;
     std::unordered_map<std::string, SDL_GPUTexture*> textures;
     std::unordered_map<std::string, SDL_GPUGraphicsPipeline*> pipelines;
+    std::unordered_map<std::string, SDL_GPUColorTargetBlendState> blendStates;
     std::unordered_map<std::string, SDL_GPURasterizerState> rasterizerStates;
 
     Uint64 currentTime = 0;
@@ -57,6 +58,7 @@ struct AppState {
     SDL_GPUSampler* GetSampler(const std::string& key) const;
     SDL_GPUTexture* GetTexture(const std::string& path);
     SDL_GPUGraphicsPipeline* GetPipeline(const std::string& key) const;
+    SDL_GPUColorTargetBlendState GetBlendState(const std::string &key) const;
     SDL_GPURasterizerState GetRasterizerState(const std::string &key) const;
 
     void CreateDefaultMeshes();
@@ -64,6 +66,7 @@ struct AppState {
     void CreateDefaultSamplers();
     void CreateDefaultTextures();
     void CreateDefaultPipelines();
+    void CreateDefaultBlendStates();
     void CreateDefaultRasterizerStates();
 };
 

@@ -48,7 +48,7 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
 
     const std::array colorTargetDescriptions{
         SDL_GPUColorTargetDescription{
-            .format = SDL_GetGPUSwapchainTextureFormat(device, window)
+            .format = SDL_GetGPUSwapchainTextureFormat(device, window),
         }
     };
 
@@ -456,30 +456,79 @@ SDL_GPURasterizerState AppState::GetRasterizerState(const std::string &key) cons
     return rasterizerStates.at(key);
 }
 
+SDL_GPUColorTargetBlendState AppState::GetBlendState(const std::string &key) const {
+    return blendStates.at(key);
+}
+
 void AppState::CreateDefaultMeshes() {
     LoadMesh("zulu.glb");
 }
 
 void AppState::CreateDefaultMaterials() {
     SDL_Log("Creating default materials...");
-    new MaterialUnlitTextured(this, "missing", "UnlitTextured", "anisotropic_repeat", "missing.png");
-    new MaterialUnlitTextured(this, "line", "Line", "anisotropic_repeat", "missing.png");
-    new MaterialUnlitTextured(this, "concrete_bricks", "UnlitTextured", "anisotropic_repeat", "brick_concrete_albedo.png");
-    new MaterialUnlitTextured(this, "concrete_bricks_with_specks", "UnlitTextured", "anisotropic_repeat", "brick_concrete_specks_albedo.png");
-    new MaterialUnlitTextured(this, "plaster", "UnlitTextured", "anisotropic_repeat", "none");
-    new MaterialUnlitTextured(this, "reinforced_glass", "UnlitTextured", "anisotropic_repeat", "reinforced_glass_albedo.png");
-    new MaterialUnlitTextured(this, "fence", "UnlitTextured", "anisotropic_repeat", "fence_albedo.png");
-    new MaterialUnlitTextured(this, "asphalt", "UnlitTextured", "anisotropic_repeat", "asphalt_albedo.png");
-    new MaterialUnlitTextured(this, "asphalt_2", "UnlitTextured", "anisotropic_repeat", "asphalt_2_albedo.png");
-    new MaterialUnlitTextured(this, "concrete", "UnlitTextured", "anisotropic_repeat", "concrete_albedo.png");
-    new MaterialUnlitTextured(this, "concrete_with_specks", "UnlitTextured", "anisotropic_repeat", "concrete_specks_albedo.png");
-    new MaterialUnlitTextured(this, "hardwood_dark", "UnlitTextured", "anisotropic_repeat", "hardwood_dark_albedo.png");
-    new MaterialUnlitTextured(this, "hardwood_light", "UnlitTextured", "anisotropic_repeat", "hardwood_light_albedo.png");
-    new MaterialUnlitTextured(this, "pine_end", "UnlitTextured", "anisotropic_repeat", "pine_end_albedo.png");
-    new MaterialUnlitTextured(this, "pine_wood_dark", "UnlitTextured", "anisotropic_repeat", "pine_wood_dark_albedo.png");
-    new MaterialUnlitTextured(this, "pine_wood_light", "UnlitTextured", "anisotropic_repeat", "pine_wood_light_albedo.png");
-    new MaterialUnlitTextured(this, "roof_tile", "UnlitTextured", "anisotropic_repeat", "roof_tile_albedo.png");
-    new MaterialUnlitTextured(this, "wood_plank", "UnlitTextured", "anisotropic_repeat", "wood_plank_albedo.png");
+    auto* missing = new MaterialUnlitTextured(this, "missing", "UnlitTextured");
+    missing->setTextureAlbedo(this, "missing.png");
+    missing->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* line = new MaterialUnlitTextured(this, "line", "Line");
+    line->setTextureAlbedo(this, "missing.png");
+    line->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* concrete_bricks = new MaterialUnlitTextured(this, "concrete_bricks", "UnlitTextured");
+    concrete_bricks->setTextureAlbedo(this, "brick_concrete_albedo.png");
+    concrete_bricks->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* concrete_bricks_with_specks = new MaterialUnlitTextured(this, "concrete_bricks_with_specks", "UnlitTextured");
+    concrete_bricks_with_specks->setTextureAlbedo(this, "brick_concrete_specks_albedo.png");
+    concrete_bricks_with_specks->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* plaster = new MaterialUnlitTextured(this, "plaster", "UnlitTextured");
+    plaster->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* reinforced_glass = new MaterialUnlitTextured(this, "reinforced_glass", "UnlitTextured");
+    reinforced_glass->setTextureAlbedo(this, "reinforced_glass_albedo.png");
+    reinforced_glass->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* fence = new MaterialUnlitTextured(this, "fence", "UnlitTextured");
+    fence->setTextureAlbedo(this, "fence_albedo.png");
+    fence->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* asphalt = new MaterialUnlitTextured(this, "asphalt", "UnlitTextured");
+    asphalt->setTextureAlbedo(this, "asphalt_albedo.png");
+    asphalt->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* asphalt_2 = new MaterialUnlitTextured(this, "asphalt_2", "UnlitTextured");
+    asphalt_2->setTextureAlbedo(this, "asphalt_2_albedo.png");
+    asphalt_2->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* concrete = new MaterialUnlitTextured(this, "concrete", "UnlitTextured");
+    concrete->setTextureAlbedo(this, "concrete_albedo.png");
+    concrete->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* concrete_with_specks = new MaterialUnlitTextured(this, "concrete_with_specks", "UnlitTextured");
+    concrete_with_specks->setTextureAlbedo(this, "concrete_specks_albedo.png");
+    concrete_with_specks->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* hardwood_dark = new MaterialUnlitTextured(this, "hardwood_dark", "UnlitTextured");
+    hardwood_dark->setTextureAlbedo(this, "hardwood_dark_albedo.png");
+    hardwood_dark->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* hardwood_light = new MaterialUnlitTextured(this, "hardwood_light", "UnlitTextured");
+    hardwood_light->setTextureAlbedo(this, "hardwood_light_albedo.png");
+    hardwood_light->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* pine_end = new MaterialUnlitTextured(this, "pine_end", "UnlitTextured");
+    pine_end->setTextureAlbedo(this, "pine_end_albedo.png");
+    pine_end->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* pine_wood_dark = new MaterialUnlitTextured(this, "pine_wood_dark", "UnlitTextured");
+    pine_wood_dark->setTextureAlbedo(this, "pine_wood_dark_albedo.png");
+    pine_wood_dark->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* pine_wood_light = new MaterialUnlitTextured(this, "pine_wood_light", "UnlitTextured");
+    pine_wood_light->setTextureAlbedo(this, "pine_wood_light_albedo.png");
+    pine_wood_light->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* roof_tile = new MaterialUnlitTextured(this, "roof_tile", "UnlitTextured");
+    roof_tile->setTextureAlbedo(this, "roof_tile_albedo.png");
+    roof_tile->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* wood_plank = new MaterialUnlitTextured(this, "wood_plank", "UnlitTextured");
+    wood_plank->setTextureAlbedo(this, "wood_plank_albedo.png");
+    wood_plank->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* grid_grey = new MaterialUnlitTextured(this, "grid_grey", "UnlitTextured");
+    grid_grey->setTextureAlbedo(this, "grid_grey_albedo.png");
+    grid_grey->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* grid_orange = new MaterialUnlitTextured(this, "grid_orange", "UnlitTextured");
+    grid_orange->setTextureAlbedo(this, "grid_orange_albedo.png");
+    grid_orange->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* paint_red = new MaterialUnlitTextured(this, "paint_red", "UnlitTextured");
+    paint_red->setColorAlbedo(glm::vec4(0.5f, 0.25f, 0.25f, 1.0f));
+    auto* paint_beige = new MaterialUnlitTextured(this, "paint_beige", "UnlitTextured");
+    paint_beige->setColorAlbedo(glm::vec4(0.75f, 0.55f, 0.45f, 1.0f));
 }
 
 void AppState::CreateDefaultSamplers() {
@@ -601,4 +650,20 @@ void AppState::CreateDefaultRasterizerStates() {
     line.cull_mode = SDL_GPU_CULLMODE_BACK;
     line.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
     rasterizerStates.insert_or_assign("Line", line);
+}
+
+void AppState::CreateDefaultBlendStates() {
+    SDL_Log("Creating default blend states...");
+    SDL_GPUColorTargetBlendState alphaBlendState = {};
+    alphaBlendState.enable_blend = true;
+    alphaBlendState.src_color_blendfactor = SDL_GPU_BLENDFACTOR_SRC_ALPHA;
+    alphaBlendState.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+    alphaBlendState.color_blend_op = SDL_GPU_BLENDOP_ADD;
+    alphaBlendState.src_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    alphaBlendState.dst_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+    alphaBlendState.alpha_blend_op = SDL_GPU_BLENDOP_ADD;
+    alphaBlendState.color_write_mask = SDL_GPU_COLORCOMPONENT_R | SDL_GPU_COLORCOMPONENT_G | SDL_GPU_COLORCOMPONENT_B | SDL_GPU_COLORCOMPONENT_A;
+    blendStates.insert_or_assign("Alpha", alphaBlendState);
+    SDL_GPUColorTargetBlendState defaultBlendState = {};
+    blendStates.insert_or_assign("Default", defaultBlendState);
 }

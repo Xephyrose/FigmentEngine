@@ -1,16 +1,11 @@
 #include "MaterialUnlitTextured.h"
-
 #include <SDL3/SDL_log.h>
 
-MaterialUnlitTextured::MaterialUnlitTextured(AppState* appState, const std::string &name, const std::string &pipeline, const std::string& sampler, const std::string &textureAlbedo) {
+MaterialUnlitTextured::MaterialUnlitTextured(AppState* appState, const std::string &name, const std::string &pipeline) {
     this->name = name;
     this->pipeline = pipeline;
-    this->sampler = sampler;
-    if (textureAlbedo != "none") {
-        appState->LoadTexture(textureAlbedo);
-    }
-    this->textureAlbedo = textureAlbedo;
     appState->materials.insert_or_assign(name, this);
+    textureAlbedo = "none";
 }
 
 void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* commandBuffer) const {
@@ -24,7 +19,7 @@ void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* comma
 
     if (textureAlbedo != "none") {
         SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
-        SDL_GPUSampler* getSampler = appState->GetSampler(sampler);
+        SDL_GPUSampler* getSampler = appState->GetSampler(samplerAlbedo);
 
         if (getAlbedo && getSampler) {
             const SDL_GPUTextureSamplerBinding binding = {getAlbedo, getSampler};
@@ -41,4 +36,19 @@ void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* comma
     push.useTexture = (this->textureAlbedo == "none" ? 0 : 1);
 
     SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
+}
+
+void MaterialUnlitTextured::setColorAlbedo(const glm::vec4 color) {
+    colorAlbedo = color;
+}
+
+void MaterialUnlitTextured::setTextureAlbedo(AppState* appState, const std::string &texture) {
+    textureAlbedo = texture;
+    if (textureAlbedo != "none") {
+        appState->LoadTexture(textureAlbedo);
+    }
+}
+
+void MaterialUnlitTextured::setSamplerAlbedo(AppState* appState, const std::string &sampler) {
+    samplerAlbedo = sampler;
 }
