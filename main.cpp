@@ -9,7 +9,7 @@
 #include <SDL3/SDL_main.h>
 
 #include "Camera3D.h"
-#include "FreeCam.h"
+#include "FreeCam3D.h"
 #include "AppState.h"
 #include "Material.h"
 #include "tiny_gltf.h"
@@ -18,16 +18,6 @@
 #ifdef __linux__
 #include <dlfcn.h>
 #endif
-
-void UpdateAndUploadMVP(const AppState* appState, SDL_GPUCommandBuffer* cmdBuf) {
-    const glm::mat4 model = appState->modelTransform.getMatrix();
-    const glm::mat4 view = appState->current_camera->GetViewMatrix();
-    const glm::mat4 projection = appState->current_camera->GetProjectionMatrix(appState->currentAspectRatio);
-
-    glm::mat4 mvp = projection * view * model;
-
-    SDL_PushGPUVertexUniformData(cmdBuf, 0, &mvp[0][0], sizeof(glm::mat4));
-}
 
 void handle_mouse_motion(const AppState* appState, const SDL_Event* event) {
     appState->current_camera->localTransform.rotate(glm::vec3(-event->motion.yrel * appState->sensitivity, -event->motion.xrel * appState->sensitivity, 0));
@@ -57,13 +47,14 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     auto* appState = new AppState();
     *appstate = appState;
 
-    auto* freeCam = new FreeCam(*appState);
+    auto* freeCam = new FreeCam3D(*appState);
     appState->nodes.push_back(freeCam);
 
-    appState->window = SDL_CreateWindow("FigmentEngine", appState->windowWidth, appState->windowHeight, 0);
+    constexpr SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+    appState->window = SDL_CreateWindow("FigmentEngine", appState->windowWidth, appState->windowHeight, window_flags);
     if (appState->window == nullptr)
     {
-        SDL_Log("Couldn't create window: %s", SDL_GetError());
+        SDL_Log("Error: SDL_CreateWindow(): %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
     SDL_SetWindowRelativeMouseMode(appState->window, true);
@@ -72,15 +63,17 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->device = SDL_CreateGPUDevice(formatFlags, true, nullptr);
     if (appState->device == nullptr)
     {
-        SDL_Log("Couldn't create GPU device: %s", SDL_GetError());
+        SDL_Log("Error: SDL_CreateGPUDevice(): %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
 
     if (!SDL_ClaimWindowForGPUDevice(appState->device, appState->window))
     {
-        SDL_Log("Couldn't claim window for GPU device: %s", SDL_GetError());
+        SDL_Log("Error: SDL_ClaimWindowForGPUDevice(): %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
+
+    SDL_SetGPUSwapchainParameters(appState->device, appState->window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_VSYNC);
 
     const SDL_GPUTextureCreateInfo depthInfo = {
         .type = SDL_GPU_TEXTURETYPE_2D,
@@ -113,6 +106,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     return SDL_APP_CONTINUE;
 }
 
+// ReSharper disable once CppParameterMayBeConstPtrOrRef
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 {
     const auto* appState = static_cast<AppState*>(appstate);
@@ -201,6 +195,8 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {
     const auto appState = static_cast<AppState*>(appstate);
+
+    SDL_WaitForGPUIdle(appState->device);
 
     for (const Node* node : appState->nodes) delete node;
     appState->nodes.clear();

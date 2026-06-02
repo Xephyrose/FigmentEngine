@@ -1,8 +1,8 @@
-#include "FreeCam.h"
+#include "FreeCam3D.h"
 
 #include <SDL3/SDL_scancode.h>
 
-void FreeCam::Input(const AppState& appState, const bool* isKeyDown) {
+void FreeCam3D::Input(const AppState& appState, const bool* isKeyDown) {
     const glm::vec3 forward = appState.current_camera->localTransform.getForward();
     const glm::vec3 right = appState.current_camera->localTransform.getRight();
 
