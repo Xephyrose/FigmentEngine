@@ -1,7 +1,10 @@
-#include <iostream>
+#include "imgui.h"
+#include "imgui_impl_sdl3.h"
+#include "imgui_impl_sdlgpu3.h"
 #include <vector>
 #include <SDL3/SDL.h>
 
+// ReSharper disable once CppUnusedIncludeDirective
 #include "Mesh.h"
 #include "MeshInstance3D.h"
 #define SDL_MAIN_USE_CALLBACKS
@@ -50,6 +53,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     auto* freeCam = new FreeCam3D(*appState);
     appState->nodes.push_back(freeCam);
 
+    const float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     constexpr SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY;
     appState->window = SDL_CreateWindow("FigmentEngine", appState->windowWidth, appState->windowHeight, window_flags);
     if (appState->window == nullptr)
@@ -103,12 +107,38 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     meshInstance->globalTransform.scale = glm::vec3(1, 1, 1);
     appState->nodes.push_back(meshInstance);
 
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsLight();
+
+    // Setup scaling
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.ScaleAllSizes(main_scale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
+    style.FontScaleDpi = main_scale;        // Set initial font scale. (in docking branch: using io.ConfigDpiScaleFonts=true automatically overrides this for every window depending on the current monitor)
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplSDL3_InitForSDLGPU(appState->window);
+    ImGui_ImplSDLGPU3_InitInfo init_info = {};
+    init_info.Device = appState->device;
+    init_info.ColorTargetFormat = SDL_GetGPUSwapchainTextureFormat(appState->device, appState->window);
+    init_info.MSAASamples = SDL_GPU_SAMPLECOUNT_1;                      // Only used in multi-viewports mode.
+    init_info.SwapchainComposition = SDL_GPU_SWAPCHAINCOMPOSITION_SDR;  // Only used in multi-viewports mode.
+    init_info.PresentMode = SDL_GPU_PRESENTMODE_VSYNC;
+    ImGui_ImplSDLGPU3_Init(&init_info);
+
     return SDL_APP_CONTINUE;
 }
 
 // ReSharper disable once CppParameterMayBeConstPtrOrRef
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 {
+    ImGui_ImplSDL3_ProcessEvent(event);
     const auto* appState = static_cast<AppState*>(appstate);
 
     switch (event->type)
@@ -126,6 +156,17 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 SDL_AppResult SDL_AppIterate(void* appstate)
 {
     auto* appState = static_cast<AppState*>(appstate);
+
+    // Start the ImGui frame
+    ImGui_ImplSDLGPU3_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
+    ImGui::NewFrame();
+
+    bool show_demo_window = true;
+    ImGui::ShowDemoWindow(&show_demo_window);
+
+    ImGui::Render();
+    ImDrawData* draw_data = ImGui::GetDrawData();
 
     appState->lastTime = appState->currentTime;
     appState->currentTime = SDL_GetTicks();
@@ -182,6 +223,22 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 
             instance->Draw(*appState, commandBuffer);
         }
+
+        ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, commandBuffer);
+
+        // Setup and start a render pass
+        SDL_GPUColorTargetInfo target_info = {};
+        target_info.texture = swapchainTexture;
+        target_info.clear_color = SDL_FColor { 0.45f, 0.55f, 0.60f, 1.00f };
+        target_info.load_op = SDL_GPU_LOADOP_CLEAR;
+        target_info.store_op = SDL_GPU_STOREOP_STORE;
+        target_info.mip_level = 0;
+        target_info.layer_or_depth_plane = 0;
+        target_info.cycle = false;
+        SDL_GPURenderPass* render_pass = SDL_BeginGPURenderPass(commandBuffer, &target_info, 1, nullptr);
+
+        // Render ImGui
+        ImGui_ImplSDLGPU3_RenderDrawData(draw_data, commandBuffer, render_pass);
 
         SDL_EndGPURenderPass(appState->renderPass);
         appState->renderPass = nullptr;

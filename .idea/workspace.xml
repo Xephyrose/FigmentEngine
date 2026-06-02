@@ -42,9 +42,6 @@
   <component name="ChangeListManager">
     <list default="true" id="5222af9d-b1fd-4aa6-bc40-7cc49bf34801" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FreeCam.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/FreeCam3D.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FreeCam.h" beforeDir="false" afterPath="$PROJECT_DIR$/FreeCam3D.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -185,7 +182,7 @@
       <workItem from="1780085077678" duration="3075000" />
       <workItem from="1780116611454" duration="3061000" />
       <workItem from="1780120636029" duration="2692000" />
-      <workItem from="1780438088923" duration="2557000" />
+      <workItem from="1780438088923" duration="5518000" />
     </task>
     <servers />
   </component>
