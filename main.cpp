@@ -53,6 +53,13 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     auto* freeCam = new FreeCam3D(*appState);
     appState->nodes.push_back(freeCam);
 
+    float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
+    if (main_scale < 1.0f) {
+        main_scale = 1.0f;
+    }
+    if (main_scale == 0.0f) {
+        SDL_Log("SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay()) returned 0.0f: %s", SDL_GetError());
+    }
     constexpr SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY;
     appState->window = SDL_CreateWindow("FigmentEngine", appState->windowWidth, appState->windowHeight, window_flags);
     if (appState->window == nullptr)
@@ -90,8 +97,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     };
     appState->depthTexture = SDL_CreateGPUTexture(appState->device, &depthInfo);
 
-    // Load texture before the pipeline uses it
-
     appState->CreateDefaultBlendStates();
     appState->CreateDefaultMeshes();
     appState->CreateDefaultTextures();
@@ -109,17 +114,15 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
-    // Setup Dear ImGui style
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
 
-    // Setup scaling
     ImGuiStyle& style = ImGui::GetStyle();
+    style.ScaleAllSizes(main_scale);
+    style.FontScaleDpi = main_scale;
 
-    // Setup Platform/Renderer backends
     ImGui_ImplSDL3_InitForSDLGPU(appState->window);
     ImGui_ImplSDLGPU3_InitInfo init_info = {};
     init_info.Device = appState->device;
@@ -154,7 +157,6 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 {
     auto* appState = static_cast<AppState*>(appstate);
 
-    // Start the ImGui frame
     ImGui_ImplSDLGPU3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
@@ -182,7 +184,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 
     ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, commandBuffer);
 
-    // here we create the texture that will be drawn to the screen once it's done
+    // Here we create the texture that will be drawn to the screen once it's done
     SDL_GPUTexture* swapchainTexture;
     if (!SDL_WaitAndAcquireGPUSwapchainTexture(commandBuffer, appState->window, &swapchainTexture, nullptr, nullptr))
     {
@@ -209,7 +211,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
             .cycle = true
         };
 
-        // now we actually define the render pass, by passing &colorTargetInfo, which modified our swapchainTexture to become cleared
+        // Now we actually define the render pass, by passing &colorTargetInfo, which modified our swapchainTexture to become cleared
         appState->renderPass = SDL_BeginGPURenderPass(commandBuffer, &colorTargetInfo, 1, &depthTarget);
         if (!appState->renderPass) {
             SDL_Log("Couldn't begin render pass: %s", SDL_GetError());
