@@ -115,11 +115,6 @@
     </key>
   </component>
   <component name="RunManager">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="FigmentEngine" type="CMakeRunConfiguration" factoryName="Application" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="FigmentEngine" TARGET_NAME="FigmentEngine" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="FigmentEngine" RUN_TARGET_NAME="FigmentEngine">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -183,6 +178,8 @@
       <workItem from="1780116611454" duration="3061000" />
       <workItem from="1780120636029" duration="2692000" />
       <workItem from="1780438088923" duration="5518000" />
+      <workItem from="1780444420005" duration="10000" />
+      <workItem from="1780447329084" duration="1015000" />
     </task>
     <servers />
   </component>

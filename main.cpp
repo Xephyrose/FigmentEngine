@@ -53,7 +53,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     auto* freeCam = new FreeCam3D(*appState);
     appState->nodes.push_back(freeCam);
 
-    const float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     constexpr SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY;
     appState->window = SDL_CreateWindow("FigmentEngine", appState->windowWidth, appState->windowHeight, window_flags);
     if (appState->window == nullptr)
@@ -119,8 +118,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     // Setup scaling
     ImGuiStyle& style = ImGui::GetStyle();
-    style.ScaleAllSizes(main_scale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
-    style.FontScaleDpi = main_scale;        // Set initial font scale. (in docking branch: using io.ConfigDpiScaleFonts=true automatically overrides this for every window depending on the current monitor)
 
     // Setup Platform/Renderer backends
     ImGui_ImplSDL3_InitForSDLGPU(appState->window);
@@ -183,6 +180,8 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         return SDL_APP_FAILURE;
     }
 
+    ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, commandBuffer);
+
     // here we create the texture that will be drawn to the screen once it's done
     SDL_GPUTexture* swapchainTexture;
     if (!SDL_WaitAndAcquireGPUSwapchainTexture(commandBuffer, appState->window, &swapchainTexture, nullptr, nullptr))
@@ -224,21 +223,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
             instance->Draw(*appState, commandBuffer);
         }
 
-        ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, commandBuffer);
-
-        // Setup and start a render pass
-        SDL_GPUColorTargetInfo target_info = {};
-        target_info.texture = swapchainTexture;
-        target_info.clear_color = SDL_FColor { 0.45f, 0.55f, 0.60f, 1.00f };
-        target_info.load_op = SDL_GPU_LOADOP_CLEAR;
-        target_info.store_op = SDL_GPU_STOREOP_STORE;
-        target_info.mip_level = 0;
-        target_info.layer_or_depth_plane = 0;
-        target_info.cycle = false;
-        SDL_GPURenderPass* render_pass = SDL_BeginGPURenderPass(commandBuffer, &target_info, 1, nullptr);
-
-        // Render ImGui
-        ImGui_ImplSDLGPU3_RenderDrawData(draw_data, commandBuffer, render_pass);
+        ImGui_ImplSDLGPU3_RenderDrawData(draw_data, commandBuffer, appState->renderPass);
 
         SDL_EndGPURenderPass(appState->renderPass);
         appState->renderPass = nullptr;
