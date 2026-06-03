@@ -112,8 +112,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     auto* meshInstance = new MeshInstance3D();
     meshInstance->mesh = "zulu.glb";
-    meshInstance->globalTransform.position = glm::vec3(0, 0, 0);
-    meshInstance->globalTransform.scale = glm::vec3(1, 1, 1);
     appState->nodes.push_back(meshInstance);
 
     IMGUI_CHECKVERSION();
@@ -181,7 +179,9 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 
     ImGui::Begin("Test");
     if (ImGui::Button("Add Crate")) {
-        appState->nodes.push_back(new Node());
+        auto* meshInstance = new MeshInstance3D();
+        meshInstance->mesh = "crate_medium.glb";
+        appState->nodes.push_back(meshInstance);
     }
     ImGui::End();
 
