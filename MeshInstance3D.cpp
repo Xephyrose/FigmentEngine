@@ -23,7 +23,7 @@ void MeshInstance3D::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffe
     SDL_PushGPUVertexUniformData(commandBuffer, 0, &mvp, sizeof(mvp));
 
     for (const auto& submesh : _mesh->submeshes) {
-        const Material* material = nullptr;
+        Material* material = nullptr;
         if (!appState.material_override.empty()) {
             material = appState.GetMaterial(appState.material_override);
         }

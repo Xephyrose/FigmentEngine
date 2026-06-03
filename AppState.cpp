@@ -53,7 +53,7 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
         }
     };
 
-    bool depth_write = blendState != "Alpha";
+    const bool depth_write = blendState != "Alpha";
     const auto pipelineCreateInfo = SDL_GPUGraphicsPipelineCreateInfo{
         .vertex_shader = vertexShader,
         .fragment_shader = fragmentShader,
@@ -480,8 +480,7 @@ void AppState::CreateDefaultMaterials() {
     auto* concrete_bricks_with_specks = new MaterialUnlitTextured(this, "concrete_bricks_with_specks", "UnlitTextured");
     concrete_bricks_with_specks->setTextureAlbedo(this, "brick_concrete_specks_albedo.png");
     concrete_bricks_with_specks->setSamplerAlbedo(this, "anisotropic_repeat");
-    auto* plaster = new MaterialUnlitTextured(this, "plaster", "UnlitTextured");
-    plaster->setSamplerAlbedo(this, "anisotropic_repeat");
+    new MaterialUnlitTextured(this, "plaster", "UnlitTextured");
     auto* reinforced_glass = new MaterialUnlitTextured(this, "reinforced_glass", "UnlitTexturedAlpha");
     reinforced_glass->setTextureAlbedo(this, "reinforced_glass_albedo.png");
     reinforced_glass->setSamplerAlbedo(this, "anisotropic_repeat");
@@ -531,6 +530,14 @@ void AppState::CreateDefaultMaterials() {
     paint_red->setColorAlbedo(glm::vec4(0.5f, 0.25f, 0.25f, 1.0f));
     auto* paint_beige = new MaterialUnlitTextured(this, "paint_beige", "UnlitTextured");
     paint_beige->setColorAlbedo(glm::vec4(0.75f, 0.55f, 0.45f, 1.0f));
+    auto* clip = new MaterialUnlitTextured(this, "clip", "UnlitTexturedAlpha");
+    clip->setColorAlbedo(glm::vec4(1.0f, 0.0f, 0.0f, 0.5f));
+    auto* glass = new MaterialUnlitTextured(this, "glass", "UnlitTexturedAlpha");
+    glass->setColorAlbedo(glm::vec4(0.0f, 0.0f, 0.0f, 0.5f));
+    auto* metal_silver = new MaterialUnlitTextured(this, "metal_silver", "UnlitTextured");
+    metal_silver->setColorAlbedo(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+    auto* blend_brick_concrete = new MaterialUnlitTextured(this, "blend_brick_concrete", "UnlitTextured");
+    blend_brick_concrete->setColorAlbedo(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
 }
 
 void AppState::CreateDefaultSamplers() {

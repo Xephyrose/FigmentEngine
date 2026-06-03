@@ -14,6 +14,7 @@
 #include "Camera3D.h"
 #include "FreeCam3D.h"
 #include "AppState.h"
+#include "Input.h"
 #include "Material.h"
 #include "tiny_gltf.h"
 #include "Vertex.h"
@@ -28,7 +29,14 @@ void handle_mouse_motion(const AppState* appState, const SDL_Event* event) {
 
 void HandleInput(const AppState* appState) {
     for (int i = 0; i < appState->nodes.size(); i++) {
-        appState->nodes[i]->Input(*appState, SDL_GetKeyboardState(nullptr));
+        appState->nodes[i]->Input(*appState);
+    }
+    const bool* raw = SDL_GetKeyboardState(nullptr);
+    SDL_Log("Raw Z = %d, prevState[Z] = %d", raw[SDL_SCANCODE_Z], Input::prevState[SDL_SCANCODE_Z]);
+    if (Input::IsJustPressed(SDL_SCANCODE_Z)) {
+        SDL_Log("test");
+        appState->isMouseRelative = !appState->isMouseRelative;
+        SDL_SetWindowRelativeMouseMode(appState->window, appState->isMouseRelative);
     }
 }
 
@@ -161,8 +169,20 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
 
-    bool show_demo_window = true;
-    ImGui::ShowDemoWindow(&show_demo_window);
+    ImGui::Begin("Node Heirarchy");
+    for (const auto & node : appState->nodes) {
+        if (ImGui::TreeNodeEx(node->name.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
+                SDL_Log("Clicked %s", node->name.c_str());
+            }
+            ImGui::TreePop();
+        }
+    }
+    ImGui::End();
+
+    ImGui::Begin("Test");
+    ImGui::Button("Add Crate");
+    ImGui::End();
 
     ImGui::Render();
     ImDrawData* draw_data = ImGui::GetDrawData();
@@ -232,6 +252,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     }
     // Send the command buffer to the GPU for drawing
     SDL_SubmitGPUCommandBuffer(commandBuffer);
+    Input::Update();
 
     return SDL_APP_CONTINUE;
 }

@@ -4,7 +4,7 @@
 
 struct FreeCam3D : public Camera3D {
     using Camera3D::Camera3D;
-    void Input(const AppState& appState, const bool* isKeyDown) override;
+    void Input(const AppState& appState) override;
 };
 
 #endif //FIGMENTENGINE_FREECAM_H

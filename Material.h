@@ -9,7 +9,7 @@ struct Material {
     std::string pipeline;
 
     virtual ~Material() = default;
-    virtual void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer) const = 0;
+    virtual void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer) = 0;
 };
 
 #endif //FIGMENTENGINE_MATERIAL_H

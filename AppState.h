@@ -20,6 +20,7 @@ struct AppState {
     SDL_GPUDevice* device = nullptr;
     SDL_GPURenderPass *renderPass;
     SDL_GPUTexture* depthTexture = nullptr;
+    mutable bool isMouseRelative = false;
 
     std::vector<Node*> nodes;
 

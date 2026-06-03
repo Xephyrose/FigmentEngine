@@ -9,4 +9,4 @@ void Node::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) {}
 
 void Node::Free(const AppState& appState) {}
 
-void Node::Input(const AppState& appState, const bool* isKeyDown) {}
+void Node::Input(const AppState& appState) {}

@@ -14,7 +14,7 @@ struct Node {
     virtual void Update(const AppState& appState);
     virtual void Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer);
     virtual void Free(const AppState& appState);
-    virtual void Input(const AppState& appState, const bool* isKeyDown); // TODO: Add input handling that can be passed into Input()
+    virtual void Input(const AppState& appState);
 };
 
 #endif //FIGMENTENGINE_NODE_H

@@ -68,6 +68,8 @@ add_executable(FigmentEngine
         imstb_rectpack.h
         imstb_textedit.h
         imstb_truetype.h
+        Input.cpp
+        Input.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

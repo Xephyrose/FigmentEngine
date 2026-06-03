@@ -5,10 +5,9 @@ MaterialUnlitTextured::MaterialUnlitTextured(AppState* appState, const std::stri
     this->name = name;
     this->pipeline = pipeline;
     appState->materials.insert_or_assign(name, this);
-    textureAlbedo = "none";
 }
 
-void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* commandBuffer) const {
+void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* commandBuffer) {
     SDL_GPUGraphicsPipeline* gotPipeline = appState->GetPipeline(pipeline);
     if (!gotPipeline) {
         SDL_Log("ERROR: Pipeline '%s' not found!", pipeline.c_str());
@@ -17,15 +16,11 @@ void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* comma
 
     SDL_BindGPUGraphicsPipeline(appState->renderPass, gotPipeline);
 
-    if (textureAlbedo != "none") {
-        SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
-        SDL_GPUSampler* getSampler = appState->GetSampler(samplerAlbedo);
+    SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
+    SDL_GPUSampler* getSampler = appState->GetSampler(samplerAlbedo);
 
-        if (getAlbedo && getSampler) {
-            const SDL_GPUTextureSamplerBinding binding = {getAlbedo, getSampler};
-            SDL_BindGPUFragmentSamplers(appState->renderPass, 0, &binding, 1);
-        }
-    }
+    const SDL_GPUTextureSamplerBinding binding = {getAlbedo, getSampler};
+    SDL_BindGPUFragmentSamplers(appState->renderPass, 0, &binding, 1);
 
     struct PushData {
         glm::vec4 colorAlbedo;
