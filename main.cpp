@@ -31,10 +31,7 @@ void HandleInput(const AppState* appState) {
     for (int i = 0; i < appState->nodes.size(); i++) {
         appState->nodes[i]->Input(*appState);
     }
-    const bool* raw = SDL_GetKeyboardState(nullptr);
-    SDL_Log("Raw Z = %d, prevState[Z] = %d", raw[SDL_SCANCODE_Z], Input::prevState[SDL_SCANCODE_Z]);
     if (Input::IsJustPressed(SDL_SCANCODE_Z)) {
-        SDL_Log("test");
         appState->isMouseRelative = !appState->isMouseRelative;
         SDL_SetWindowRelativeMouseMode(appState->window, appState->isMouseRelative);
     }
@@ -171,17 +168,21 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 
     ImGui::Begin("Node Heirarchy");
     for (const auto & node : appState->nodes) {
+        ImGui::PushID(node);
         if (ImGui::TreeNodeEx(node->name.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
             if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
                 SDL_Log("Clicked %s", node->name.c_str());
             }
             ImGui::TreePop();
         }
+        ImGui::PopID();
     }
     ImGui::End();
 
     ImGui::Begin("Test");
-    ImGui::Button("Add Crate");
+    if (ImGui::Button("Add Crate")) {
+        appState->nodes.push_back(new Node());
+    }
     ImGui::End();
 
     ImGui::Render();

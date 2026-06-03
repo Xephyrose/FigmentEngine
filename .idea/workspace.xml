@@ -41,23 +41,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5222af9d-b1fd-4aa6-bc40-7cc49bf34801" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Input.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Input.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AppState.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/AppState.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/AppState.h" beforeDir="false" afterPath="$PROJECT_DIR$/AppState.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FreeCam3D.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/FreeCam3D.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FreeCam3D.h" beforeDir="false" afterPath="$PROJECT_DIR$/FreeCam3D.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Material.h" beforeDir="false" afterPath="$PROJECT_DIR$/Material.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MaterialUnlitTextured.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/MaterialUnlitTextured.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MaterialUnlitTextured.h" beforeDir="false" afterPath="$PROJECT_DIR$/MaterialUnlitTextured.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MeshInstance3D.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/MeshInstance3D.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Node.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Node.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Node.h" beforeDir="false" afterPath="$PROJECT_DIR$/Node.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WorkingFiles/zulu.blend" beforeDir="false" afterPath="$PROJECT_DIR$/WorkingFiles/zulu.blend" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WorkingFiles/zulu.blend1" beforeDir="false" afterPath="$PROJECT_DIR$/WorkingFiles/zulu.blend1" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/meshes/zulu.glb" beforeDir="false" afterPath="$PROJECT_DIR$/assets/meshes/zulu.glb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -202,7 +187,7 @@
       <workItem from="1780444420005" duration="10000" />
       <workItem from="1780447329084" duration="3215000" />
       <workItem from="1780460543239" duration="2192000" />
-      <workItem from="1780500490524" duration="9236000" />
+      <workItem from="1780500490524" duration="11490000" />
     </task>
     <servers />
   </component>
