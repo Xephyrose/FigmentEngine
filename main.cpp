@@ -1,6 +1,7 @@
 #include "imgui.h"
 #include "imgui_impl_sdl3.h"
 #include "imgui_impl_sdlgpu3.h"
+#include "imgui_stdlib.h"
 #include <vector>
 #include <SDL3/SDL.h>
 
@@ -184,9 +185,13 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         ImGui::End();
 
         ImGui::Begin("Debug");
-        if (ImGui::Button("Add Crate")) {
+        ImGui::Text("Mesh Spawner");
+        ImGui::InputText("Mesh", &appState->mesh);
+        ImGui::SameLine();
+        if (ImGui::Button("Spawn")) {
             auto* meshInstance = new MeshInstance3D();
-            meshInstance->mesh = "crate_medium.glb";
+            meshInstance->mesh = appState->mesh;
+            SDL_Log("Mesh spawned: %s", appState->mesh.c_str());
             meshInstance->localTransform.position = appState->current_camera->GetGlobalTransform().position;
             meshInstance->localTransform.rotation = appState->current_camera->GetGlobalTransform().rotation * glm::vec3(0.0f, 1.0f, 0.0f);
             appState->root.addChild(std::unique_ptr<Node>(meshInstance));

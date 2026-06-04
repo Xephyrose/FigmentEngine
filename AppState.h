@@ -24,8 +24,9 @@ struct AppState {
 
     Node root = Node("root");
 
-    Node* editorSelected = nullptr;
     bool debug = true;
+    Node* editorSelected = nullptr;
+    std::string mesh;
 
     Camera3D* current_camera;
     Transform3D modelTransform;
