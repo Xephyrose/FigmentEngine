@@ -5,7 +5,7 @@
 #include "AppState.h"
 
 struct Material {
-    std::pmr::string name;
+    std::string name;
     std::string pipeline;
 
     virtual ~Material() = default;

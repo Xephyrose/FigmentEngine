@@ -42,7 +42,26 @@
   <component name="ChangeListManager">
     <list default="true" id="5222af9d-b1fd-4aa6-bc40-7cc49bf34801" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AppState.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/AppState.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/AppState.h" beforeDir="false" afterPath="$PROJECT_DIR$/AppState.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Camera3D.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Camera3D.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Camera3D.h" beforeDir="false" afterPath="$PROJECT_DIR$/Camera3D.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FreeCam3D.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/FreeCam3D.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Material.h" beforeDir="false" afterPath="$PROJECT_DIR$/Material.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MaterialPBR.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MaterialPBR.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MeshInstance3D.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/MeshInstance3D.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Node.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Node.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Node.h" beforeDir="false" afterPath="$PROJECT_DIR$/Node.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Node3D.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Node3D.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Node3D.h" beforeDir="false" afterPath="$PROJECT_DIR$/Node3D.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Transform3D.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Transform3D.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WorkingFiles/crate.blend" beforeDir="false" afterPath="$PROJECT_DIR$/WorkingFiles/crate.blend" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/meshes/crate_extra_large.glb" beforeDir="false" afterPath="$PROJECT_DIR$/assets/meshes/crate_extra_large.glb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/meshes/crate_medium.glb" beforeDir="false" afterPath="$PROJECT_DIR$/assets/meshes/crate_medium.glb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/meshes/crate_short.glb" beforeDir="false" afterPath="$PROJECT_DIR$/assets/meshes/crate_short.glb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/meshes/crate_small.glb" beforeDir="false" afterPath="$PROJECT_DIR$/assets/meshes/crate_small.glb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/meshes/crate_small_short.glb" beforeDir="false" afterPath="$PROJECT_DIR$/assets/meshes/crate_small_short.glb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -116,6 +135,11 @@
     </key>
   </component>
   <component name="RunManager">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="FigmentEngine" type="CMakeRunConfiguration" factoryName="Application" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="FigmentEngine" TARGET_NAME="FigmentEngine" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="FigmentEngine" RUN_TARGET_NAME="FigmentEngine">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -184,6 +208,8 @@
       <workItem from="1780460543239" duration="2192000" />
       <workItem from="1780500490524" duration="11490000" />
       <workItem from="1780525442664" duration="694000" />
+      <workItem from="1780530705978" duration="2119000" />
+      <workItem from="1780538560474" duration="6020000" />
     </task>
     <servers />
   </component>

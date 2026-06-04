@@ -27,20 +27,16 @@ void handle_mouse_motion(const AppState* appState, const SDL_Event* event) {
     appState->current_camera->localTransform.rotate(glm::vec3(-event->motion.yrel * appState->sensitivity, -event->motion.xrel * appState->sensitivity, 0));
 }
 
-void HandleInput(const AppState* appState) {
-    for (int i = 0; i < appState->nodes.size(); i++) {
-        appState->nodes[i]->Input(*appState);
-    }
+void HandleInput(AppState* appState) {
+    appState->root.Input(*appState);
     if (Input::IsJustPressed(SDL_SCANCODE_Z)) {
         appState->isMouseRelative = !appState->isMouseRelative;
         SDL_SetWindowRelativeMouseMode(appState->window, appState->isMouseRelative);
     }
 }
 
-void HandleUpdate(const AppState* appState) {
-    for (int i = 0; i < appState->nodes.size(); i++) {
-        appState->nodes[i]->Update(*appState);
-    }
+void HandleUpdate(AppState* appState) {
+    appState->root.Update(*appState);
 }
 
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
@@ -55,8 +51,9 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     auto* appState = new AppState();
     *appstate = appState;
 
-    auto* freeCam = new FreeCam3D(*appState);
-    appState->nodes.push_back(freeCam);
+    auto* freeCam = new FreeCam3D();
+    appState->current_camera = freeCam;
+    appState->root.addChild(std::unique_ptr<Node>(freeCam));
 
     float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     if (main_scale < 1.0f) {
@@ -112,7 +109,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     auto* meshInstance = new MeshInstance3D();
     meshInstance->mesh = "zulu.glb";
-    appState->nodes.push_back(meshInstance);
+    appState->root.addChild(std::unique_ptr<Node>(meshInstance));
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -156,6 +153,22 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
     }
 }
 
+void DrawNodeTree(const Node* node) {
+    ImGui::PushID(node);  // Use pointer as unique ID
+    if (ImGui::TreeNodeEx(node->name.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+        // Handle click on the node's header
+        if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
+            SDL_Log("Clicked %s", node->name.c_str());
+        }
+        // Recursively draw all children
+        for (auto& child : node->children) {
+            DrawNodeTree(child.get());
+        }
+        ImGui::TreePop();  // Close the tree node
+    }
+    ImGui::PopID();
+}
+
 SDL_AppResult SDL_AppIterate(void* appstate)
 {
     auto* appState = static_cast<AppState*>(appstate);
@@ -165,23 +178,16 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     ImGui::NewFrame();
 
     ImGui::Begin("Node Heirarchy");
-    for (const auto & node : appState->nodes) {
-        ImGui::PushID(node);
-        if (ImGui::TreeNodeEx(node->name.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-            if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
-                SDL_Log("Clicked %s", node->name.c_str());
-            }
-            ImGui::TreePop();
-        }
-        ImGui::PopID();
-    }
+    DrawNodeTree(&appState->root);
     ImGui::End();
 
     ImGui::Begin("Test");
     if (ImGui::Button("Add Crate")) {
         auto* meshInstance = new MeshInstance3D();
         meshInstance->mesh = "crate_medium.glb";
-        appState->nodes.push_back(meshInstance);
+        meshInstance->localTransform.position = appState->current_camera->GetGlobalTransform().position;
+        meshInstance->localTransform.rotation = appState->current_camera->GetGlobalTransform().rotation * glm::vec3(0.0f, 1.0f, 0.0f);
+        appState->root.addChild(std::unique_ptr<Node>(meshInstance));
     }
     ImGui::End();
 
@@ -239,12 +245,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
             return SDL_APP_FAILURE;
         }
 
-        for (Node* node : appState->nodes) {
-            auto* instance = dynamic_cast<MeshInstance3D*>(node);
-            if (!instance) continue;
-
-            instance->Draw(*appState, commandBuffer);
-        }
+        appState->root.Draw(*appState, commandBuffer);
 
         ImGui_ImplSDLGPU3_RenderDrawData(draw_data, commandBuffer, appState->renderPass);
 
@@ -263,9 +264,6 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
     const auto appState = static_cast<AppState*>(appstate);
 
     SDL_WaitForGPUIdle(appState->device);
-
-    for (const Node* node : appState->nodes) delete node;
-    appState->nodes.clear();
 
     for (const auto &material: appState->materials | std::views::values) {delete material;}
     appState->materials.clear();

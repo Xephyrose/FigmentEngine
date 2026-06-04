@@ -5,7 +5,7 @@
 
 struct Node3D : public Node {
     Transform3D localTransform;
-    Transform3D globalTransform;
+    [[nodiscard]] Transform3D GetGlobalTransform() const;
 };
 
 

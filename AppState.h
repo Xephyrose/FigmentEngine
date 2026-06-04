@@ -2,10 +2,10 @@
 #define FIGMENTENGINE_APPSTATE_H
 #include <string>
 #include <unordered_map>
-#include <vector>
 #include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL_video.h>
 
+#include "Node.h"
 #include "Transform3D.h"
 
 struct Node;
@@ -22,7 +22,7 @@ struct AppState {
     SDL_GPUTexture* depthTexture = nullptr;
     mutable bool isMouseRelative = true;
 
-    std::vector<Node*> nodes;
+    Node root = Node("root");
 
     mutable Camera3D* current_camera;
     Transform3D modelTransform;

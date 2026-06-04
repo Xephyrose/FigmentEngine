@@ -16,7 +16,7 @@ void MeshInstance3D::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffe
         SDL_BindGPUIndexBuffer(appState.renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
     }
 
-    const glm::mat4 model = globalTransform.getMatrix();
+    const glm::mat4 model = GetGlobalTransform().getMatrix();
     const glm::mat4 view = appState.current_camera->GetViewMatrix();
     const glm::mat4 proj = appState.current_camera->GetProjectionMatrix(appState.currentAspectRatio);
     const glm::mat4 mvp = proj * view * model;
@@ -43,5 +43,8 @@ void MeshInstance3D::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffe
         } else {
             SDL_DrawGPUPrimitives(appState.renderPass, submesh.vertexCount, 1, submesh.startVertex, 0);
         }
+    }
+    for (const auto & i : children) {
+        i->Draw(appState, commandBuffer);
     }
 }

@@ -47,8 +47,6 @@ add_executable(FigmentEngine
         MaterialUnlitTextured.h
         Material.h
         AppState.cpp
-        MaterialPBR.h
-        MaterialPBR.cpp
         MaterialUnlitTextured.cpp
         MeshInstance3D.cpp
         MeshInstance3D.h

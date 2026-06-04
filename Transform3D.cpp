@@ -1,7 +1,6 @@
 #include "Transform3D.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
-#include <SDL3/SDL_log.h>
 
 void Transform3D::updateQuaternion() {
     quaternion = glm::quat(glm::radians(rotation));

@@ -1,7 +1,6 @@
 #include "Camera3D.h"
 
-Camera3D::Camera3D(const AppState& appState) {
-    appState.current_camera = this;
+Camera3D::Camera3D() {
     name = "Camera";
 }
 
