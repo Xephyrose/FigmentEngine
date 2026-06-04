@@ -32,8 +32,9 @@ struct Mesh {
 
     [[nodiscard]] const Submesh *GetSubmesh(const std::string &name) const;
 
-    static Mesh CreateQuad(float width = 1.6f, float height = 1.6f);
-    static Mesh CreateTriangle(float size = 1.4f);
+    void CreateQuad(float width = 1.0f, float height = 1.0f, float depth = 0);
+
+    void CreateTriangle(float size = static_cast<float>(sqrt(2)), float depth = 0);
 };
 
 #endif //FIGMENTENGINE_MESH_H

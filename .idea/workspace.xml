@@ -41,11 +41,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5222af9d-b1fd-4aa6-bc40-7cc49bf34801" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Camera2D.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Camera2D.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Node2D.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Node2D.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Sprite2D.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Sprite2D.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Transform2D.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Transform2D.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/AppState.h" beforeDir="false" afterPath="$PROJECT_DIR$/AppState.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Camera3D.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Camera3D.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Camera3D.h" beforeDir="false" afterPath="$PROJECT_DIR$/Camera3D.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Mesh.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Mesh.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Mesh.h" beforeDir="false" afterPath="$PROJECT_DIR$/Mesh.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MeshInstance3D.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/MeshInstance3D.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MeshInstance3D.h" beforeDir="false" afterPath="$PROJECT_DIR$/MeshInstance3D.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Node3D.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Node3D.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Node3D.h" beforeDir="false" afterPath="$PROJECT_DIR$/Node3D.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Transform3D.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Transform3D.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Transform3D.h" beforeDir="false" afterPath="$PROJECT_DIR$/Transform3D.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -192,6 +207,9 @@
       <workItem from="1780547206337" duration="7316000" />
       <workItem from="1780554615096" duration="353000" />
       <workItem from="1780589659930" duration="2446000" />
+      <workItem from="1780594289741" duration="6570000" />
+      <workItem from="1780602782291" duration="914000" />
+      <workItem from="1780608676616" duration="2654000" />
     </task>
     <servers />
   </component>

@@ -8,7 +8,7 @@ Camera3D::Camera3D() {
 
 void Camera3D::ImGuiDraw() {
     Node3D::ImGuiDraw();
-    ImGui::Text("Node");
+    ImGui::Text("Camera3D");
     ImGui::InputFloat("FOV", &fov);
     ImGui::InputFloat("Near Plane", &nearPlane);
     ImGui::InputFloat("Far Plane", &farPlane);

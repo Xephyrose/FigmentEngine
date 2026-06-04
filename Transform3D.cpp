@@ -78,7 +78,6 @@ void Transform3D::rotateObjectLocal(const glm::vec3& eulerDegrees) {
 }
 
 glm::mat4 Transform3D::getMatrix() const {
-
     glm::mat4 mat(1.0f);
     mat = glm::translate(mat, position);
 

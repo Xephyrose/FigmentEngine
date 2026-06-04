@@ -70,6 +70,14 @@ add_executable(FigmentEngine
         Input.h
         imgui_stdlib.cpp
         imgui_stdlib.h
+        Node2D.cpp
+        Node2D.h
+        Transform2D.cpp
+        Transform2D.h
+        Camera2D.cpp
+        Camera2D.h
+        Sprite2D.cpp
+        Sprite2D.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

@@ -15,6 +15,7 @@
 #include "Camera3D.h"
 #include "FreeCam3D.h"
 #include "AppState.h"
+#include "Camera2D.h"
 #include "Input.h"
 #include "Material.h"
 #include "tiny_gltf.h"
@@ -48,8 +49,12 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     *appstate = appState;
 
     auto* freeCam = new FreeCam3D();
-    appState->current_camera = freeCam;
+    appState->current_camera_3d = freeCam;
     appState->root.addChild(std::unique_ptr<Node>(freeCam));
+
+    auto* camera2d = new Camera2D();
+    appState->current_camera_2d = camera2d;
+    appState->root.addChild(std::unique_ptr<Node>(camera2d));
 
     float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     if (main_scale < 1.0f) {
@@ -192,8 +197,8 @@ SDL_AppResult SDL_AppIterate(void* appstate)
             auto* meshInstance = new MeshInstance3D();
             meshInstance->mesh = appState->mesh;
             SDL_Log("Mesh spawned: %s", appState->mesh.c_str());
-            meshInstance->localTransform.position = appState->current_camera->GetGlobalTransform().position;
-            meshInstance->localTransform.rotation = appState->current_camera->GetGlobalTransform().rotation * glm::vec3(0.0f, 1.0f, 0.0f);
+            meshInstance->localTransform.position = appState->current_camera_3d->GetGlobalTransform().position;
+            meshInstance->localTransform.rotation = appState->current_camera_3d->GetGlobalTransform().rotation * glm::vec3(0.0f, 1.0f, 0.0f);
             appState->root.addChild(std::unique_ptr<Node>(meshInstance));
         }
         ImGui::End();

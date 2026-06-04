@@ -4,6 +4,10 @@
 #include "Material.h"
 #include <SDL3/SDL_log.h>
 
+MeshInstance3D::MeshInstance3D() {
+    name = "MeshInstance3D";
+}
+
 void MeshInstance3D::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) {
     const Mesh* _mesh = appState.GetMesh(this->mesh);
     if (!_mesh || !_mesh->isOnGPU) return;
@@ -17,8 +21,8 @@ void MeshInstance3D::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffe
     }
 
     const glm::mat4 model = GetGlobalTransform().getMatrix();
-    const glm::mat4 view = appState.current_camera->GetViewMatrix();
-    const glm::mat4 proj = appState.current_camera->GetProjectionMatrix(appState.currentAspectRatio);
+    const glm::mat4 view = appState.current_camera_3d->GetViewMatrix();
+    const glm::mat4 proj = appState.current_camera_3d->GetProjectionMatrix(appState.currentAspectRatio);
     const glm::mat4 mvp = proj * view * model;
     SDL_PushGPUVertexUniformData(commandBuffer, 0, &mvp, sizeof(mvp));
 

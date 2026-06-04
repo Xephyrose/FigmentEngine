@@ -4,12 +4,10 @@
 
 #include "Mesh.h"
 #include <tiny_gltf.h>
-#include <stdexcept>
 #include <cstring>
 #include <vector>
 #include <string>
 #include <SDL3/SDL_filesystem.h>
-#include <SDL3/SDL_log.h>
 
 #include "Material.h"
 
@@ -117,36 +115,28 @@ const Submesh *Mesh::GetSubmesh(const std::string &name) const {
     return nullptr;
 }
 
-Mesh Mesh::CreateQuad(const float width, const float height) {
-    Mesh mesh;
-
+void Mesh::CreateQuad(const float width, const float height, const float depth) {
     const float halfW = width * 0.5f;
     const float halfH = height * 0.5f;
 
-    mesh.vertices = {
-        Vertex(glm::vec3(-halfW,  halfH, 0.0f), glm::vec2(0.0f, 0.0f)),
-        Vertex(glm::vec3( halfW,  halfH, 0.0f), glm::vec2(1.0f, 0.0f)),
-        Vertex(glm::vec3( halfW, -halfH, 0.0f), glm::vec2(1.0f, 1.0f)),
-        Vertex(glm::vec3(-halfW, -halfH, 0.0f), glm::vec2(0.0f, 1.0f))
+    vertices = {
+        Vertex(glm::vec3(-halfW,  halfH, depth), glm::vec2(0.0f, 0.0f)),
+        Vertex(glm::vec3( halfW,  halfH, depth), glm::vec2(1.0f, 0.0f)),
+        Vertex(glm::vec3( halfW, -halfH, depth), glm::vec2(1.0f, 1.0f)),
+        Vertex(glm::vec3(-halfW, -halfH, depth), glm::vec2(0.0f, 1.0f))
     };
 
-    mesh.indices = {0, 1, 2, 0, 2, 3};
-
-    return mesh;
+    indices = {0, 1, 2, 0, 2, 3};
 }
 
-Mesh Mesh::CreateTriangle(const float size) {
-    Mesh mesh;
+void Mesh::CreateTriangle(const float size, const float depth) {
+    const float halfSize = size * 0.5f;
 
-    float halfSize = size * 0.5f;
-
-    mesh.vertices = {
-        Vertex(glm::vec3(0.0f,  halfSize, 0.0f), glm::vec2(0.5f, 0.0f)),
-        Vertex(glm::vec3(-halfSize, -halfSize, 0.0f), glm::vec2(0.0f, 1.0f)),
-        Vertex(glm::vec3( halfSize, -halfSize, 0.0f), glm::vec2(1.0f, 1.0f))
+    vertices = {
+        Vertex(glm::vec3(0.0f,  halfSize, depth), glm::vec2(0.5f, 0.0f)),
+        Vertex(glm::vec3(-halfSize, -halfSize, depth), glm::vec2(0.0f, 1.0f)),
+        Vertex(glm::vec3( halfSize, -halfSize, depth), glm::vec2(1.0f, 1.0f))
     };
 
-    mesh.indices = {0, 1, 2};
-
-    return mesh;
+    indices = {0, 1, 2};
 }

@@ -8,6 +8,7 @@
 #include "Node.h"
 #include "Transform3D.h"
 
+struct Camera2D;
 struct Node;
 struct Camera3D;
 struct Transform3D;
@@ -28,7 +29,8 @@ struct AppState {
     Node* editorSelected = nullptr;
     std::string mesh;
 
-    Camera3D* current_camera;
+    Camera2D* current_camera_2d;
+    Camera3D* current_camera_3d;
     Transform3D modelTransform;
 
     int windowWidth = 1920;

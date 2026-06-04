@@ -3,6 +3,7 @@
 #include "Node3D.h"
 
 struct MeshInstance3D : public Node3D {
+    MeshInstance3D();
     std::string mesh;
     void Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) override;
 };
