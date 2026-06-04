@@ -469,6 +469,7 @@ void AppState::CreateDefaultMeshes() {
 
 void AppState::CreateDefaultMaterials() {
     SDL_Log("Creating default materials...");
+    new MaterialUnlitTextured(this, "uvs", "UnlitUVs");
     auto* missing = new MaterialUnlitTextured(this, "missing", "UnlitTextured");
     missing->setTextureAlbedo(this, "missing.png");
     missing->setSamplerAlbedo(this, "anisotropic_repeat");

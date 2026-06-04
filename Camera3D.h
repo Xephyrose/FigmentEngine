@@ -3,11 +3,12 @@
 #include "Node3D.h"
 
 struct Camera3D : public Node3D {
-public:
     explicit Camera3D();
+    void ImGuiDraw() override;
     float fov = 90.0f;
     float nearPlane = 0.1f;
     float farPlane = 500.0f;
+
 
     [[nodiscard]] glm::mat4 GetViewMatrix() const;
     [[nodiscard]] glm::mat4 GetProjectionMatrix(float aspectRatio) const;

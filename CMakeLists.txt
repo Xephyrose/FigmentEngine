@@ -68,6 +68,8 @@ add_executable(FigmentEngine
         imstb_truetype.h
         Input.cpp
         Input.h
+        imgui_stdlib.cpp
+        imgui_stdlib.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

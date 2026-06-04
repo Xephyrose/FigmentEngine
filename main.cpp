@@ -23,15 +23,10 @@
 #include <dlfcn.h>
 #endif
 
-void handle_mouse_motion(const AppState* appState, const SDL_Event* event) {
-    appState->current_camera->localTransform.rotate(glm::vec3(-event->motion.yrel * appState->sensitivity, -event->motion.xrel * appState->sensitivity, 0));
-}
-
 void HandleInput(AppState* appState) {
     appState->root.Input(*appState);
-    if (Input::IsJustPressed(SDL_SCANCODE_Z)) {
-        appState->isMouseRelative = !appState->isMouseRelative;
-        SDL_SetWindowRelativeMouseMode(appState->window, appState->isMouseRelative);
+    if (Input::IsJustPressed(SDL_SCANCODE_X)) {
+        appState->debug = !appState->debug;
     }
 }
 
@@ -69,7 +64,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         SDL_Log("Error: SDL_CreateWindow(): %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
-    SDL_SetWindowRelativeMouseMode(appState->window, true);
 
     constexpr SDL_GPUShaderFormat formatFlags = SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL;
     appState->device = SDL_CreateGPUDevice(formatFlags, true, nullptr);
@@ -138,13 +132,16 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 // ReSharper disable once CppParameterMayBeConstPtrOrRef
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 {
-    ImGui_ImplSDL3_ProcessEvent(event);
-    const auto* appState = static_cast<AppState*>(appstate);
+    auto* appState = static_cast<AppState*>(appstate);
+    if (appState->debug) {
+        ImGui_ImplSDL3_ProcessEvent(event);
+    }
+
+    appState->root.Event(*appState, *event);
 
     switch (event->type)
     {
         case SDL_EVENT_MOUSE_MOTION:
-            handle_mouse_motion(appState, event);
             return SDL_APP_CONTINUE;
         case SDL_EVENT_QUIT:
             return SDL_APP_SUCCESS;
@@ -153,18 +150,22 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
     }
 }
 
-void DrawNodeTree(const Node* node) {
-    ImGui::PushID(node);  // Use pointer as unique ID
-    if (ImGui::TreeNodeEx(node->name.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-        // Handle click on the node's header
+void DrawNodeTree(AppState* appState, Node* node) {
+    ImGui::PushID(node);
+
+    int flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow;
+    if (node == appState->editorSelected)
+        flags |= ImGuiTreeNodeFlags_Selected;
+    if (node->children.empty())
+        flags |= ImGuiTreeNodeFlags_Leaf;
+    if (ImGui::TreeNodeEx(node->name.c_str(), flags)) {
         if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
-            SDL_Log("Clicked %s", node->name.c_str());
+            appState->editorSelected = node;
         }
-        // Recursively draw all children
         for (auto& child : node->children) {
-            DrawNodeTree(child.get());
+            DrawNodeTree(appState, child.get());
         }
-        ImGui::TreePop();  // Close the tree node
+        ImGui::TreePop();
     }
     ImGui::PopID();
 }
@@ -173,25 +174,40 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 {
     auto* appState = static_cast<AppState*>(appstate);
 
-    ImGui_ImplSDLGPU3_NewFrame();
-    ImGui_ImplSDL3_NewFrame();
-    ImGui::NewFrame();
+    if (appState->debug) {
+        ImGui_ImplSDLGPU3_NewFrame();
+        ImGui_ImplSDL3_NewFrame();
+        ImGui::NewFrame();
 
-    ImGui::Begin("Node Heirarchy");
-    DrawNodeTree(&appState->root);
-    ImGui::End();
+        ImGui::Begin("Node Heirarchy");
+        DrawNodeTree(appState, &appState->root);
+        ImGui::End();
 
-    ImGui::Begin("Test");
-    if (ImGui::Button("Add Crate")) {
-        auto* meshInstance = new MeshInstance3D();
-        meshInstance->mesh = "crate_medium.glb";
-        meshInstance->localTransform.position = appState->current_camera->GetGlobalTransform().position;
-        meshInstance->localTransform.rotation = appState->current_camera->GetGlobalTransform().rotation * glm::vec3(0.0f, 1.0f, 0.0f);
-        appState->root.addChild(std::unique_ptr<Node>(meshInstance));
+        ImGui::Begin("Debug");
+        if (ImGui::Button("Add Crate")) {
+            auto* meshInstance = new MeshInstance3D();
+            meshInstance->mesh = "crate_medium.glb";
+            meshInstance->localTransform.position = appState->current_camera->GetGlobalTransform().position;
+            meshInstance->localTransform.rotation = appState->current_camera->GetGlobalTransform().rotation * glm::vec3(0.0f, 1.0f, 0.0f);
+            appState->root.addChild(std::unique_ptr<Node>(meshInstance));
+        }
+        ImGui::End();
+        if (appState->editorSelected != nullptr) {
+            ImGui::Begin("Inspector");
+            appState->editorSelected->ImGuiDraw();
+            ImGui::End();
+        }
+
+        ImGui::Begin("Rendering Overrides");
+        static const char* items[] = { "", "missing", "line", "uvs" };
+        static int selected_idx = 0;
+        ImGui::Combo("Override", &selected_idx, items, IM_ARRAYSIZE(items));
+        appState->material_override = items[selected_idx];
+
+        ImGui::End();
+
+        ImGui::Render();
     }
-    ImGui::End();
-
-    ImGui::Render();
     ImDrawData* draw_data = ImGui::GetDrawData();
 
     appState->lastTime = appState->currentTime;
@@ -209,8 +225,9 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         return SDL_APP_FAILURE;
     }
 
-    ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, commandBuffer);
-
+    if (appState->debug) {
+        ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, commandBuffer);
+    }
     // Here we create the texture that will be drawn to the screen once it's done
     SDL_GPUTexture* swapchainTexture;
     if (!SDL_WaitAndAcquireGPUSwapchainTexture(commandBuffer, appState->window, &swapchainTexture, nullptr, nullptr))
@@ -247,7 +264,9 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 
         appState->root.Draw(*appState, commandBuffer);
 
-        ImGui_ImplSDLGPU3_RenderDrawData(draw_data, commandBuffer, appState->renderPass);
+        if (appState->debug) {
+            ImGui_ImplSDLGPU3_RenderDrawData(draw_data, commandBuffer, appState->renderPass);
+        }
 
         SDL_EndGPURenderPass(appState->renderPass);
         appState->renderPass = nullptr;

@@ -4,6 +4,7 @@
 #include "Transform3D.h"
 
 struct Node3D : public Node {
+    void ImGuiDraw() override;
     Transform3D localTransform;
     [[nodiscard]] Transform3D GetGlobalTransform() const;
 };

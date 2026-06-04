@@ -1,7 +1,17 @@
 #include "Camera3D.h"
 
+#include "imgui.h"
+
 Camera3D::Camera3D() {
     name = "Camera";
+}
+
+void Camera3D::ImGuiDraw() {
+    Node3D::ImGuiDraw();
+    ImGui::Text("Node");
+    ImGui::InputFloat("FOV", &fov);
+    ImGui::InputFloat("Near Plane", &nearPlane);
+    ImGui::InputFloat("Far Plane", &farPlane);
 }
 
 glm::mat4 Camera3D::GetViewMatrix() const {

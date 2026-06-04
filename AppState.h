@@ -20,11 +20,14 @@ struct AppState {
     SDL_GPUDevice* device = nullptr;
     SDL_GPURenderPass *renderPass;
     SDL_GPUTexture* depthTexture = nullptr;
-    mutable bool isMouseRelative = true;
+    bool isMouseRelative = false;
 
     Node root = Node("root");
 
-    mutable Camera3D* current_camera;
+    Node* editorSelected = nullptr;
+    bool debug = true;
+
+    Camera3D* current_camera;
     Transform3D modelTransform;
 
     int windowWidth = 1920;

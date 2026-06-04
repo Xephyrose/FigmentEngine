@@ -1,11 +1,19 @@
 #include "Node.h"
 
 #include <utility>
+#include "imgui.h"
+#include "imgui_stdlib.h"
 
 Node::Node(std::string name) : name(std::move(name)) {}
+
 Node::Node() : name("Node") {}
 
-void Node::Update(const AppState& appState) {
+void Node::ImGuiDraw() {
+    ImGui::Text("Node");
+    ImGui::InputText("Name", &name);
+}
+
+void Node::Update(AppState& appState) {
     for (const auto & i : children) {
         i->Update(appState);
     }
@@ -17,9 +25,15 @@ void Node::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) {
     }
 }
 
-void Node::Input(const AppState& appState) {
+void Node::Input(AppState& appState) {
     for (const auto & i : children) {
         i->Input(appState);
+    }
+}
+
+void Node::Event(AppState &appState, SDL_Event &event) {
+    for (const auto & i : children) {
+        i->Event(appState, event);
     }
 }
 

@@ -3,9 +3,20 @@
 #include <SDL3/SDL_scancode.h>
 
 #include "AppState.h"
+#include "imgui.h"
 #include "Input.h"
 
-void FreeCam3D::Input(const AppState& appState) {
+FreeCam3D::FreeCam3D() {
+    name = "FreeCam3D";
+}
+
+void FreeCam3D::ImGuiDraw() {
+    Camera3D::ImGuiDraw();
+    ImGui::Text("Node");
+    ImGui::InputFloat("Speed", &speed);
+}
+
+void FreeCam3D::Input(AppState& appState) {
     const glm::vec3 forward = localTransform.getForward();
     const glm::vec3 right = localTransform.getRight();
 
@@ -21,5 +32,20 @@ void FreeCam3D::Input(const AppState& appState) {
         moveDirection = glm::normalize(moveDirection);
     }
 
-    localTransform.move(moveDirection * 0.025f * static_cast<float>(appState.delta));
+    localTransform.move(moveDirection * speed * static_cast<float>(appState.delta));
+}
+
+void FreeCam3D::Event(AppState &appState, SDL_Event &event) {
+    if (event.type == SDL_EVENT_MOUSE_MOTION && appState.isMouseRelative) {
+        localTransform.rotate(glm::vec3(-event.motion.yrel * appState.sensitivity, -event.motion.xrel * appState.sensitivity, 0));
+    }
+
+    if (!appState.debug) return;
+
+    if (event.button.button == SDL_BUTTON_RIGHT) {
+        appState.isMouseRelative = event.type == SDL_EVENT_MOUSE_BUTTON_DOWN;
+        SDL_SetWindowRelativeMouseMode(appState.window, appState.isMouseRelative);
+    }
+
+    Camera3D::Event(appState, event);
 }

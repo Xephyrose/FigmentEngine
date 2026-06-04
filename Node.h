@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "SDL3/SDL_events.h"
 #include "SDL3/SDL_gpu.h"
 
 struct AppState;
@@ -17,9 +18,11 @@ struct Node {
     std::vector<std::unique_ptr<Node>> children;
 
     std::string name;
-    virtual void Update(const AppState& appState);
+    virtual void ImGuiDraw();
+    virtual void Update(AppState& appState);
     virtual void Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer);
-    virtual void Input(const AppState& appState);
+    virtual void Input(AppState& appState);
+    virtual void Event(AppState& appState, SDL_Event &event);
     void addChild(std::unique_ptr<Node> child);
     void killChild(Node* child);
     void killChild(const std::string& name);
