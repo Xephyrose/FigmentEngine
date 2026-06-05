@@ -30,4 +30,4 @@ appState->root.addChild(std::unique_ptr<Node>(meshInstance));
 The primary Nodes are Node, Node2D/Node3D, Camera2D/Camera3D, MeshInstance3D, and Sprite2D. Most systems can be built off of these.
 
 ## Compiling
-Currently, compiling is limited to Linux. This is due to the use of system libraries, which must be accessible via path; this currently just being [OpenGL Mathematics (GLM)](https://github.com/g-truc/glm).
+Currently, compiling is limited to Linux. This is due to a lack of runtime access to the DLLs, which should soon be updated to either utilize static linking or manually copying the DLLs into the executable directory.
