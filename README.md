@@ -1,9 +1,7 @@
 # FigmentEngine
 
 <p align="center">
-  <a href="https://godotengine.org">
-    <img src="https://github.com/Xephyrose/FigmentEngine/blob/main/figment-engine.png" width="400" alt="Logo">
-  </a>
+    <img src="https://github.com/Xephyrose/FigmentEngine/blob/main/figment-engine.png" width="600" alt="Logo">
 </p>
 
 ## What is Figment Engine?
