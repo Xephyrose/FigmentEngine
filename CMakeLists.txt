@@ -13,19 +13,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SDL3)
 
+set(SDL3_DIR "${sdl3_BINARY_DIR}" CACHE PATH "Path to built SDL3 config" FORCE)
+
 FetchContent_Declare(
         SDL3_image
         GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
         GIT_TAG main
         GIT_SHALLOW TRUE
-)
-FetchContent_MakeAvailable(SDL3_image)
-
-FetchContent_Declare(
-    shadercross
-    GIT_REPOSITORY https://github.com/libsdl-org/SDL_shadercross.git
-    GIT_TAG main
-    GIT_SHALLOW TRUE
 )
 FetchContent_MakeAvailable(SDL3_image)
 
@@ -89,6 +83,28 @@ target_link_libraries(FigmentEngine PRIVATE
         pthread
 )
 
+add_custom_command(TARGET FigmentEngine POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_RUNTIME_DLLS:FigmentEngine>
+        $<TARGET_FILE_DIR:FigmentEngine>
+        COMMAND_EXPAND_LISTS
+        COMMENT "Deploying runtime DLLs"
+)
+
+if(MINGW)
+    find_program(GCC_EXECUTABLE gcc)
+    if(GCC_EXECUTABLE)
+        get_filename_component(GCC_BIN_DIR ${GCC_EXECUTABLE} DIRECTORY)
+        add_custom_command(TARGET FigmentEngine POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${GCC_BIN_DIR}/libgcc_s_seh-1.dll"
+                "${GCC_BIN_DIR}/libstdc++-6.dll"
+                $<TARGET_FILE_DIR:FigmentEngine>
+                COMMENT "Deploying MinGW runtime DLLs"
+        )
+    endif()
+endif()
+
 if(WIN32)
     set(SHADERCROSS_HINT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tools/SDL3_shadercross-3.0.0-windows-mingw-x64/bin/")
 elseif(UNIX AND NOT APPLE)
@@ -146,9 +162,9 @@ if(SHADERCROSS_EXECUTABLE)
 
         add_custom_command(
                 OUTPUT ${OUTPUTS}
-                COMMAND ${SHADERCROSS_EXECUTABLE} "$<GENEX_EVAL:${SHADERS_BINARY_DIR}/${SHADER_FULLNAME}>" --stage ${SHADER_STAGE} -o ${SHADERS_BINARY_DIR}/${SHADER_NAME}.spv
-                COMMAND ${SHADERCROSS_EXECUTABLE} "$<GENEX_EVAL:${SHADERS_BINARY_DIR}/${SHADER_FULLNAME}>" --stage ${SHADER_STAGE} -o ${SHADERS_BINARY_DIR}/${SHADER_NAME}.dxil
-                COMMAND ${SHADERCROSS_EXECUTABLE} "$<GENEX_EVAL:${SHADERS_BINARY_DIR}/${SHADER_FULLNAME}>" --stage ${SHADER_STAGE} -o ${SHADERS_BINARY_DIR}/${SHADER_NAME}.msl
+                COMMAND ${SHADERCROSS_EXECUTABLE} "${SHADERS_BINARY_DIR}/${SHADER_FULLNAME}" --stage ${SHADER_STAGE} -o ${SHADERS_BINARY_DIR}/${SHADER_NAME}.spv
+                COMMAND ${SHADERCROSS_EXECUTABLE} "${SHADERS_BINARY_DIR}/${SHADER_FULLNAME}" --stage ${SHADER_STAGE} -o ${SHADERS_BINARY_DIR}/${SHADER_NAME}.dxil
+                COMMAND ${SHADERCROSS_EXECUTABLE} "${SHADERS_BINARY_DIR}/${SHADER_FULLNAME}" --stage ${SHADER_STAGE} -o ${SHADERS_BINARY_DIR}/${SHADER_NAME}.msl
                 DEPENDS CopyAssets
                 COMMENT "Compiling ${SHADER_FULLNAME} (${SHADER_STAGE}) to spv, dxil, and msl"
         )
