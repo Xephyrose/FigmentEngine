@@ -8,13 +8,13 @@
 #include "Node.h"
 #include "Transform3D.h"
 
+struct Mesh;
 struct Camera2D;
 struct Node;
 struct Camera3D;
 struct Transform3D;
 
 struct Material;
-struct Mesh;
 
 struct AppState {
     SDL_Window* window = nullptr;
@@ -28,6 +28,7 @@ struct AppState {
     bool debug = true;
     Node* editorSelected = nullptr;
     std::string mesh;
+    Mesh* quadMesh = nullptr;
 
     Camera2D* current_camera_2d;
     Camera3D* current_camera_3d;

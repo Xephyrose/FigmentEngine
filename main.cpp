@@ -18,6 +18,7 @@
 #include "Camera2D.h"
 #include "Input.h"
 #include "Material.h"
+#include "Sprite2D.h"
 #include "tiny_gltf.h"
 #include "Vertex.h"
 
@@ -107,6 +108,10 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->CreateDefaultRasterizerStates();
     appState->CreateDefaultPipelines();
 
+    appState->quadMesh = new Mesh();
+    appState->quadMesh->CreateQuad(1, 1, -1);
+    appState->quadMesh->UploadToGPU(*appState);
+
     auto* meshInstance = new MeshInstance3D();
     meshInstance->mesh = "zulu.glb";
     appState->root.addChild(std::unique_ptr<Node>(meshInstance));
@@ -193,13 +198,21 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         ImGui::Text("Mesh Spawner");
         ImGui::InputText("Mesh", &appState->mesh);
         ImGui::SameLine();
-        if (ImGui::Button("Spawn")) {
+        if (ImGui::Button("Spawn Mesh")) {
             auto* meshInstance = new MeshInstance3D();
             meshInstance->mesh = appState->mesh;
             SDL_Log("Mesh spawned: %s", appState->mesh.c_str());
             meshInstance->localTransform.position = appState->current_camera_3d->GetGlobalTransform().position;
             meshInstance->localTransform.rotation = appState->current_camera_3d->GetGlobalTransform().rotation * glm::vec3(0.0f, 1.0f, 0.0f);
             appState->root.addChild(std::unique_ptr<Node>(meshInstance));
+        }
+        ImGui::Text("Sprite Spawner");
+        ImGui::InputText("Sprite", &appState->mesh);
+        ImGui::SameLine();
+        if (ImGui::Button("Spawn Sprite")) {
+            auto* sprite = new Sprite2D();
+            SDL_Log("Sprite spawned: %s", appState->mesh.c_str());
+            appState->root.addChild(std::unique_ptr<Node>(sprite));
         }
         ImGui::End();
         if (appState->editorSelected != nullptr) {

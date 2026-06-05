@@ -3,16 +3,18 @@
 #include "Camera2D.h"
 #include "Material.h"
 #include "Mesh.h"
+#include "SDL3/SDL_log.h"
 
 Sprite2D::Sprite2D() {
     name = "Sprite2D";
+    sprite = "missing";
 }
 
 void Sprite2D::Draw(AppState& appState, SDL_GPUCommandBuffer* commandBuffer) {
-    const auto quadMesh = new Mesh();
-    quadMesh->CreateQuad(1, 1, 0);
+    const Mesh* quadMesh = appState.quadMesh;
 
     if (!quadMesh->isOnGPU) return;
+    SDL_Log("Testing draw now!");
 
     const SDL_GPUBufferBinding vertexBinding = { .buffer = quadMesh->vertexBuffer, .offset = 0 };
     SDL_BindGPUVertexBuffers(appState.renderPass, 0, &vertexBinding, 1);
@@ -28,13 +30,15 @@ void Sprite2D::Draw(AppState& appState, SDL_GPUCommandBuffer* commandBuffer) {
         appState.windowHeight
     );
     const glm::mat4 mvp = proj * view * model;
+    glm::vec4 ndc = mvp * glm::vec4(0,0,0,1); // center of quad
+    SDL_Log("Sprite center NDC: (%f, %f, %f)", ndc.x, ndc.y, ndc.z);
 
     SDL_PushGPUVertexUniformData(commandBuffer, 0, &mvp, sizeof(mvp));
 
-    Material* material = appState.GetMaterial("UnlitTextured");
+    Material* material = appState.GetMaterial(sprite);
     if (!material) material = appState.GetMaterial("default_sprite");
     material->Bind(&appState, commandBuffer);
 
     SDL_DrawGPUIndexedPrimitives(appState.renderPass, quadMesh->indices.size(), 1, 0, 0, 0);
-
+    SDL_Log("Done draw!");
 }

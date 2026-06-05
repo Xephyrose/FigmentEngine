@@ -10,6 +10,7 @@
 #include <SDL3/SDL_filesystem.h>
 
 #include "Material.h"
+#include "SDL3/SDL_log.h"
 
 void Mesh::UploadToGPU(const AppState& appState) {
     if (isOnGPU) return;
@@ -38,8 +39,17 @@ void Mesh::UploadToGPU(const AppState& appState) {
         .size = static_cast<Uint32>(vertices.size() * sizeof(Vertex))
     };
     SDL_GPUTransferBuffer* vertexTransfer = SDL_CreateGPUTransferBuffer(appState.device, &transferBufferInfo);
+    if (!vertexTransfer) {
+        SDL_Log("Failed to create vertex transfer buffer!");
+        return;
+    }
     void* vertexData = SDL_MapGPUTransferBuffer(appState.device, vertexTransfer, false);
-    memcpy(vertexData, vertices.data(), vertices.size() * sizeof(Vertex));
+    if (!vertexData) {
+        SDL_Log("Failed to map vertex transfer buffer!");
+        SDL_ReleaseGPUTransferBuffer(appState.device, vertexTransfer);
+        return;
+    }
+    memcpy(vertexData, vertices.data(), vertices.size() * sizeof(Vertex)); // crashes on this line
     SDL_UnmapGPUTransferBuffer(appState.device, vertexTransfer);
 
     SDL_GPUTransferBufferLocation transferLocation = {

@@ -21,11 +21,9 @@ void Transform2D::rotate(const float& eulerDegrees) {
 }
 
 glm::mat4 Transform2D::getMatrix() const {
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(position.x, position.y, 0.0f));
-    model = glm::translate(model, glm::vec3(position.x, position.y, 0.0f));
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(position, 0.0f));
     model = glm::rotate(model, glm::radians(rotation), glm::vec3(0, 0, 1));
     model = glm::scale(model, glm::vec3(scale, 1.0f));
-    model = glm::translate(model, glm::vec3(-position.x, -position.y, 0.0f));
     return model;
 }
 
