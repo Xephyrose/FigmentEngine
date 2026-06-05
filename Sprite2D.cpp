@@ -7,7 +7,8 @@
 
 Sprite2D::Sprite2D() {
     name = "Sprite2D";
-    sprite = "missing";
+    sprite = "missing_2d";
+    localTransform.position = glm::vec2(100.0f, 100.0f);
 }
 
 void Sprite2D::Draw(AppState& appState, SDL_GPUCommandBuffer* commandBuffer) {
@@ -32,6 +33,9 @@ void Sprite2D::Draw(AppState& appState, SDL_GPUCommandBuffer* commandBuffer) {
     const glm::mat4 mvp = proj * view * model;
     glm::vec4 ndc = mvp * glm::vec4(0,0,0,1); // center of quad
     SDL_Log("Sprite center NDC: (%f, %f, %f)", ndc.x, ndc.y, ndc.z);
+    SDL_Log("Proj matrix: [%f %f %f %f]", proj[0][0], proj[0][1], proj[0][2], proj[0][3]);
+    SDL_Log("View matrix: [%f %f %f %f]", view[0][0], view[0][1], view[0][2], view[0][3]);
+    SDL_Log("Model matrix position: (%f, %f, %f)", model[3][0], model[3][1], model[3][2]);
 
     SDL_PushGPUVertexUniformData(commandBuffer, 0, &mvp, sizeof(mvp));
 

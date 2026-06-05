@@ -65,12 +65,14 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         SDL_Log("SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay()) returned 0.0f: %s", SDL_GetError());
     }
     constexpr SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+
     appState->window = SDL_CreateWindow("FigmentEngine", appState->windowWidth, appState->windowHeight, window_flags);
     if (appState->window == nullptr)
     {
         SDL_Log("Error: SDL_CreateWindow(): %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
+    SDL_SetWindowAspectRatio(appState->window, 1.777f, 1.777f);
 
     constexpr SDL_GPUShaderFormat formatFlags = SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL;
     appState->device = SDL_CreateGPUDevice(formatFlags, true, nullptr);

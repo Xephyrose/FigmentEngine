@@ -136,7 +136,7 @@ void Mesh::CreateQuad(const float width, const float height, const float depth) 
         Vertex(glm::vec3(-halfW, -halfH, depth), glm::vec2(0.0f, 1.0f))
     };
 
-    indices = {0, 1, 2, 0, 2, 3};
+    indices = {0, 2, 1, 0, 3, 2};
 }
 
 void Mesh::CreateTriangle(const float size, const float depth) {

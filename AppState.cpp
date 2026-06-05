@@ -9,7 +9,8 @@
 #include "Vertex.h"
 #include "SDL3/SDL_log.h"
 
-bool AppState::CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader, const std::string& rasterizerState, const std::string &blendState) {
+bool AppState::CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader, const std::string& rasterizerState, const std::string &blendState, const
+                              bool &depth_test, const bool &depth_write) {
     SDL_GPUShader* vertexShader = GetShader(vertShader + ".vert");
     if (!vertexShader) {
         SDL_Log("Couldn't create vertex shader: %s", vertShader.c_str());
@@ -53,7 +54,6 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
         }
     };
 
-    const bool depth_write = blendState != "Alpha";
     const auto pipelineCreateInfo = SDL_GPUGraphicsPipelineCreateInfo{
         .vertex_shader = vertexShader,
         .fragment_shader = fragmentShader,
@@ -67,7 +67,7 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
         .rasterizer_state = GetRasterizerState(rasterizerState),
         .depth_stencil_state = SDL_GPUDepthStencilState{
             .compare_op = SDL_GPU_COMPAREOP_LESS,
-            .enable_depth_test = true,
+            .enable_depth_test = depth_test,
             .enable_depth_write = depth_write,
         },
         .target_info = SDL_GPUGraphicsPipelineTargetInfo{
@@ -470,6 +470,9 @@ void AppState::CreateDefaultMeshes() {
 void AppState::CreateDefaultMaterials() {
     SDL_Log("Creating default materials...");
     new MaterialUnlitTextured(this, "uvs", "UnlitUVs");
+    auto* missing_2d = new MaterialUnlitTextured(this, "missing_2d", "2D");
+    missing_2d->setTextureAlbedo(this, "missing.png");
+    missing_2d->setSamplerAlbedo(this, "anisotropic_repeat");
     auto* missing = new MaterialUnlitTextured(this, "missing", "UnlitTextured");
     missing->setTextureAlbedo(this, "missing.png");
     missing->setSamplerAlbedo(this, "anisotropic_repeat");
@@ -644,10 +647,11 @@ void AppState::CreateDefaultTextures() {
 
 void AppState::CreateDefaultPipelines() {
     SDL_Log("Creating default pipelines...");
-    CreatePipeline("Line", "UnlitTextured", "UnlitTextured", "Line", "Default");
-    CreatePipeline("UnlitTextured", "UnlitTextured", "UnlitTextured", "Fill", "Default");
-    CreatePipeline("UnlitTexturedAlpha", "UnlitTextured", "UnlitTextured", "FillNoBack", "Alpha");
-    CreatePipeline("UnlitUVs", "UnlitTextured", "UnlitUVs", "Fill", "Default");
+    CreatePipeline("Line", "UnlitTextured", "UnlitTextured", "Line", "Default", true, true);
+    CreatePipeline("UnlitTextured", "UnlitTextured", "UnlitTextured", "Fill", "Default", true, true);
+    CreatePipeline("UnlitTexturedAlpha", "UnlitTextured", "UnlitTextured", "FillNoBack", "Alpha", true, false);
+    CreatePipeline("UnlitUVs", "UnlitTextured", "UnlitUVs", "Fill", "Default", true, true);
+    CreatePipeline("2D", "UnlitTextured", "UnlitTextured", "FillNoBack", "Alpha", false, false);
 }
 
 void AppState::CreateDefaultRasterizerStates() {
@@ -661,7 +665,7 @@ void AppState::CreateDefaultRasterizerStates() {
     fillNoBack.fill_mode = SDL_GPU_FILLMODE_FILL;
     fillNoBack.cull_mode = SDL_GPU_CULLMODE_NONE;
     fillNoBack.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
-    rasterizerStates.insert_or_assign("FillNoBack", fill);
+    rasterizerStates.insert_or_assign("FillNoBack", fillNoBack);
     auto line = SDL_GPURasterizerState {};
     line.fill_mode = SDL_GPU_FILLMODE_LINE;
     line.cull_mode = SDL_GPU_CULLMODE_BACK;

@@ -34,8 +34,8 @@ struct AppState {
     Camera3D* current_camera_3d;
     Transform3D modelTransform;
 
-    int windowWidth = 1920;
-    int windowHeight = 1080;
+    int windowWidth = 7680;
+    int windowHeight = 4320;
     float sensitivity = 0.05f;
     float currentAspectRatio = static_cast<float>(windowWidth) / static_cast<float>(windowHeight);
 
@@ -55,7 +55,7 @@ struct AppState {
     std::string material_override;
 
     bool CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader, const std::string& rasterizerState, const
-                        std::string &blendState);
+                        std::string &blendState, const bool &depth_test, const bool &depth_write);
 
     bool LoadMesh(const std::string& path);
     bool LoadShader(const std::string& path);
