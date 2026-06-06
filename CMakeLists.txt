@@ -83,13 +83,14 @@ target_link_libraries(FigmentEngine PRIVATE
         pthread
 )
 
-add_custom_command(TARGET FigmentEngine POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_RUNTIME_DLLS:FigmentEngine>
-        $<TARGET_FILE_DIR:FigmentEngine>
-        COMMAND_EXPAND_LISTS
-        COMMENT "Deploying runtime DLLs"
-)
+if(WIN32)
+    add_custom_command(TARGET FigmentEngine POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_RUNTIME_DLLS:FigmentEngine>
+            $<TARGET_FILE_DIR:FigmentEngine>
+            COMMENT "Deploying runtime DLLs"
+    )
+endif()
 
 if(MINGW)
     find_program(GCC_EXECUTABLE gcc)

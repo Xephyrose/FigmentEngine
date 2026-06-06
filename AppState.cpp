@@ -699,7 +699,7 @@ void AppState::CreateDefaultBlendStates() {
 void AppState::CreateDefaultMultisampleStates()
 {
     SDL_GPUMultisampleState defaultMultisampleState = {};
-    defaultMultisampleState.sample_count = SDL_GPU_SAMPLECOUNT_8;
+    defaultMultisampleState.sample_count = SDL_GPU_SAMPLECOUNT_1;
     defaultMultisampleState.enable_mask = false;
     defaultMultisampleState.enable_alpha_to_coverage = true;
     defaultMultisampleState.sample_mask = 0;
