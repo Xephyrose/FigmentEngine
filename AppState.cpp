@@ -65,6 +65,7 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
         },
         .primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
         .rasterizer_state = GetRasterizerState(rasterizerState),
+        .multisample_state = GetMultisampleState("Multisample"),
         .depth_stencil_state = SDL_GPUDepthStencilState{
             .compare_op = SDL_GPU_COMPAREOP_LESS,
             .enable_depth_test = depth_test,
@@ -74,7 +75,7 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
             .color_target_descriptions = colorTargetDescriptions.data(),
             .num_color_targets = colorTargetDescriptions.size(),
             .depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT_S8_UINT,
-            .has_depth_stencil_target = true
+            .has_depth_stencil_target = true,
         },
     };
 
@@ -84,8 +85,6 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
         return false;
     }
 
-    SDL_ReleaseGPUShader(device, vertexShader);
-    SDL_ReleaseGPUShader(device, fragmentShader);
     return true;
 }
 
@@ -458,6 +457,11 @@ SDL_GPURasterizerState AppState::GetRasterizerState(const std::string &key) cons
     return rasterizerStates.at(key);
 }
 
+SDL_GPUMultisampleState AppState::GetMultisampleState(const std::string& key) const
+{
+    return multisampleStates.at(key);
+}
+
 SDL_GPUColorTargetBlendState AppState::GetBlendState(const std::string &key) const {
     return blendStates.at(key);
 }
@@ -647,6 +651,7 @@ void AppState::CreateDefaultTextures() {
 
 void AppState::CreateDefaultPipelines() {
     SDL_Log("Creating default pipelines...");
+
     CreatePipeline("Line", "UnlitTextured", "UnlitTextured", "Line", "Default", true, true);
     CreatePipeline("UnlitTextured", "UnlitTextured", "UnlitTextured", "Fill", "Default", true, true);
     CreatePipeline("UnlitTexturedAlpha", "UnlitTextured", "UnlitTextured", "FillNoBack", "Alpha", true, false);
@@ -661,11 +666,13 @@ void AppState::CreateDefaultRasterizerStates() {
     fill.cull_mode = SDL_GPU_CULLMODE_BACK;
     fill.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
     rasterizerStates.insert_or_assign("Fill", fill);
+
     SDL_GPURasterizerState fillNoBack{};
     fillNoBack.fill_mode = SDL_GPU_FILLMODE_FILL;
     fillNoBack.cull_mode = SDL_GPU_CULLMODE_NONE;
     fillNoBack.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
     rasterizerStates.insert_or_assign("FillNoBack", fillNoBack);
+
     auto line = SDL_GPURasterizerState {};
     line.fill_mode = SDL_GPU_FILLMODE_LINE;
     line.cull_mode = SDL_GPU_CULLMODE_BACK;
@@ -687,4 +694,14 @@ void AppState::CreateDefaultBlendStates() {
     blendStates.insert_or_assign("Alpha", alphaBlendState);
     SDL_GPUColorTargetBlendState defaultBlendState = {};
     blendStates.insert_or_assign("Default", defaultBlendState);
+}
+
+void AppState::CreateDefaultMultisampleStates()
+{
+    SDL_GPUMultisampleState defaultMultisampleState = {};
+    defaultMultisampleState.sample_count = SDL_GPU_SAMPLECOUNT_8;
+    defaultMultisampleState.enable_mask = false;
+    defaultMultisampleState.enable_alpha_to_coverage = true;
+    defaultMultisampleState.sample_mask = 0;
+    multisampleStates.insert_or_assign("Multisample", defaultMultisampleState);
 }

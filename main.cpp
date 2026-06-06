@@ -49,6 +49,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     auto* appState = new AppState();
     *appstate = appState;
 
+    SDL_SetHint(SDL_HINT_RENDER_DIRECT3D11_DEBUG, "1");
+
     auto* freeCam = new FreeCam3D();
     appState->current_camera_3d = freeCam;
     appState->root.addChild(std::unique_ptr<Node>(freeCam));
@@ -103,6 +105,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->depthTexture = SDL_CreateGPUTexture(appState->device, &depthInfo);
 
     appState->CreateDefaultBlendStates();
+    appState->CreateDefaultMultisampleStates();
     appState->CreateDefaultMeshes();
     appState->CreateDefaultTextures();
     appState->CreateDefaultMaterials();

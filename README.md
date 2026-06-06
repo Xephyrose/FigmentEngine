@@ -30,4 +30,12 @@ appState->root.addChild(std::unique_ptr<Node>(meshInstance));
 The primary Nodes are Node, Node2D/Node3D, Camera2D/Camera3D, MeshInstance3D, and Sprite2D. Most systems can be built off of these.
 
 ## Compiling
-Currently, compiling is limited to Linux. This is due to a lack of runtime access to the DLLs, which should soon be updated to either utilize static linking or manually copying the DLLs into the executable directory.
+Compiling has been tested on and supports both windows and linux. While tested on CachyOS & Windows 11, it should be relatively platform-agnostic. To build, run:
+
+```shell
+# Windows
+"C:\Program Files\JetBrains\CLion 2026.1.2\bin\cmake\win\x64\bin\cmake.exe" --build C:\Repos\FigmentEngine\cmake-build-debug --target FigmentEngine -j 10
+```
+```fish
+
+```

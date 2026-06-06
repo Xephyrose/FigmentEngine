@@ -34,8 +34,8 @@ struct AppState {
     Camera3D* current_camera_3d;
     Transform3D modelTransform;
 
-    int windowWidth = 7680;
-    int windowHeight = 4320;
+    int windowWidth = 1080;
+    int windowHeight = 720;
     float sensitivity = 0.05f;
     float currentAspectRatio = static_cast<float>(windowWidth) / static_cast<float>(windowHeight);
 
@@ -47,6 +47,7 @@ struct AppState {
     std::unordered_map<std::string, SDL_GPUGraphicsPipeline*> pipelines;
     std::unordered_map<std::string, SDL_GPUColorTargetBlendState> blendStates;
     std::unordered_map<std::string, SDL_GPURasterizerState> rasterizerStates;
+    std::unordered_map<std::string, SDL_GPUMultisampleState> multisampleStates;
 
     Uint64 currentTime = 0;
     Uint64 lastTime = 0;
@@ -69,6 +70,7 @@ struct AppState {
     SDL_GPUGraphicsPipeline* GetPipeline(const std::string& key) const;
     SDL_GPUColorTargetBlendState GetBlendState(const std::string &key) const;
     SDL_GPURasterizerState GetRasterizerState(const std::string &key) const;
+    SDL_GPUMultisampleState GetMultisampleState(const std::string &key) const;
 
     void CreateDefaultMeshes();
     void CreateDefaultMaterials();
@@ -77,6 +79,7 @@ struct AppState {
     void CreateDefaultPipelines();
     void CreateDefaultBlendStates();
     void CreateDefaultRasterizerStates();
+    void CreateDefaultMultisampleStates();
 };
 
 
