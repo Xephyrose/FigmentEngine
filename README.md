@@ -37,5 +37,5 @@ Compiling has been tested on and supports both windows and linux. While tested o
 "C:\Program Files\JetBrains\CLion 2026.1.2\bin\cmake\win\x64\bin\cmake.exe" --build C:\Repos\FigmentEngine\cmake-build-debug --target FigmentEngine -j 10
 ```
 ```fish
-
+/home/max/.local/share/JetBrains/Toolbox/apps/clion/bin/cmake/linux/x64/bin/cmake --build /home/max/Repos/FigmentEngine/cmake-build-debug --target FigmentEngine -- -j 10
 ```
