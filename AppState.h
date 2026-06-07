@@ -34,8 +34,8 @@ struct AppState {
     Camera3D* current_camera_3d;
     Transform3D modelTransform;
 
-    int windowWidth = 1080;
-    int windowHeight = 720;
+    int windowWidth = 1600;
+    int windowHeight = 900;
     float sensitivity = 0.05f;
     float currentAspectRatio = static_cast<float>(windowWidth) / static_cast<float>(windowHeight);
 
