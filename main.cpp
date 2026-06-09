@@ -1,7 +1,7 @@
-#include "imgui.h"
-#include "imgui_impl_sdl3.h"
-#include "imgui_impl_sdlgpu3.h"
-#include "imgui_stdlib.h"
+#include "thirdparty/imgui/imgui.h"
+#include "thirdparty/imgui/imgui_impl_sdl3.h"
+#include "thirdparty/imgui/imgui_impl_sdlgpu3.h"
+#include "thirdparty/imgui/imgui_stdlib.h"
 #include <vector>
 #include <SDL3/SDL.h>
 
@@ -16,6 +16,7 @@
 #include "FreeCam3D.h"
 #include "AppState.h"
 #include "Camera2D.h"
+#include "FreeCam2D.h"
 #include "Input.h"
 #include "Material.h"
 #include "Sprite2D.h"
@@ -49,13 +50,17 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     auto* appState = new AppState();
     *appstate = appState;
 
-    auto* freeCam = new FreeCam3D();
-    appState->current_camera_3d = freeCam;
-    appState->root.addChild(std::unique_ptr<Node>(freeCam));
+    // auto* freeCam = new FreeCam3D();
+    // appState->current_camera_3d = freeCam;
+    // appState->root.addChild(std::unique_ptr<Node>(freeCam));
+    //
+    // auto* camera2d = new Camera2D();
+    // appState->current_camera_2d = camera2d;
+    // appState->root.addChild(std::unique_ptr<Node>(camera2d));
 
-    auto* camera2d = new Camera2D();
-    appState->current_camera_2d = camera2d;
-    appState->root.addChild(std::unique_ptr<Node>(camera2d));
+    auto* freeCam = new FreeCam2D();
+    appState->current_camera_2d = freeCam;
+    appState->root.addChild(std::unique_ptr<Node>(freeCam));
 
     float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     if (main_scale < 1.0f) {
@@ -115,9 +120,9 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->quadMesh->CreateQuad(1, 1, -1);
     appState->quadMesh->UploadToGPU(*appState);
 
-    auto* meshInstance = new MeshInstance3D();
-    meshInstance->mesh = "zulu.glb";
-    appState->root.addChild(std::unique_ptr<Node>(meshInstance));
+    // auto* meshInstance = new MeshInstance3D();
+    // meshInstance->mesh = "zulu.glb";
+    // appState->root.addChild(std::unique_ptr<Node>(meshInstance));
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -210,11 +215,11 @@ SDL_AppResult SDL_AppIterate(void* appstate)
             appState->root.addChild(std::unique_ptr<Node>(meshInstance));
         }
         ImGui::Text("Sprite Spawner");
-        ImGui::InputText("Sprite", &appState->mesh);
+        ImGui::InputText("Sprite", &appState->sprite);
         ImGui::SameLine();
         if (ImGui::Button("Spawn Sprite")) {
             auto* sprite = new Sprite2D();
-            SDL_Log("Sprite spawned: %s", appState->mesh.c_str());
+            SDL_Log("Sprite spawned: %s", appState->sprite.c_str());
             appState->root.addChild(std::unique_ptr<Node>(sprite));
         }
         ImGui::End();

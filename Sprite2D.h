@@ -4,7 +4,9 @@
 
 struct Sprite2D : Node2D {
     Sprite2D();
+    void ImGuiDraw() override;
     std::string sprite;
+    glm::vec2 size;
     void Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) override;
 };
 

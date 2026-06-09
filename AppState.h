@@ -28,6 +28,7 @@ struct AppState {
     bool debug = true;
     Node* editorSelected = nullptr;
     std::string mesh;
+    std::string sprite;
     Mesh* quadMesh = nullptr;
 
     Camera2D* current_camera_2d;

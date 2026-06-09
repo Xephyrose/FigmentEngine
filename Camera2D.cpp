@@ -1,6 +1,6 @@
 #include "Camera2D.h"
 
-#include "imgui.h"
+#include "thirdparty/imgui/imgui.h"
 
 Camera2D::Camera2D() {
     name = "Camera2D";

@@ -1,6 +1,6 @@
 #include "Node3D.h"
 
-#include "imgui.h"
+#include "thirdparty/imgui/imgui.h"
 
 Node3D::Node3D() {
     name = "Node3D";

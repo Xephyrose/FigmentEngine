@@ -44,26 +44,26 @@ add_executable(FigmentEngine
         MaterialUnlitTextured.cpp
         MeshInstance3D.cpp
         MeshInstance3D.h
-        imgui.cpp
-        imgui.h
-        imgui_impl_sdl3.cpp
-        imgui_impl_sdl3.h
-        imgui_impl_sdlgpu3.cpp
-        imgui_impl_sdlgpu3.h
-        imgui_impl_sdlgpu3_shaders.h
-        imconfig.h
-        imgui_demo.cpp
-        imgui_draw.cpp
-        imgui_internal.h
-        imgui_tables.cpp
-        imgui_widgets.cpp
-        imstb_rectpack.h
-        imstb_textedit.h
-        imstb_truetype.h
+        thirdparty/imgui/imgui.cpp
+        thirdparty/imgui/imgui.h
+        thirdparty/imgui/imgui_impl_sdl3.cpp
+        thirdparty/imgui/imgui_impl_sdl3.h
+        thirdparty/imgui/imgui_impl_sdlgpu3.cpp
+        thirdparty/imgui/imgui_impl_sdlgpu3.h
+        thirdparty/imgui/imgui_impl_sdlgpu3_shaders.h
+        thirdparty/imgui/imconfig.h
+        thirdparty/imgui/imgui_demo.cpp
+        thirdparty/imgui/imgui_draw.cpp
+        thirdparty/imgui/imgui_internal.h
+        thirdparty/imgui/imgui_tables.cpp
+        thirdparty/imgui/imgui_widgets.cpp
+        thirdparty/imgui/imstb_rectpack.h
+        thirdparty/imgui/imstb_textedit.h
+        thirdparty/imgui/imstb_truetype.h
         Input.cpp
         Input.h
-        imgui_stdlib.cpp
-        imgui_stdlib.h
+        thirdparty/imgui/imgui_stdlib.cpp
+        thirdparty/imgui/imgui_stdlib.h
         Node2D.cpp
         Node2D.h
         Transform2D.cpp
@@ -72,6 +72,8 @@ add_executable(FigmentEngine
         Camera2D.h
         Sprite2D.cpp
         Sprite2D.h
+        FreeCam2D.cpp
+        FreeCam2D.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

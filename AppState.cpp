@@ -654,7 +654,7 @@ void AppState::CreateDefaultPipelines() {
 
     CreatePipeline("Line", "UnlitTextured", "UnlitTextured", "Line", "Default", true, true);
     CreatePipeline("UnlitTextured", "UnlitTextured", "UnlitTextured", "Fill", "Default", true, true);
-    CreatePipeline("UnlitTexturedAlpha", "UnlitTextured", "UnlitTextured", "FillNoBack", "Alpha", true, false);
+    CreatePipeline("UnlitTexturedAlpha", "UnlitTextured", "UnlitTextured", "Fill", "Alpha", true, false);
     CreatePipeline("UnlitUVs", "UnlitTextured", "UnlitUVs", "Fill", "Default", true, true);
     CreatePipeline("2D", "UnlitTextured", "UnlitTextured", "FillNoBack", "Alpha", false, false);
 }
