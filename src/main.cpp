@@ -378,6 +378,8 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
 
     if (appState->depthTexture) {SDL_ReleaseGPUTexture(appState->device, appState->depthTexture);}
 
+    b2DestroyWorld(appState->worldId);
+
     SDL_ReleaseWindowFromGPUDevice(appState->device, appState->window);
     // hehehe kill rog astral 5090 with hammers
     SDL_DestroyGPUDevice(appState->device);
