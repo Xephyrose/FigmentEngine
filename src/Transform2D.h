@@ -16,6 +16,7 @@ struct Transform2D {
     [[nodiscard]] glm::mat4 getMatrix() const;
 
     void move(glm::vec2 amt);
+    void logTransform() const;
 };
 
 

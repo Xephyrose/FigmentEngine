@@ -7,6 +7,7 @@
 
 #include "Node.h"
 #include "Transform3D.h"
+#include "box2d/box2d.h"
 
 struct Mesh;
 struct Camera2D;
@@ -24,6 +25,7 @@ struct AppState {
     bool isMouseRelative = false;
 
     Node root = Node("root");
+    b2WorldId worldId;
 
     bool debug = true;
     Node* editorSelected = nullptr;
@@ -53,6 +55,8 @@ struct AppState {
     Uint64 currentTime = 0;
     Uint64 lastTime = 0;
     Uint64 delta = 0;
+    double fixedTimeStepAccumulator = 0;
+    double fixedTimeStep = 1.0 / 60.0;
 
     std::string material_override;
 

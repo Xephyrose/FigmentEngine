@@ -8,7 +8,7 @@ struct Node2D : public Node{
     Node2D();
     void ImGuiDraw() override;
     Transform2D localTransform;
-    [[nodiscard]] Transform2D GetGlobalTransform() const;
+    [[nodiscard]] virtual Transform2D GetGlobalTransform() const;
 };
 
 

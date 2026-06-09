@@ -1,6 +1,7 @@
 #include "Transform2D.h"
 
 #include "../thirdparty/imgui/imgui.h"
+#include "SDL3/SDL_log.h"
 
 void Transform2D::ImGuiDraw() {
     float _position[2] = { position.x, position.y };
@@ -29,4 +30,8 @@ glm::mat4 Transform2D::getMatrix() const {
 
 void Transform2D::move(const glm::vec2 amt) {
     position += amt;
+}
+
+void Transform2D::logTransform() const {
+    SDL_Log("Transform2D: x: %f, y: %f, deg: %f", position.x, position.y, rotation);
 }

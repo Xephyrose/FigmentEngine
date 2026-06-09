@@ -1,9 +1,10 @@
+#include <vector>
+#include <SDL3/SDL.h>
+#include "box2d/box2d.h"
 #include "thirdparty/imgui/imgui.h"
 #include "thirdparty/imgui/imgui_impl_sdl3.h"
 #include "thirdparty/imgui/imgui_impl_sdlgpu3.h"
 #include "thirdparty/imgui/imgui_stdlib.h"
-#include <vector>
-#include <SDL3/SDL.h>
 
 // ReSharper disable once CppUnusedIncludeDirective
 #include "Mesh.h"
@@ -12,19 +13,37 @@
 #include <ranges>
 #include <SDL3/SDL_main.h>
 
-#include "Camera3D.h"
 #include "AppState.h"
 #include "Camera2D.h"
+#include "Camera3D.h"
 #include "FreeCam2D.h"
 #include "Input.h"
 #include "Material.h"
+#include "PhysicsBody2D.h"
 #include "Sprite2D.h"
-#include "thirdparty/tiny_gltf.h"
 #include "Vertex.h"
+#include "thirdparty/tiny_gltf.h"
 
 #ifdef __linux__
 #include <dlfcn.h>
 #endif
+
+void FixedDelta(AppState* appState) {
+    appState->lastTime = appState->currentTime;
+    appState->currentTime = SDL_GetTicks();
+    appState->delta = appState->currentTime - appState->lastTime;
+
+    double frameTimeSeconds = appState->delta / 1000.0;
+    constexpr double MAX_FRAME_TIME = 0.25;
+    if (frameTimeSeconds > MAX_FRAME_TIME) frameTimeSeconds = MAX_FRAME_TIME;
+
+    appState->fixedTimeStepAccumulator += frameTimeSeconds;
+
+    while (appState->fixedTimeStepAccumulator >= appState->fixedTimeStep) {
+        b2World_Step(appState->worldId, appState->fixedTimeStep, 4);
+        appState->fixedTimeStepAccumulator -= appState->fixedTimeStep;
+    }
+}
 
 void HandleInput(AppState* appState) {
     appState->root.Input(*appState);
@@ -40,14 +59,17 @@ void HandleUpdate(AppState* appState) {
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
     #ifdef __linux__
-        const void *rd = dlopen("librenderdoc.so", RTLD_NOW | RTLD_NOLOAD);
-        if (rd != nullptr) {
+        if (dlopen("librenderdoc.so", RTLD_NOW | RTLD_NOLOAD) != nullptr) {
             SDL_Log("librenderdoc.so loaded. Forcing X11.");
             SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "x11");
         }
     #endif
     auto* appState = new AppState();
     *appstate = appState;
+
+    b2WorldDef worldDef = b2DefaultWorldDef();
+    worldDef.gravity = (b2Vec2){0.0f, 9.8f};
+    appState->worldId = b2CreateWorld(&worldDef);
 
     // auto* freeCam = new FreeCam3D();
     // appState->current_camera_3d = freeCam;
@@ -92,7 +114,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
 
-    SDL_SetGPUSwapchainParameters(appState->device, appState->window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_VSYNC);
+    SDL_SetGPUSwapchainParameters(appState->device, appState->window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_IMMEDIATE);
 
     const SDL_GPUTextureCreateInfo depthInfo = {
         .type = SDL_GPU_TEXTURETYPE_2D,
@@ -122,6 +144,18 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     // auto* meshInstance = new MeshInstance3D();
     // meshInstance->mesh = "zulu.glb";
     // appState->root.addChild(std::unique_ptr<Node>(meshInstance));
+
+    auto* physicsBody = new PhysicsBody2D(*appState, b2_dynamicBody, 100, 100, appState->windowWidth / 2, 0);
+    appState->root.addChild(std::unique_ptr<Node>(physicsBody));
+
+    auto* sprite = new Sprite2D();
+    physicsBody->addChild(std::unique_ptr<Node>(sprite));
+
+    auto* physicsBody2 = new PhysicsBody2D(*appState, b2_staticBody, 800, 100, appState->windowWidth / 2, 800);
+    appState->root.addChild(std::unique_ptr<Node>(physicsBody2));
+
+    auto* sprite2 = new Sprite2D();
+    physicsBody2->addChild(std::unique_ptr<Node>(sprite2));
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -240,10 +274,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     }
     ImDrawData* draw_data = ImGui::GetDrawData();
 
-    appState->lastTime = appState->currentTime;
-    appState->currentTime = SDL_GetTicks();
-    appState->delta = appState->currentTime - appState->lastTime;
-
+    FixedDelta(appState);
     HandleInput(appState);
     HandleUpdate(appState);
 
