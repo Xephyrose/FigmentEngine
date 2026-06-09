@@ -1,8 +1,8 @@
 #include "Sprite2D.h"
 
 #include "Camera2D.h"
-#include "thirdparty/imgui/imgui.h"
-#include "thirdparty/imgui/imgui_stdlib.h"
+#include "../thirdparty/imgui/imgui.h"
+#include "../thirdparty/imgui/imgui_stdlib.h"
 #include "Material.h"
 #include "Mesh.h"
 

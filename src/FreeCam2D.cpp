@@ -1,6 +1,6 @@
 #include "FreeCam2D.h"
 #include "AppState.h"
-#include "thirdparty/imgui/imgui.h"
+#include "../thirdparty/imgui/imgui.h"
 
 FreeCam2D::FreeCam2D() {
     name = "FreeCam2D";

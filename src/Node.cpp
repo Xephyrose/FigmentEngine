@@ -1,8 +1,8 @@
 #include "Node.h"
 
 #include <utility>
-#include "thirdparty/imgui/imgui.h"
-#include "thirdparty/imgui/imgui_stdlib.h"
+#include "../thirdparty/imgui/imgui.h"
+#include "../thirdparty/imgui/imgui_stdlib.h"
 
 Node::Node(std::string name) : name(std::move(name)) {}
 

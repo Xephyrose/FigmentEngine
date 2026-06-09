@@ -24,26 +24,26 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(SDL3_image)
 
 add_executable(FigmentEngine
-        main.cpp
-        Node.cpp
-        Mesh.cpp
-        Vertex.cpp
-        Transform3D.cpp
-        Transform3D.h
-        Node3D.cpp
-        Node3D.h
-        Camera3D.cpp
-        Camera3D.h
-        FreeCam3D.cpp
-        FreeCam3D.h
-        AppState.h
-        MaterialUnlitTextured.cpp
-        MaterialUnlitTextured.h
-        Material.h
-        AppState.cpp
-        MaterialUnlitTextured.cpp
-        MeshInstance3D.cpp
-        MeshInstance3D.h
+        src/main.cpp
+        src/Node.cpp
+        src/Mesh.cpp
+        src/Vertex.cpp
+        src/Transform3D.cpp
+        src/Transform3D.h
+        src/Node3D.cpp
+        src/Node3D.h
+        src/Camera3D.cpp
+        src/Camera3D.h
+        src/FreeCam3D.cpp
+        src/FreeCam3D.h
+        src/AppState.h
+        src/MaterialUnlitTextured.cpp
+        src/MaterialUnlitTextured.h
+        src/Material.h
+        src/AppState.cpp
+        src/MaterialUnlitTextured.cpp
+        src/MeshInstance3D.cpp
+        src/MeshInstance3D.h
         thirdparty/imgui/imgui.cpp
         thirdparty/imgui/imgui.h
         thirdparty/imgui/imgui_impl_sdl3.cpp
@@ -60,20 +60,20 @@ add_executable(FigmentEngine
         thirdparty/imgui/imstb_rectpack.h
         thirdparty/imgui/imstb_textedit.h
         thirdparty/imgui/imstb_truetype.h
-        Input.cpp
-        Input.h
+        src/Input.cpp
+        src/Input.h
         thirdparty/imgui/imgui_stdlib.cpp
         thirdparty/imgui/imgui_stdlib.h
-        Node2D.cpp
-        Node2D.h
-        Transform2D.cpp
-        Transform2D.h
-        Camera2D.cpp
-        Camera2D.h
-        Sprite2D.cpp
-        Sprite2D.h
-        FreeCam2D.cpp
-        FreeCam2D.h
+        src/Node2D.cpp
+        src/Node2D.h
+        src/Transform2D.cpp
+        src/Transform2D.h
+        src/Camera2D.cpp
+        src/Camera2D.h
+        src/Sprite2D.cpp
+        src/Sprite2D.h
+        src/FreeCam2D.cpp
+        src/FreeCam2D.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

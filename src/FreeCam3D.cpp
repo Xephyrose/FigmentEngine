@@ -3,7 +3,7 @@
 #include <SDL3/SDL_scancode.h>
 
 #include "AppState.h"
-#include "thirdparty/imgui/imgui.h"
+#include "../thirdparty/imgui/imgui.h"
 #include "Input.h"
 
 FreeCam3D::FreeCam3D() {

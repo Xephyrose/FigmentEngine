@@ -2,7 +2,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
-#include "thirdparty/imgui/imgui.h"
+#include "../thirdparty/imgui/imgui.h"
 
 void Transform3D::ImGuiDraw() {
     float _position[3] = { position.x, position.y, position.z };
