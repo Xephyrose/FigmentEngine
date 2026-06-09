@@ -33,6 +33,7 @@ void FreeCam3D::Input(AppState& appState) {
     }
 
     localTransform.move(moveDirection * speed * static_cast<float>(appState.delta));
+    Camera3D::Input(appState);
 }
 
 void FreeCam3D::Event(AppState &appState, SDL_Event &event) {

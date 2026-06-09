@@ -85,6 +85,8 @@ add_executable(FigmentEngine
         src/FreeCam2D.h
         src/PhysicsBody2D.cpp
         src/PhysicsBody2D.h
+        src/Player2D.cpp
+        src/Player2D.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

@@ -476,7 +476,7 @@ void AppState::CreateDefaultMaterials() {
     new MaterialUnlitTextured(this, "uvs", "UnlitUVs");
     auto* missing_2d = new MaterialUnlitTextured(this, "missing_2d", "2D");
     missing_2d->setTextureAlbedo(this, "missing.png");
-    missing_2d->setSamplerAlbedo(this, "anisotropic_repeat");
+    missing_2d->setSamplerAlbedo(this, "nearest_repeat");
     auto* missing = new MaterialUnlitTextured(this, "missing", "UnlitTextured");
     missing->setTextureAlbedo(this, "missing.png");
     missing->setSamplerAlbedo(this, "anisotropic_repeat");
@@ -551,7 +551,6 @@ void AppState::CreateDefaultMaterials() {
 
 void AppState::CreateDefaultSamplers() {
     SDL_Log("Creating default samplers...");
-    // Linear sampler (for most 3D textures, smooth scaling)
     constexpr SDL_GPUSamplerCreateInfo linearSamplerInfo = {
         .min_filter = SDL_GPU_FILTER_LINEAR,
         .mag_filter = SDL_GPU_FILTER_LINEAR,
@@ -569,7 +568,6 @@ void AppState::CreateDefaultSamplers() {
         SDL_Log("Couldn't create linear sampler: %s", SDL_GetError());
     }
 
-    // Linear sampler with clamp to edge (for UI, decals, etc.)
     constexpr SDL_GPUSamplerCreateInfo linearClampInfo = {
         .min_filter = SDL_GPU_FILTER_LINEAR,
         .mag_filter = SDL_GPU_FILTER_LINEAR,
@@ -587,8 +585,7 @@ void AppState::CreateDefaultSamplers() {
         SDL_Log("Couldn't create linear clamp sampler: %s", SDL_GetError());
     }
 
-    // Point sampler (for pixel art, sharp pixelated look)
-    constexpr SDL_GPUSamplerCreateInfo pointSamplerInfo = {
+    constexpr SDL_GPUSamplerCreateInfo nearestSamplerInfo = {
         .min_filter = SDL_GPU_FILTER_NEAREST,
         .mag_filter = SDL_GPU_FILTER_NEAREST,
         .mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_NEAREST,
@@ -599,14 +596,13 @@ void AppState::CreateDefaultSamplers() {
         .min_lod = 0.0f,
         .max_lod = FLT_MAX,
     };
-    if (SDL_GPUSampler* pointSampler = SDL_CreateGPUSampler(device, &pointSamplerInfo)) {
-        samplers["point_clamp"] = pointSampler;
+    if (SDL_GPUSampler* nearestSampler = SDL_CreateGPUSampler(device, &nearestSamplerInfo)) {
+        samplers["nmearest_clamp"] = nearestSampler;
     } else {
-        SDL_Log("Couldn't create point sampler: %s", SDL_GetError());
+        SDL_Log("Couldn't create nearest sampler: %s", SDL_GetError());
     }
 
-    // Point sampler with repeat (for tiled pixel art)
-    constexpr SDL_GPUSamplerCreateInfo pointRepeatInfo = {
+    constexpr SDL_GPUSamplerCreateInfo nearestRepeatInfo = {
         .min_filter = SDL_GPU_FILTER_NEAREST,
         .mag_filter = SDL_GPU_FILTER_NEAREST,
         .mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_NEAREST,
@@ -617,13 +613,12 @@ void AppState::CreateDefaultSamplers() {
         .min_lod = 0.0f,
         .max_lod = FLT_MAX,
     };
-    if (SDL_GPUSampler* pointRepeatSampler = SDL_CreateGPUSampler(device, &pointRepeatInfo)) {
-        samplers["point_repeat"] = pointRepeatSampler;
+    if (SDL_GPUSampler* nearestRepeatSampler = SDL_CreateGPUSampler(device, &nearestRepeatInfo)) {
+        samplers["nearest_repeat"] = nearestRepeatSampler;
     } else {
-        SDL_Log("Couldn't create point repeat sampler: %s", SDL_GetError());
+        SDL_Log("Couldn't create nearest repeat sampler: %s", SDL_GetError());
     }
 
-    // Anisotropic sampler (for textures viewed at extreme angles, like ground)
     constexpr SDL_GPUSamplerCreateInfo anisotropicInfo = {
         .min_filter = SDL_GPU_FILTER_LINEAR,
         .mag_filter = SDL_GPU_FILTER_LINEAR,

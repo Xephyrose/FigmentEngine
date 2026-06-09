@@ -20,6 +20,7 @@
 #include "Input.h"
 #include "Material.h"
 #include "PhysicsBody2D.h"
+#include "Player2D.h"
 #include "Sprite2D.h"
 #include "Vertex.h"
 #include "thirdparty/tiny_gltf.h"
@@ -145,17 +146,15 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     // meshInstance->mesh = "zulu.glb";
     // appState->root.addChild(std::unique_ptr<Node>(meshInstance));
 
-    auto* physicsBody = new PhysicsBody2D(*appState, b2_dynamicBody, 100, 100, appState->windowWidth / 2, 0);
+    auto* physicsBody = new PhysicsBody2D(*appState, b2_staticBody, 800, 100, appState->windowWidth / 2.0f, 800);
     appState->root.addChild(std::unique_ptr<Node>(physicsBody));
 
     auto* sprite = new Sprite2D();
+    sprite->size.x = appState->windowWidth;
     physicsBody->addChild(std::unique_ptr<Node>(sprite));
 
-    auto* physicsBody2 = new PhysicsBody2D(*appState, b2_staticBody, 800, 100, appState->windowWidth / 2, 800);
-    appState->root.addChild(std::unique_ptr<Node>(physicsBody2));
-
-    auto* sprite2 = new Sprite2D();
-    physicsBody2->addChild(std::unique_ptr<Node>(sprite2));
+    auto* player = new Player2D(*appState, 100, 100, appState->windowWidth / 2.0f, 0);
+    appState->root.addChild(std::unique_ptr<Node>(player));
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
