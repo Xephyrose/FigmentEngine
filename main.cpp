@@ -13,14 +13,13 @@
 #include <SDL3/SDL_main.h>
 
 #include "Camera3D.h"
-#include "FreeCam3D.h"
 #include "AppState.h"
 #include "Camera2D.h"
 #include "FreeCam2D.h"
 #include "Input.h"
 #include "Material.h"
 #include "Sprite2D.h"
-#include "tiny_gltf.h"
+#include "thirdparty/tiny_gltf.h"
 #include "Vertex.h"
 
 #ifdef __linux__

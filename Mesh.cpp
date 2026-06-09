@@ -3,7 +3,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
 #include "Mesh.h"
-#include <tiny_gltf.h>
+#include <thirdparty/tiny_gltf.h>
 #include <cstring>
 #include <vector>
 #include <string>

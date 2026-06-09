@@ -1,6 +1,6 @@
 #include "AppState.h"
 
-#include <tiny_gltf.h>
+#include <thirdparty/tiny_gltf.h>
 #include <filesystem>
 #include <SDL3_image/SDL_image.h>
 
