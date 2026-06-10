@@ -30,7 +30,7 @@ void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* comma
     push.colorAlbedo = this->colorAlbedo;
     push.useTexture = (this->textureAlbedo == "none" ? 0 : 1);
 
-    SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
+    // SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
 }
 
 void MaterialUnlitTextured::setColorAlbedo(const glm::vec4 color) {

@@ -347,9 +347,10 @@ bool AppState::LoadShader(const std::string& path) {
 
     Uint32 storageBufferCount = 0;
     // SDL_Log("%s", path.c_str());
-    if (path == "LitColor.frag") {
+    if (path == "LitTextured.frag") {
         storageBufferCount = 1;
     }
+    SDL_Log("Creating shader %s, buffer count is %u", path.c_str(), storageBufferCount);
     const auto shaderInfo = SDL_GPUShaderCreateInfo{
         .code_size = fileSize,
         .code = static_cast<Uint8*>(code),
@@ -505,7 +506,7 @@ void AppState::CreateLightBuffers() {
     SDL_Log("Creating light buffers...");
     SDL_GPUBufferCreateInfo bufferInfo = {};
     bufferInfo.usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ;
-    bufferInfo.size = 128 * sizeof(PointLight3DGPU);
+    bufferInfo.size = MAX_LIGHTS * sizeof(PointLight3DGPU);
 
     lightBuffer = SDL_CreateGPUBuffer(device, &bufferInfo);
     if (!lightBuffer) {
@@ -703,7 +704,7 @@ void AppState::CreateDefaultPipelines() {
     CreatePipeline("UnlitTexturedAlpha", "UnlitTextured", "UnlitTextured", "Fill", "Alpha", true, false);
     CreatePipeline("UnlitUVs", "UnlitTextured", "UnlitUVs", "Fill", "Default", true, true);
     CreatePipeline("2D", "UnlitTextured", "UnlitTextured", "FillNoBack", "Alpha", false, false);
-    CreatePipeline("Lit", "UnlitTextured", "LitColor", "FillNoBack", "Default", true, true);
+    CreatePipeline("Lit", "UnlitTextured", "LitTextured", "FillNoBack", "Default", true, true);
 }
 
 void AppState::CreateDefaultRasterizerStates() {

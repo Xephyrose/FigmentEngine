@@ -76,7 +76,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     auto* pointLight = new PointLight3D(appState);
     pointLight->localTransform.position = glm::vec3(-52.479f, 1.0f, -19.153f);
     pointLight->color = glm::vec3(1.0f, 0.0f, 0.5f);
-    pointLight->intensity = 500.0f;
+    pointLight->intensity = 1.0f;
     appState->root.addChild(std::unique_ptr<Node>(pointLight));
     //
     // auto* camera2d = new Camera2D();
@@ -317,10 +317,12 @@ SDL_AppResult RenderFrame(AppState* appState) {
         // repopulate gpuLights
         for (const PointLight3D* light : appState->pointLights) {
             PointLight3DGPU gpu;
-            gpu.position = glm::vec4(light->GetGlobalTransform().position, 1.0f);
+            gpu.position = glm::vec4(light->GetGlobalTransform().position, 0.0f);
             gpu.color = glm::vec4(light->color, light->intensity);
             appState->gpuLights.push_back(gpu);
         }
+
+        SDL_Log("appState->pointLights size is %i", appState->pointLights.size());
 
         // transfer the light data into the light buffer
         if (void* mapped = SDL_MapGPUTransferBuffer(appState->device, appState->lightTransferBuffer, false)) {
@@ -359,8 +361,8 @@ SDL_AppResult RenderFrame(AppState* appState) {
         );
 
         // Pass the light count to the PushConstants cbuffer to read out how many lights we have
-        const uint32_t lightCount = 0; // appState->gpuLights.size()
-        SDL_PushGPUFragmentUniformData(commandBuffer, 0, &lightCount, sizeof(lightCount));
+        // const uint32_t lightCount = 1; // appState->gpuLights.size()
+        // SDL_PushGPUFragmentUniformData(commandBuffer, 0, &lightCount, sizeof(lightCount));
 
         appState->root.Draw(*appState, commandBuffer);
 
