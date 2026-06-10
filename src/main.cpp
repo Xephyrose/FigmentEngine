@@ -124,6 +124,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->CreateDefaultRasterizerStates();
     appState->CreateDefaultPipelines();
     appState->CreateDepthTexture();
+    appState->CreateLightBuffers();
 
     appState->quadMesh = new Mesh();
     appState->quadMesh->CreateQuad(1, 1, -1);
@@ -215,9 +216,7 @@ void DrawNodeTree(AppState* appState, Node* node) {
     ImGui::PopID();
 }
 
-SDL_AppResult SDL_AppIterate(void* appstate)
-{
-    auto* appState = static_cast<AppState*>(appstate);
+SDL_AppResult RenderFrame(AppState* appState) {
 
     if (appState->debug) {
         ImGui_ImplSDLGPU3_NewFrame();
@@ -268,10 +267,6 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     }
     ImDrawData* draw_data = ImGui::GetDrawData();
 
-    FixedDelta(appState);
-    HandleInput(appState);
-    HandleUpdate(appState);
-
     // Here's where we store the commands that will be eventually sent to the GPU
     SDL_GPUCommandBuffer* commandBuffer = SDL_AcquireGPUCommandBuffer(appState->device);
     if (commandBuffer == nullptr)
@@ -310,12 +305,63 @@ SDL_AppResult SDL_AppIterate(void* appstate)
             .cycle = true
         };
 
+        appState->gpuLights.clear();
+        appState->gpuLights.reserve(appState->pointLights.size());
+
+        for (const PointLight3D* light : appState->pointLights) {
+            PointLight3DGPU gpu;
+            gpu.position = glm::vec4(light->GetGlobalTransform().position, 1.0f);
+            gpu.color = glm::vec4(light->color, light->intensity);
+            appState->gpuLights.push_back(gpu);
+        }
+
+        if (void* mapped = SDL_MapGPUTransferBuffer(appState->device, appState->lightTransferBuffer, false)) {
+            memcpy(mapped, appState->gpuLights.data(), appState->gpuLights.size() * sizeof(PointLight3DGPU));
+            SDL_UnmapGPUTransferBuffer(appState->device, appState->lightTransferBuffer);
+        }
+
+        SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(commandBuffer);
+
+        SDL_GPUTransferBufferLocation src = {};
+        src.transfer_buffer = appState->lightTransferBuffer;
+        src.offset = 0;
+
+        SDL_GPUBufferRegion dst = {};
+        dst.buffer = appState->lightBuffer;
+        dst.offset = 0;
+        dst.size = appState->gpuLights.size() * sizeof(PointLight3DGPU);
+
+        SDL_UploadToGPUBuffer(copyPass, &src, &dst, false);
+
+        SDL_EndGPUCopyPass(copyPass);
+
         // Now we actually define the render pass, by passing &colorTargetInfo, which modified our swapchainTexture to become cleared
         appState->renderPass = SDL_BeginGPURenderPass(commandBuffer, &colorTargetInfo, 1, &depthTarget);
         if (!appState->renderPass) {
             SDL_Log("Couldn't begin render pass: %s", SDL_GetError());
             return SDL_APP_FAILURE;
         }
+
+
+
+
+
+
+
+
+        SDL_BindGPUFragmentStorageBuffers(
+            appState->renderPass,
+            1,
+            &appState->lightBuffer,
+            1
+        );
+
+        const uint32_t lightCount = appState->gpuLights.size();
+        SDL_PushGPUFragmentUniformData(commandBuffer, 1, &lightCount, sizeof(lightCount));
+
+
+
+
 
         appState->root.Draw(*appState, commandBuffer);
 
@@ -331,6 +377,16 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     Input::Update();
 
     return SDL_APP_CONTINUE;
+}
+
+SDL_AppResult SDL_AppIterate(void* appstate)
+{
+    auto* appState = static_cast<AppState*>(appstate);
+
+    FixedDelta(appState);
+    HandleInput(appState);
+    HandleUpdate(appState);
+    return RenderFrame(appState);
 }
 
 void SDL_AppQuit(void* appstate, SDL_AppResult result)

@@ -12,10 +12,10 @@ void PointLight3D::Register(AppState &appState) {
 }
 
 void PointLight3D::Unregister(AppState &appState) {
-    if (const auto it = std::ranges::find(appState.pointLights, this); it != appState.pointLights.end()) {
+    if (auto it = std::ranges::find(appState.pointLights, this); it != appState.pointLights.end()) {
         appState.pointLights.erase(it);
     }
     else {
-        SDL_Log("Attempted to unregister an unregistered PointLight3D");
+        SDL_Log("Attempted to unregister an unregistered PointLight3DGPU");
     }
 }

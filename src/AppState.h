@@ -6,10 +6,11 @@
 #include <SDL3/SDL_video.h>
 
 #include "Node.h"
+#include "PointLight3D.h"
+#include "PointLight3DGPU.h"
 #include "Transform3D.h"
 #include "box2d/box2d.h"
 
-struct PointLight3D;
 struct Mesh;
 struct Camera2D;
 struct Node;
@@ -43,7 +44,11 @@ struct AppState {
     float sensitivity = 0.05f;
     float currentAspectRatio = static_cast<float>(windowWidth) / static_cast<float>(windowHeight);
 
+    const int MAX_LIGHTS = 128;
+    std::vector<PointLight3DGPU> gpuLights;
     std::vector<PointLight3D*> pointLights;
+    SDL_GPUBuffer* lightBuffer;
+    SDL_GPUTransferBuffer* lightTransferBuffer;
 
     std::unordered_map<std::string, Mesh> meshes;
     std::unordered_map<std::string, Material*> materials;
@@ -82,6 +87,7 @@ struct AppState {
 
     void CreateDefaultMeshes();
     void CreateDepthTexture();
+    void CreateLightBuffers();
     void CreateDefaultMaterials();
     void CreateDefaultSamplers();
     void CreateDefaultTextures();

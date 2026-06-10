@@ -6,6 +6,7 @@
 
 #include "MaterialUnlitTextured.h"
 #include "Mesh.h"
+#include "PointLight3DGPU.h"
 #include "Vertex.h"
 #include "SDL3/SDL_log.h"
 
@@ -472,13 +473,13 @@ void AppState::CreateDefaultMeshes() {
 }
 
 void AppState::CreateDepthTexture() {
-    SDL_Log("Creating depth texture...");
     if (depthTexture != nullptr) {
         SDL_Log("Freeing depth texture...");
         SDL_WaitForGPUIdle(device);
         SDL_ReleaseGPUTexture(device, depthTexture);
         depthTexture = nullptr;
     }
+    SDL_Log("Creating depth texture...");
     const SDL_GPUTextureCreateInfo depthInfo = {
         .type = SDL_GPU_TEXTURETYPE_2D,
         .format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT_S8_UINT,
@@ -492,6 +493,27 @@ void AppState::CreateDepthTexture() {
     depthTexture = SDL_CreateGPUTexture(device, &depthInfo);
     if (!depthTexture) {
         SDL_Log("CreateDepthTexture: %s", SDL_GetError());
+    }
+}
+
+void AppState::CreateLightBuffers() {
+    SDL_Log("Creating light buffers...");
+    SDL_GPUBufferCreateInfo bufferInfo = {};
+    bufferInfo.usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ;
+    bufferInfo.size = 128 * sizeof(PointLight3DGPU);
+
+    lightBuffer = SDL_CreateGPUBuffer(device, &bufferInfo);
+    if (!lightBuffer) {
+        SDL_Log("Failed to create light buffer: %s", SDL_GetError());
+    }
+
+    SDL_GPUTransferBufferCreateInfo transferInfo = {};
+    transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
+    transferInfo.size = MAX_LIGHTS * sizeof(PointLight3DGPU);
+
+    lightTransferBuffer = SDL_CreateGPUTransferBuffer(device, &transferInfo);
+    if (!lightTransferBuffer) {
+        SDL_Log("Failed to create light transfer buffer: %s", SDL_GetError());
     }
 }
 
