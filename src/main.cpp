@@ -72,6 +72,12 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     auto* freeCam = new FreeCam3D();
     appState->current_camera_3d = freeCam;
     appState->root.addChild(std::unique_ptr<Node>(freeCam));
+
+    auto* pointLight = new PointLight3D(appState);
+    pointLight->localTransform.position = glm::vec3(-52.479f, 1.0f, -19.153f);
+    pointLight->color = glm::vec3(1.0f, 0.0f, 0.5f);
+    pointLight->intensity = 500.0f;
+    appState->root.addChild(std::unique_ptr<Node>(pointLight));
     //
     // auto* camera2d = new Camera2D();
     // appState->current_camera_2d = camera2d;
@@ -217,7 +223,6 @@ void DrawNodeTree(AppState* appState, Node* node) {
 }
 
 SDL_AppResult RenderFrame(AppState* appState) {
-
     if (appState->debug) {
         ImGui_ImplSDLGPU3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
@@ -305,9 +310,11 @@ SDL_AppResult RenderFrame(AppState* appState) {
             .cycle = true
         };
 
+        // gpuLights is a vector of structs that store point light data. Here we clear this list, so we can upload the latest light data to the GPU.
         appState->gpuLights.clear();
         appState->gpuLights.reserve(appState->pointLights.size());
 
+        // repopulate gpuLights
         for (const PointLight3D* light : appState->pointLights) {
             PointLight3DGPU gpu;
             gpu.position = glm::vec4(light->GetGlobalTransform().position, 1.0f);
@@ -315,6 +322,7 @@ SDL_AppResult RenderFrame(AppState* appState) {
             appState->gpuLights.push_back(gpu);
         }
 
+        // transfer the light data into the light buffer
         if (void* mapped = SDL_MapGPUTransferBuffer(appState->device, appState->lightTransferBuffer, false)) {
             memcpy(mapped, appState->gpuLights.data(), appState->gpuLights.size() * sizeof(PointLight3DGPU));
             SDL_UnmapGPUTransferBuffer(appState->device, appState->lightTransferBuffer);
@@ -342,26 +350,17 @@ SDL_AppResult RenderFrame(AppState* appState) {
             return SDL_APP_FAILURE;
         }
 
-
-
-
-
-
-
-
+        // Pass light data into our shader
         SDL_BindGPUFragmentStorageBuffers(
             appState->renderPass,
-            1,
+            0,
             &appState->lightBuffer,
             1
         );
 
-        const uint32_t lightCount = appState->gpuLights.size();
-        SDL_PushGPUFragmentUniformData(commandBuffer, 1, &lightCount, sizeof(lightCount));
-
-
-
-
+        // Pass the light count to the PushConstants cbuffer to read out how many lights we have
+        const uint32_t lightCount = 0; // appState->gpuLights.size()
+        SDL_PushGPUFragmentUniformData(commandBuffer, 0, &lightCount, sizeof(lightCount));
 
         appState->root.Draw(*appState, commandBuffer);
 

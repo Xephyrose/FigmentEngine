@@ -3,7 +3,7 @@
 #include "Node.h"
 #include "Transform3D.h"
 
-struct Node3D : public Node {
+struct Node3D : Node {
     Node3D();
     void ImGuiDraw() override;
     Transform3D localTransform;

@@ -345,6 +345,11 @@ bool AppState::LoadShader(const std::string& path) {
         return false;
     }
 
+    Uint32 storageBufferCount = 0;
+    // SDL_Log("%s", path.c_str());
+    if (path == "LitColor.frag") {
+        storageBufferCount = 1;
+    }
     const auto shaderInfo = SDL_GPUShaderCreateInfo{
         .code_size = fileSize,
         .code = static_cast<Uint8*>(code),
@@ -356,7 +361,7 @@ bool AppState::LoadShader(const std::string& path) {
             stage == SDL_GPU_SHADERSTAGE_FRAGMENT ? 1u : 0u,
 
         .num_storage_textures = 0u,
-        .num_storage_buffers = 0u,
+        .num_storage_buffers = storageBufferCount,
         .num_uniform_buffers = 1u,
     };
 
@@ -523,7 +528,7 @@ void AppState::CreateDefaultMaterials() {
     auto* missing_2d = new MaterialUnlitTextured(this, "missing_2d", "2D");
     missing_2d->setTextureAlbedo(this, "missing.png");
     missing_2d->setSamplerAlbedo(this, "nearest_repeat");
-    auto* missing = new MaterialUnlitTextured(this, "missing", "UnlitTextured");
+    auto* missing = new MaterialUnlitTextured(this, "missing", "Lit");
     missing->setTextureAlbedo(this, "missing.png");
     missing->setSamplerAlbedo(this, "anisotropic_repeat");
     auto* line = new MaterialUnlitTextured(this, "line", "Line");
@@ -698,6 +703,7 @@ void AppState::CreateDefaultPipelines() {
     CreatePipeline("UnlitTexturedAlpha", "UnlitTextured", "UnlitTextured", "Fill", "Alpha", true, false);
     CreatePipeline("UnlitUVs", "UnlitTextured", "UnlitUVs", "Fill", "Default", true, true);
     CreatePipeline("2D", "UnlitTextured", "UnlitTextured", "FillNoBack", "Alpha", false, false);
+    CreatePipeline("Lit", "UnlitTextured", "LitColor", "FillNoBack", "Default", true, true);
 }
 
 void AppState::CreateDefaultRasterizerStates() {
