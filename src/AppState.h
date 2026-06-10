@@ -9,6 +9,7 @@
 #include "Transform3D.h"
 #include "box2d/box2d.h"
 
+struct PointLight3D;
 struct Mesh;
 struct Camera2D;
 struct Node;
@@ -27,20 +28,22 @@ struct AppState {
     Node root = Node("root");
     b2WorldId worldId;
 
+    Mesh* quadMesh = nullptr;
+    Camera2D* current_camera_2d;
+    Camera3D* current_camera_3d;
+    Transform3D modelTransform;
+
     bool debug = true;
     Node* editorSelected = nullptr;
     std::string mesh;
     std::string sprite;
-    Mesh* quadMesh = nullptr;
-
-    Camera2D* current_camera_2d;
-    Camera3D* current_camera_3d;
-    Transform3D modelTransform;
 
     int windowWidth = 1600;
     int windowHeight = 900;
     float sensitivity = 0.05f;
     float currentAspectRatio = static_cast<float>(windowWidth) / static_cast<float>(windowHeight);
+
+    std::vector<PointLight3D*> pointLights;
 
     std::unordered_map<std::string, Mesh> meshes;
     std::unordered_map<std::string, Material*> materials;
@@ -78,6 +81,7 @@ struct AppState {
     SDL_GPUMultisampleState GetMultisampleState(const std::string &key) const;
 
     void CreateDefaultMeshes();
+    void CreateDepthTexture();
     void CreateDefaultMaterials();
     void CreateDefaultSamplers();
     void CreateDefaultTextures();

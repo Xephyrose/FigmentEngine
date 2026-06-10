@@ -471,6 +471,30 @@ void AppState::CreateDefaultMeshes() {
     LoadMesh("crate_medium.glb");
 }
 
+void AppState::CreateDepthTexture() {
+    SDL_Log("Creating depth texture...");
+    if (depthTexture != nullptr) {
+        SDL_Log("Freeing depth texture...");
+        SDL_WaitForGPUIdle(device);
+        SDL_ReleaseGPUTexture(device, depthTexture);
+        depthTexture = nullptr;
+    }
+    const SDL_GPUTextureCreateInfo depthInfo = {
+        .type = SDL_GPU_TEXTURETYPE_2D,
+        .format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT_S8_UINT,
+        .usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET,
+        .width = static_cast<Uint32>(windowWidth),
+        .height = static_cast<Uint32>(windowHeight),
+        .layer_count_or_depth = 1,
+        .num_levels = 1,
+        .sample_count = SDL_GPU_SAMPLECOUNT_1
+    };
+    depthTexture = SDL_CreateGPUTexture(device, &depthInfo);
+    if (!depthTexture) {
+        SDL_Log("CreateDepthTexture: %s", SDL_GetError());
+    }
+}
+
 void AppState::CreateDefaultMaterials() {
     SDL_Log("Creating default materials...");
     new MaterialUnlitTextured(this, "uvs", "UnlitUVs");

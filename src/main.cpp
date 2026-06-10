@@ -97,6 +97,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
     SDL_SetWindowAspectRatio(appState->window, 1.777f, 1.777f);
+    SDL_MaximizeWindow(appState->window);
 
     constexpr SDL_GPUShaderFormat formatFlags = SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL;
     appState->device = SDL_CreateGPUDevice(formatFlags, true, nullptr);
@@ -114,18 +115,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     SDL_SetGPUSwapchainParameters(appState->device, appState->window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_IMMEDIATE);
 
-    const SDL_GPUTextureCreateInfo depthInfo = {
-        .type = SDL_GPU_TEXTURETYPE_2D,
-        .format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT_S8_UINT,
-        .usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET,
-        .width = static_cast<Uint32>(appState->windowWidth),
-        .height = static_cast<Uint32>(appState->windowHeight),
-        .layer_count_or_depth = 1,
-        .num_levels = 1,
-        .sample_count = SDL_GPU_SAMPLECOUNT_1
-    };
-    appState->depthTexture = SDL_CreateGPUTexture(appState->device, &depthInfo);
-
     appState->CreateDefaultBlendStates();
     appState->CreateDefaultMultisampleStates();
     appState->CreateDefaultMeshes();
@@ -134,6 +123,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->CreateDefaultSamplers();
     appState->CreateDefaultRasterizerStates();
     appState->CreateDefaultPipelines();
+    appState->CreateDepthTexture();
 
     appState->quadMesh = new Mesh();
     appState->quadMesh->CreateQuad(1, 1, -1);
@@ -191,6 +181,11 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 
     switch (event->type)
     {
+        case SDL_EVENT_WINDOW_RESIZED:
+            appState->windowWidth = event->window.data1;
+            appState->windowHeight = event->window.data2;
+            appState->CreateDepthTexture();
+            return SDL_APP_CONTINUE;
         case SDL_EVENT_MOUSE_MOTION:
             return SDL_APP_CONTINUE;
         case SDL_EVENT_QUIT:
