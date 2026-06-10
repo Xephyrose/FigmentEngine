@@ -87,6 +87,8 @@ add_executable(FigmentEngine
         src/PhysicsBody2D.h
         src/Player2D.cpp
         src/Player2D.h
+        src/PointLight3D.cpp
+        src/PointLight3D.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

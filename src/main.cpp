@@ -14,13 +14,10 @@
 #include <SDL3/SDL_main.h>
 
 #include "AppState.h"
-#include "Camera2D.h"
 #include "Camera3D.h"
-#include "FreeCam2D.h"
+#include "FreeCam3D.h"
 #include "Input.h"
 #include "Material.h"
-#include "PhysicsBody2D.h"
-#include "Player2D.h"
 #include "Sprite2D.h"
 #include "Vertex.h"
 #include "thirdparty/tiny_gltf.h"
@@ -72,17 +69,17 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     worldDef.gravity = (b2Vec2){0.0f, 9.8f};
     appState->worldId = b2CreateWorld(&worldDef);
 
-    // auto* freeCam = new FreeCam3D();
-    // appState->current_camera_3d = freeCam;
-    // appState->root.addChild(std::unique_ptr<Node>(freeCam));
+    auto* freeCam = new FreeCam3D();
+    appState->current_camera_3d = freeCam;
+    appState->root.addChild(std::unique_ptr<Node>(freeCam));
     //
     // auto* camera2d = new Camera2D();
     // appState->current_camera_2d = camera2d;
     // appState->root.addChild(std::unique_ptr<Node>(camera2d));
 
-    auto* freeCam = new FreeCam2D();
-    appState->current_camera_2d = freeCam;
-    appState->root.addChild(std::unique_ptr<Node>(freeCam));
+    // auto* freeCam = new FreeCam2D();
+    // appState->current_camera_2d = freeCam;
+    // appState->root.addChild(std::unique_ptr<Node>(freeCam));
 
     float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     if (main_scale < 1.0f) {
@@ -142,25 +139,27 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->quadMesh->CreateQuad(1, 1, -1);
     appState->quadMesh->UploadToGPU(*appState);
 
-    // auto* meshInstance = new MeshInstance3D();
-    // meshInstance->mesh = "zulu.glb";
-    // appState->root.addChild(std::unique_ptr<Node>(meshInstance));
+    auto* meshInstance = new MeshInstance3D();
+    meshInstance->mesh = "zulu.glb";
+    appState->root.addChild(std::unique_ptr<Node>(meshInstance));
 
-    auto* physicsBody = new PhysicsBody2D(*appState, b2_staticBody, 800, 100, appState->windowWidth / 2.0f, 800);
-    appState->root.addChild(std::unique_ptr<Node>(physicsBody));
+    // auto* physicsBody = new PhysicsBody2D(*appState, b2_staticBody, 800, 100, appState->windowWidth / 2.0f, 800);
+    // appState->root.addChild(std::unique_ptr<Node>(physicsBody));
+    //
+    // auto* sprite = new Sprite2D();
+    // sprite->size.x = appState->windowWidth;
+    // physicsBody->addChild(std::unique_ptr<Node>(sprite));
+    //
+    // auto* player = new Player2D(*appState, 100, 100, appState->windowWidth / 2.0f, 0);
+    // appState->root.addChild(std::unique_ptr<Node>(player));
 
-    auto* sprite = new Sprite2D();
-    sprite->size.x = appState->windowWidth;
-    physicsBody->addChild(std::unique_ptr<Node>(sprite));
-
-    auto* player = new Player2D(*appState, 100, 100, appState->windowWidth / 2.0f, 0);
-    appState->root.addChild(std::unique_ptr<Node>(player));
-
-    IMGUI_CHECKVERSION();
+    // IMGUI_CHECKVERSION(); // Crashes on ImGui docking branch (?)
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiDockNodeFlags_PassthruCentralNode;
 
     ImGui::StyleColorsDark();
 
@@ -229,6 +228,8 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         ImGui_ImplSDLGPU3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
+
+        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
         ImGui::Begin("Node Heirarchy");
         DrawNodeTree(appState, &appState->root);
