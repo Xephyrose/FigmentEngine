@@ -31,14 +31,14 @@ void FixedDelta(AppState* appState) {
     appState->currentTime = SDL_GetTicks();
     appState->delta = appState->currentTime - appState->lastTime;
 
-    double frameTimeSeconds = appState->delta / 1000.0;
+    double frameTimeSeconds = static_cast<double>(appState->delta) / 1000.0;
     constexpr double MAX_FRAME_TIME = 0.25;
     if (frameTimeSeconds > MAX_FRAME_TIME) frameTimeSeconds = MAX_FRAME_TIME;
 
     appState->fixedTimeStepAccumulator += frameTimeSeconds;
 
     while (appState->fixedTimeStepAccumulator >= appState->fixedTimeStep) {
-        b2World_Step(appState->worldId, appState->fixedTimeStep, 4);
+        b2World_Step(appState->worldId, static_cast<float>(appState->fixedTimeStep), 4);
         appState->fixedTimeStepAccumulator -= appState->fixedTimeStep;
     }
 }
@@ -267,7 +267,6 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         static int selected_idx = 0;
         ImGui::Combo("Override", &selected_idx, items, IM_ARRAYSIZE(items));
         appState->material_override = items[selected_idx];
-
         ImGui::End();
 
         ImGui::Render();
