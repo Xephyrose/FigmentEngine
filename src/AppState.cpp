@@ -529,9 +529,12 @@ void AppState::CreateDefaultMaterials() {
     auto* missing_2d = new MaterialUnlitTextured(this, "missing_2d", "2D");
     missing_2d->setTextureAlbedo(this, "missing.png");
     missing_2d->setSamplerAlbedo(this, "nearest_repeat");
-    auto* missing = new MaterialUnlitTextured(this, "missing", "Lit");
+    auto* missing = new MaterialUnlitTextured(this, "missing", "UnlitTextured");
     missing->setTextureAlbedo(this, "missing.png");
     missing->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* lit = new MaterialUnlitTextured(this, "lit", "Lit");
+    lit->setTextureAlbedo(this, "missing.png");
+    lit->setSamplerAlbedo(this, "anisotropic_repeat");
     auto* line = new MaterialUnlitTextured(this, "line", "Line");
     line->setTextureAlbedo(this, "missing.png");
     line->setSamplerAlbedo(this, "anisotropic_repeat");

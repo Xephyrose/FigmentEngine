@@ -10,7 +10,7 @@ struct Transform3D {
     glm::vec3 position{0.0f, 0.0f, 0.0f};
     glm::vec3 scale{1.0f, 1.0f, 1.0f};
     glm::vec3 rotation{0.0f};
-    glm::quat quaternion{1.0f, 0.0f, 0.0f, 0.0f};
+    glm::quat quaternion{1.0f, 0.0f, 0.0f, 0.0f}; // internal. generally you should just use rotation and have it modify this for you
 
     bool rotationDirty{true};
     bool usingQuaternion{false};

@@ -140,6 +140,12 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     meshInstance->mesh = "zulu.glb";
     appState->root.addChild(std::unique_ptr<Node>(meshInstance));
 
+    auto* meshInstance2 = new MeshInstance3D();
+    meshInstance2->mesh = "lynx.glb";
+    meshInstance2->localTransform.position = glm::vec3(0.35f, -0.5f, -0.25f);
+    meshInstance2->localTransform.rotation = glm::vec3(0.0f, 180, 0.0f);
+    freeCam->addChild(std::unique_ptr<Node>(meshInstance2));
+
     // auto* physicsBody = new PhysicsBody2D(*appState, b2_staticBody, 800, 100, appState->windowWidth / 2.0f, 800);
     // appState->root.addChild(std::unique_ptr<Node>(physicsBody));
     //
@@ -262,7 +268,7 @@ SDL_AppResult RenderFrame(AppState* appState) {
         }
 
         ImGui::Begin("Rendering Overrides");
-        static const char* items[] = { "", "missing", "line", "uvs" };
+        static const char* items[] = { "", "lit", "missing", "line", "uvs" };
         static int selected_idx = 0;
         ImGui::Combo("Override", &selected_idx, items, IM_ARRAYSIZE(items));
         appState->material_override = items[selected_idx];
