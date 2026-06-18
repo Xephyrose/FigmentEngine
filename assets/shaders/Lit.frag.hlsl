@@ -12,12 +12,9 @@ struct PSInput {
 };
 
 float4 main(PSInput input) : SV_TARGET {
-//    return pointLights[0];
-//    return float4(1.0f, 1.0f, 1.0f, 1.0f);
     float4 position = pointLights[1];
     float4 color = pointLights[0];
 
-    // Lighting calculation using position and color
     float3 lightDir = -position.xyz - input.worldPos;
     float dist = length(lightDir);
     float att = 1.0 / (1.0 + dist * dist);
