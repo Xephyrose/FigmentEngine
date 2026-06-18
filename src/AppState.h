@@ -72,12 +72,12 @@ struct AppState {
                         std::string &blendState, const bool &depth_test, const bool &depth_write);
 
     bool LoadMesh(const std::string& path);
-    bool LoadShader(const std::string& path);
+    bool LoadShader(const std::string& path, Uint32 storageBufferCount = 0, Uint32 uniformBufferCount = 0, Uint32 samplerBufferCount = 0);
     bool LoadTexture(const std::string& path);
 
     Mesh* GetMesh(const std::string& path);
     Material* GetMaterial(const std::string& key) const;
-    SDL_GPUShader* GetShader(const std::string& path);
+    SDL_GPUShader* GetShader(const std::string& path) const;
     SDL_GPUSampler* GetSampler(const std::string& key) const;
     SDL_GPUTexture* GetTexture(const std::string& path);
     SDL_GPUGraphicsPipeline* GetPipeline(const std::string& key) const;
@@ -85,6 +85,7 @@ struct AppState {
     SDL_GPURasterizerState GetRasterizerState(const std::string &key) const;
     SDL_GPUMultisampleState GetMultisampleState(const std::string &key) const;
 
+    void CreateDefaultShaders();
     void CreateDefaultMeshes();
     void CreateDepthTexture();
     void CreateLightBuffers();

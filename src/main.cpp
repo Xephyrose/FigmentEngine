@@ -74,11 +74,10 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->root.addChild(std::unique_ptr<Node>(freeCam));
 
     auto* pointLight = new PointLight3D(appState);
-    pointLight->localTransform.position = glm::vec3(-52.479f, 1.0f, -19.153f);
-    pointLight->color = glm::vec3(1.0f, 0.0f, 0.5f);
-    pointLight->intensity = 1.0f;
+    pointLight->localTransform.position = glm::vec3(-51, 1, -17);
+    pointLight->intensity = 100.0f;
     appState->root.addChild(std::unique_ptr<Node>(pointLight));
-    //
+
     // auto* camera2d = new Camera2D();
     // appState->current_camera_2d = camera2d;
     // appState->root.addChild(std::unique_ptr<Node>(camera2d));
@@ -121,6 +120,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     SDL_SetGPUSwapchainParameters(appState->device, appState->window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_IMMEDIATE);
 
+    appState->CreateDefaultShaders();
     appState->CreateDefaultBlendStates();
     appState->CreateDefaultMultisampleStates();
     appState->CreateDefaultMeshes();
@@ -178,6 +178,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     init_info.SwapchainComposition = SDL_GPU_SWAPCHAINCOMPOSITION_SDR;  // Only used in multi-viewports mode.
     init_info.PresentMode = SDL_GPU_PRESENTMODE_VSYNC;
     ImGui_ImplSDLGPU3_Init(&init_info);
+    SDL_Log("testtesttesttesttest");
 
     return SDL_APP_CONTINUE;
 }
@@ -328,8 +329,6 @@ SDL_AppResult RenderFrame(AppState* appState) {
             appState->gpuLights.push_back(gpu);
         }
 
-        SDL_Log("appState->pointLights size is %i", appState->pointLights.size());
-
         // transfer the light data into the light buffer
         if (void* mapped = SDL_MapGPUTransferBuffer(appState->device, appState->lightTransferBuffer, false)) {
             memcpy(mapped, appState->gpuLights.data(), appState->gpuLights.size() * sizeof(PointLight3DGPU));
@@ -357,18 +356,6 @@ SDL_AppResult RenderFrame(AppState* appState) {
             SDL_Log("Couldn't begin render pass: %s", SDL_GetError());
             return SDL_APP_FAILURE;
         }
-
-        // Pass light data into our shader
-        SDL_BindGPUFragmentStorageBuffers(
-            appState->renderPass,
-            0,
-            &appState->lightBuffer,
-            1
-        );
-
-        // Pass the light count to the PushConstants cbuffer to read out how many lights we have
-        // const uint32_t lightCount = 1; // appState->gpuLights.size()
-        // SDL_PushGPUFragmentUniformData(commandBuffer, 0, &lightCount, sizeof(lightCount));
 
         appState->root.Draw(*appState, commandBuffer);
 

@@ -49,7 +49,7 @@ void Mesh::UploadToGPU(const AppState& appState) {
         SDL_ReleaseGPUTransferBuffer(appState.device, vertexTransfer);
         return;
     }
-    memcpy(vertexData, vertices.data(), vertices.size() * sizeof(Vertex)); // crashes on this line
+    memcpy(vertexData, vertices.data(), vertices.size() * sizeof(Vertex));
     SDL_UnmapGPUTransferBuffer(appState.device, vertexTransfer);
 
     SDL_GPUTransferBufferLocation transferLocation = {

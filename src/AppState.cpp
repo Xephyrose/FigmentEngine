@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <SDL3_image/SDL_image.h>
 
+#include "MaterialLit.h"
 #include "MaterialUnlitTextured.h"
 #include "Mesh.h"
 #include "PointLight3DGPU.h"
@@ -288,7 +289,7 @@ bool AppState::LoadMesh(const std::string& path) {
     return true;
 }
 
-bool AppState::LoadShader(const std::string& path) {
+bool AppState::LoadShader(const std::string& path, const Uint32 storageBufferCount, const Uint32 uniformBufferCount, const Uint32 samplerBufferCount) {
     const std::string fullPath = (std::filesystem::path(SDL_GetBasePath()) / "assets" / "shaders" / path).string();
     SDL_GPUShaderStage stage;
     if (fullPath.contains(".vert"))
@@ -344,26 +345,17 @@ bool AppState::LoadShader(const std::string& path) {
         SDL_Log("Couldn't load shader file from disk!\n\t%s", SDL_GetError());
         return false;
     }
-
-    Uint32 storageBufferCount = 0;
-    // SDL_Log("%s", path.c_str());
-    if (path == "LitTextured.frag") {
-        storageBufferCount = 1;
-    }
-    SDL_Log("Creating shader %s, buffer count is %u", path.c_str(), storageBufferCount);
+    SDL_Log("Creating shader %s, storageBufferCount is %u, uniformBufferCount is %u, samplerBufferCount is %u", path.c_str(), storageBufferCount, uniformBufferCount, samplerBufferCount);
     const auto shaderInfo = SDL_GPUShaderCreateInfo{
         .code_size = fileSize,
         .code = static_cast<Uint8*>(code),
         .entrypoint = entrypoint,
         .format = format,
         .stage = stage,
-
-        .num_samplers =
-            stage == SDL_GPU_SHADERSTAGE_FRAGMENT ? 1u : 0u,
-
+        .num_samplers = samplerBufferCount,
         .num_storage_textures = 0u,
         .num_storage_buffers = storageBufferCount,
-        .num_uniform_buffers = 1u,
+        .num_uniform_buffers = uniformBufferCount,
     };
 
     SDL_GPUShader* shader = SDL_CreateGPUShader(device, &shaderInfo);
@@ -432,12 +424,10 @@ Material* AppState::GetMaterial(const std::string& key) const {
     return materials.at(key);
 }
 
-SDL_GPUShader* AppState::GetShader(const std::string& path) {
+SDL_GPUShader* AppState::GetShader(const std::string& path) const {
     if (!shaders.contains(path)) {
-        if (!LoadShader(path)) {
-            SDL_Log("Couldn't load shader %s: %s", path.c_str(), SDL_GetError());
-            return nullptr;
-        }
+        SDL_Log("Shader %s not loaded!", path.c_str());
+        return nullptr;
     }
     return shaders.at(path);
 }
@@ -467,6 +457,16 @@ SDL_GPURasterizerState AppState::GetRasterizerState(const std::string &key) cons
 SDL_GPUMultisampleState AppState::GetMultisampleState(const std::string& key) const
 {
     return multisampleStates.at(key);
+}
+
+void AppState::CreateDefaultShaders() {
+    // vert
+    LoadShader("UnlitTextured.vert", 0, 1);
+
+    // frag
+    LoadShader("UnlitTextured.frag", 0, 1, 1);
+    LoadShader("UnlitUVs.frag", 0);
+    LoadShader("Lit.frag", 1, 0);
 }
 
 SDL_GPUColorTargetBlendState AppState::GetBlendState(const std::string &key) const {
@@ -532,9 +532,7 @@ void AppState::CreateDefaultMaterials() {
     auto* missing = new MaterialUnlitTextured(this, "missing", "UnlitTextured");
     missing->setTextureAlbedo(this, "missing.png");
     missing->setSamplerAlbedo(this, "anisotropic_repeat");
-    auto* lit = new MaterialUnlitTextured(this, "lit", "Lit");
-    lit->setTextureAlbedo(this, "missing.png");
-    lit->setSamplerAlbedo(this, "anisotropic_repeat");
+    auto* lit = new MaterialLit(this, "lit", "Lit");
     auto* line = new MaterialUnlitTextured(this, "line", "Line");
     line->setTextureAlbedo(this, "missing.png");
     line->setSamplerAlbedo(this, "anisotropic_repeat");
@@ -707,7 +705,7 @@ void AppState::CreateDefaultPipelines() {
     CreatePipeline("UnlitTexturedAlpha", "UnlitTextured", "UnlitTextured", "Fill", "Alpha", true, false);
     CreatePipeline("UnlitUVs", "UnlitTextured", "UnlitUVs", "Fill", "Default", true, true);
     CreatePipeline("2D", "UnlitTextured", "UnlitTextured", "FillNoBack", "Alpha", false, false);
-    CreatePipeline("Lit", "UnlitTextured", "LitTextured", "FillNoBack", "Default", true, true);
+    CreatePipeline("Lit", "UnlitTextured", "Lit", "FillNoBack", "Default", true, true);
 }
 
 void AppState::CreateDefaultRasterizerStates() {
