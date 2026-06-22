@@ -8,8 +8,9 @@ Camera2D::Camera2D() {
 
 void Camera2D::ImGuiDraw() {
     Node2D::ImGuiDraw();
-    ImGui::Text("Camera2D");
-    ImGui::DragFloat("Zoom", &zoom);
+    if (ImGui::CollapsingHeader("Camera2D", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::DragFloat("Zoom", &zoom);
+    }
 }
 
 glm::mat4 Camera2D::GetViewMatrix() const {

@@ -8,8 +8,9 @@ Node3D::Node3D() {
 
 void Node3D::ImGuiDraw() {
     Node::ImGuiDraw();
-    ImGui::Text("Node3D");
-    localTransform.ImGuiDraw();
+    if (ImGui::CollapsingHeader("Node3D", ImGuiTreeNodeFlags_DefaultOpen)) {
+        localTransform.ImGuiDraw();
+    }
 }
 
 Transform3D Node3D::GetGlobalTransform() const {

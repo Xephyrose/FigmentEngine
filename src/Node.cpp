@@ -9,8 +9,9 @@ Node::Node(std::string name) : name(std::move(name)) {}
 Node::Node() : name("Node") {}
 
 void Node::ImGuiDraw() {
-    ImGui::Text("Node");
-    ImGui::InputText("Name", &name);
+    if (ImGui::CollapsingHeader("Node", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::InputText("Name", &name);
+    }
 }
 
 void Node::Update(AppState& appState) {

@@ -1,5 +1,6 @@
 #include "Camera3D.h"
 
+#include "ImGuiWidgets.h"
 #include "thirdparty/imgui/imgui.h"
 
 Camera3D::Camera3D() {
@@ -8,10 +9,11 @@ Camera3D::Camera3D() {
 
 void Camera3D::ImGuiDraw() {
     Node3D::ImGuiDraw();
-    ImGui::Text("Camera3D");
-    ImGui::DragFloat("FOV", &fov);
-    ImGui::DragFloat("Near", &nearPlane);
-    ImGui::DragFloat("Far", &farPlane);
+    if (ImGui::CollapsingHeader("Camera3D", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::ColoredDragFloat("FOV", fov, false);
+        ImGui::ColoredDragFloat("Near", nearPlane, false);
+        ImGui::ColoredDragFloat("Far", farPlane, false);
+    }
 }
 
 glm::mat4 Camera3D::GetViewMatrix() const {

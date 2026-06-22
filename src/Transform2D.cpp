@@ -4,15 +4,13 @@
 #include "SDL3/SDL_log.h"
 
 void Transform2D::ImGuiDraw() {
-    if (ImGui::CollapsingHeader("Transform2D", ImGuiTreeNodeFlags_DefaultOpen)) {
-        float _position[2] = { position.x, position.y };
-        ImGui::ColoredDragFloat2("##Position", _position, true);
-        position = glm::vec2(_position[0], _position[1]);
+    float _position[2] = { position.x, position.y };
+    ImGui::ColoredDragFloat2("##Position", _position, true);
+    position = glm::vec2(_position[0], _position[1]);
 
-        float _scale[2] = { scale.x, scale.y };
-        ImGui::ColoredDragFloat2("##Scale", _scale, true);
-        scale = glm::vec2(_scale[0], _scale[1]);
-    }
+    float _scale[2] = { scale.x, scale.y };
+    ImGui::ColoredDragFloat2("##Scale", _scale, true);
+    scale = glm::vec2(_scale[0], _scale[1]);
 }
 
 void Transform2D::rotate(const float& eulerDegrees) {

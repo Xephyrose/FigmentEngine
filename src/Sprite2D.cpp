@@ -1,6 +1,7 @@
 #include "Sprite2D.h"
 
 #include "Camera2D.h"
+#include "ImGuiWidgets.h"
 #include "../thirdparty/imgui/imgui.h"
 #include "../thirdparty/imgui/imgui_stdlib.h"
 #include "Material.h"
@@ -13,12 +14,13 @@ Sprite2D::Sprite2D() : size(glm::vec2(100.0f, 100.0f)) {
 
 void Sprite2D::ImGuiDraw() {
     Node2D::ImGuiDraw();
-    ImGui::Text("Sprite2D");
-    ImGui::InputText("Sprite", &sprite);
-    float _size[2] = {size.x, size.y};
-    ImGui::DragFloat2("Size", _size);
-    size.x = _size[0];
-    size.y = _size[1];
+    if (ImGui::CollapsingHeader("Sprite2D", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::InputText("Sprite", &sprite);
+        float _size[2] = {size.x, size.y};
+        ImGui::ColoredDragFloat2("Size", _size, true);
+        size.x = _size[0];
+        size.y = _size[1];
+    }
 }
 
 void Sprite2D::Draw(AppState& appState, SDL_GPUCommandBuffer* commandBuffer) {

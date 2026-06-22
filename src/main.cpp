@@ -181,7 +181,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     init_info.SwapchainComposition = SDL_GPU_SWAPCHAINCOMPOSITION_SDR;  // Only used in multi-viewports mode.
     init_info.PresentMode = SDL_GPU_PRESENTMODE_VSYNC;
     ImGui_ImplSDLGPU3_Init(&init_info);
-    SDL_Log("testtesttesttesttest");
 
     return SDL_APP_CONTINUE;
 }

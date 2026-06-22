@@ -5,20 +5,17 @@
 #include "ImGuiWidgets.h"
 
 void Transform3D::ImGuiDraw() {
-    if (ImGui::CollapsingHeader("Transform3D", ImGuiTreeNodeFlags_DefaultOpen))
-    {
-        float _position[3] = { position.x, position.y, position.z };
-        ImGui::ColoredDragFloat3("##Position", _position, true);
-        position = glm::vec3(_position[0], _position[1], _position[2]);
+    float _position[3] = { position.x, position.y, position.z };
+    ImGui::ColoredDragFloat3("##Position", _position, true);
+    position = glm::vec3(_position[0], _position[1], _position[2]);
 
-        float _rotation[3] = { rotation.x, rotation.y, rotation.z };
-        ImGui::ColoredDragFloat3("##Rotation", _rotation, true);
-        setRotation(glm::vec3(_rotation[0], _rotation[1], _rotation[2]));
+    float _rotation[3] = { rotation.x, rotation.y, rotation.z };
+    ImGui::ColoredDragFloat3("##Rotation", _rotation, true);
+    setRotation(glm::vec3(_rotation[0], _rotation[1], _rotation[2]));
 
-        float _scale[3] = { scale.x, scale.y, scale.z };
-        ImGui::ColoredDragFloat3("##Scale", _scale, true);
-        scale = glm::vec3(_scale[0], _scale[1], _scale[2]);
-    }
+    float _scale[3] = { scale.x, scale.y, scale.z };
+    ImGui::ColoredDragFloat3("##Scale", _scale, true);
+    scale = glm::vec3(_scale[0], _scale[1], _scale[2]);
 }
 
 void Transform3D::updateQuaternion() {
