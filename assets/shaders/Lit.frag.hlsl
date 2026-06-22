@@ -8,7 +8,8 @@
 StructuredBuffer<float4> pointLights : register(t0, space2);
 
 struct PSInput {
-    float3 worldPos : TEXCOORD0;
+    float2 uv : TEXCOORD0;
+    float3 worldPos : TEXCOORD1;
 };
 
 float4 main(PSInput input) : SV_TARGET {

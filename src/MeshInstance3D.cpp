@@ -24,7 +24,17 @@ void MeshInstance3D::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffe
     const glm::mat4 view = appState.current_camera_3d->GetViewMatrix();
     const glm::mat4 proj = appState.current_camera_3d->GetProjectionMatrix(appState.currentAspectRatio);
     const glm::mat4 mvp = proj * view * model;
-    SDL_PushGPUVertexUniformData(commandBuffer, 0, &mvp, sizeof(mvp));
+
+    struct TransformData {
+        glm::mat4 mvp;
+        glm::mat4 model;
+    };
+
+    TransformData data{};
+    data.mvp = mvp;
+    data.model = model;
+
+    SDL_PushGPUVertexUniformData(commandBuffer, 0, &data, sizeof(data));
 
     for (const auto& submesh : _mesh->submeshes) {
         Material* material = nullptr;

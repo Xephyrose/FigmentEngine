@@ -10,18 +10,11 @@ void MaterialLitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *command
 
     SDL_BindGPUGraphicsPipeline(appState->renderPass, gotPipeline);
 
-    SDL_BindGPUFragmentStorageBuffers(
-        appState->renderPass,
-        0,
-        &appState->lightBuffer,
-        1
-    );
-
     SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
     SDL_GPUSampler* getSampler = appState->GetSampler(samplerAlbedo);
 
     const SDL_GPUTextureSamplerBinding binding = {getAlbedo, getSampler};
-    SDL_BindGPUFragmentSamplers(appState->renderPass, 1, &binding, 1);
+    SDL_BindGPUFragmentSamplers(appState->renderPass, 0, &binding, 1);
 
     struct PushData {
         glm::vec4 colorAlbedo;
@@ -33,5 +26,10 @@ void MaterialLitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *command
 
     SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
 
-
+    SDL_BindGPUFragmentStorageBuffers(
+        appState->renderPass,
+        0,
+        &appState->lightBuffer,
+        1
+    );
 }
