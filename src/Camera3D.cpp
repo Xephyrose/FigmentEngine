@@ -9,9 +9,9 @@ Camera3D::Camera3D() {
 void Camera3D::ImGuiDraw() {
     Node3D::ImGuiDraw();
     ImGui::Text("Camera3D");
-    ImGui::InputFloat("FOV", &fov);
-    ImGui::InputFloat("Near", &nearPlane);
-    ImGui::InputFloat("Far", &farPlane);
+    ImGui::DragFloat("FOV", &fov);
+    ImGui::DragFloat("Near", &nearPlane);
+    ImGui::DragFloat("Far", &farPlane);
 }
 
 glm::mat4 Camera3D::GetViewMatrix() const {

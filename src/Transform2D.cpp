@@ -1,18 +1,16 @@
 #include "Transform2D.h"
 
-#include "../thirdparty/imgui/imgui.h"
+#include "ImGuiWidgets.h"
 #include "SDL3/SDL_log.h"
 
 void Transform2D::ImGuiDraw() {
-    float _position[2] = { position.x, position.y };
-    if (ImGui::InputFloat2("Position", _position)) {
+    if (ImGui::CollapsingHeader("Transform2D", ImGuiTreeNodeFlags_DefaultOpen)) {
+        float _position[2] = { position.x, position.y };
+        ImGui::ColoredDragFloat2("##Position", _position, true);
         position = glm::vec2(_position[0], _position[1]);
-    }
 
-    ImGui::InputFloat("Rotation", &rotation);
-
-    float _scale[2] = { scale.x, scale.y };
-    if (ImGui::InputFloat2("Scale", _scale)) {
+        float _scale[2] = { scale.x, scale.y };
+        ImGui::ColoredDragFloat2("##Scale", _scale, true);
         scale = glm::vec2(_scale[0], _scale[1]);
     }
 }

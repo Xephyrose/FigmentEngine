@@ -16,7 +16,7 @@ void Sprite2D::ImGuiDraw() {
     ImGui::Text("Sprite2D");
     ImGui::InputText("Sprite", &sprite);
     float _size[2] = {size.x, size.y};
-    ImGui::InputFloat2("Size", _size);
+    ImGui::DragFloat2("Size", _size);
     size.x = _size[0];
     size.y = _size[1];
 }

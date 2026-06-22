@@ -114,6 +114,10 @@ add_executable(FigmentEngine
         src/MaterialLit.h
         src/MaterialLitTextured.cpp
         src/MaterialLitTextured.h
+        src/EditorThemeManager.cpp
+        src/EditorThemeManager.h
+        src/ImGuiWidgets.cpp
+        src/ImGuiWidgets.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

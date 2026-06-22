@@ -13,7 +13,7 @@ FreeCam3D::FreeCam3D() {
 void FreeCam3D::ImGuiDraw() {
     Camera3D::ImGuiDraw();
     ImGui::Text("Node");
-    ImGui::InputFloat("Speed", &speed);
+    ImGui::DragFloat("Speed", &speed);
 }
 
 void FreeCam3D::Input(AppState& appState) {

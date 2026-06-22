@@ -2,21 +2,21 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
-#include "../thirdparty/imgui/imgui.h"
+#include "ImGuiWidgets.h"
 
 void Transform3D::ImGuiDraw() {
-    float _position[3] = { position.x, position.y, position.z };
-    if (ImGui::InputFloat3("Position", _position)) {
+    if (ImGui::CollapsingHeader("Transform3D", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        float _position[3] = { position.x, position.y, position.z };
+        ImGui::ColoredDragFloat3("##Position", _position, true);
         position = glm::vec3(_position[0], _position[1], _position[2]);
-    }
 
-    float _rotation[3] = { rotation.x, rotation.y, rotation.z };
-    if (ImGui::InputFloat3("Rotation", _rotation)) {
+        float _rotation[3] = { rotation.x, rotation.y, rotation.z };
+        ImGui::ColoredDragFloat3("##Rotation", _rotation, true);
         setRotation(glm::vec3(_rotation[0], _rotation[1], _rotation[2]));
-    }
 
-    float _scale[3] = { scale.x, scale.y, scale.z };
-    if (ImGui::InputFloat3("Scale", _scale)) {
+        float _scale[3] = { scale.x, scale.y, scale.z };
+        ImGui::ColoredDragFloat3("##Scale", _scale, true);
         scale = glm::vec3(_scale[0], _scale[1], _scale[2]);
     }
 }
@@ -62,15 +62,15 @@ void Transform3D::rotate(const glm::vec3& eulerDegrees) {
     updateQuaternion();
 }
 
-void Transform3D::rotateX(float degrees) { rotate(glm::vec3(degrees, 0, 0)); }
-void Transform3D::rotateY(float degrees) { rotate(glm::vec3(0, degrees, 0)); }
-void Transform3D::rotateZ(float degrees) { rotate(glm::vec3(0, 0, degrees)); }
+void Transform3D::rotateX(const float degrees) { rotate(glm::vec3(degrees, 0, 0)); }
+void Transform3D::rotateY(const float degrees) { rotate(glm::vec3(0, degrees, 0)); }
+void Transform3D::rotateZ(const float degrees) { rotate(glm::vec3(0, 0, degrees)); }
 
 void Transform3D::rotateObjectLocal(const glm::vec3& eulerDegrees) {
     if (rotationDirty) updateQuaternion();
-    glm::quat rotX = glm::angleAxis(glm::radians(eulerDegrees.x), glm::vec3(1, 0, 0));
-    glm::quat rotY = glm::angleAxis(glm::radians(eulerDegrees.y), glm::vec3(0, 1, 0));
-    glm::quat rotZ = glm::angleAxis(glm::radians(eulerDegrees.z), glm::vec3(0, 0, 1));
+    const glm::quat rotX = glm::angleAxis(glm::radians(eulerDegrees.x), glm::vec3(1, 0, 0));
+    const glm::quat rotY = glm::angleAxis(glm::radians(eulerDegrees.y), glm::vec3(0, 1, 0));
+    const glm::quat rotZ = glm::angleAxis(glm::radians(eulerDegrees.z), glm::vec3(0, 0, 1));
 
     quaternion = glm::normalize(quaternion * rotX * rotY * rotZ);
     rotationDirty = true;
@@ -117,6 +117,6 @@ void Transform3D::lookAt(const glm::vec3& target) {
     usingQuaternion = true;
 }
 
-void Transform3D::move(glm::vec3 amt) {
+void Transform3D::move(const glm::vec3 amt) {
     position += amt;
 }

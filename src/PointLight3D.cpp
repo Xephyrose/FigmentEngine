@@ -8,10 +8,10 @@ void PointLight3D::ImGuiDraw() {
     Node3D::ImGuiDraw();
     ImGui::Text("PointLight3D");
     float col[3] = { color.x, color.y, color.z };
-    if (ImGui::InputFloat3("RGB", col)) {
+    if (ImGui::DragFloat3("RGB", col)) {
         color = glm::vec3(col[0], col[1], col[2]);
     }
-    ImGui::InputFloat("Intensity", &intensity);
+    ImGui::DragFloat("Intensity", &intensity);
 }
 
 PointLight3D::PointLight3D(AppState* appState) {

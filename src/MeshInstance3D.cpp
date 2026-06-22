@@ -2,7 +2,6 @@
 #include "Mesh.h"
 #include "Camera3D.h"
 #include "Material.h"
-#include <SDL3/SDL_log.h>
 
 MeshInstance3D::MeshInstance3D() {
     name = "MeshInstance3D";
@@ -45,7 +44,7 @@ void MeshInstance3D::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffe
             material = appState.materials.at("missing");
         }
         else if (!appState.materials.contains(submesh.material)) {
-            SDL_Log("AppState's materials does not contain %s, setting to missing...", submesh.material.c_str());
+            // SDL_Log("AppState's materials does not contain %s, setting to missing...", submesh.material.c_str());
             material = appState.GetMaterial("missing");
         }
         else {

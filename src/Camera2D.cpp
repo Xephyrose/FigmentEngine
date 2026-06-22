@@ -9,7 +9,7 @@ Camera2D::Camera2D() {
 void Camera2D::ImGuiDraw() {
     Node2D::ImGuiDraw();
     ImGui::Text("Camera2D");
-    ImGui::InputFloat("Zoom", &zoom);
+    ImGui::DragFloat("Zoom", &zoom);
 }
 
 glm::mat4 Camera2D::GetViewMatrix() const {

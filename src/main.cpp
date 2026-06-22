@@ -23,6 +23,8 @@
 #include "thirdparty/tiny_gltf.h"
 #include <SDL3_shadercross/SDL_shadercross.h>
 
+#include "EditorThemeManager.h"
+
 #ifdef __linux__
 #include <dlfcn.h>
 #endif
@@ -165,7 +167,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigFlags |= ImGuiDockNodeFlags_PassthruCentralNode;
 
-    ImGui::StyleColorsDark();
+    EditorThemeManager::ApplyImGuiTheme();
 
     ImGuiStyle& style = ImGui::GetStyle();
     style.ScaleAllSizes(main_scale);
