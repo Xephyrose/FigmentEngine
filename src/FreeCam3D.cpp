@@ -41,9 +41,7 @@ void FreeCam3D::Event(AppState &appState, SDL_Event &event) {
         localTransform.rotate(glm::vec3(-event.motion.yrel * appState.sensitivity, -event.motion.xrel * appState.sensitivity, 0));
     }
 
-    if (!appState.debug) return;
-
-    if (event.button.button == SDL_BUTTON_RIGHT) {
+    if (event.button.button == SDL_BUTTON_RIGHT && appState.debug) {
         appState.isMouseRelative = event.type == SDL_EVENT_MOUSE_BUTTON_DOWN;
         SDL_SetWindowRelativeMouseMode(appState.window, appState.isMouseRelative);
     }

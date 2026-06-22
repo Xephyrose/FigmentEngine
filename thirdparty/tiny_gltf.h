@@ -5212,7 +5212,7 @@ static bool ParseNode(Node *node, std::string *err, const detail::json &o,
   node->camera = camera;
 
   int mesh = -1;
-  ParseIntegerProperty(&mesh, err, o, "mesh", false);
+  ParseIntegerProperty(&mesh, err, o, "editorMesh", false);
   node->mesh = mesh;
 
   node->children.clear();
@@ -7903,7 +7903,7 @@ static void SerializeGltfNode(const Node &node, detail::json &o) {
     SerializeNumberArrayProperty<double>("matrix", node.matrix, o);
   }
   if (node.mesh != -1) {
-    SerializeNumberProperty<int>("mesh", node.mesh, o);
+    SerializeNumberProperty<int>("editorMesh", node.mesh, o);
   }
 
   if (node.skin != -1) {

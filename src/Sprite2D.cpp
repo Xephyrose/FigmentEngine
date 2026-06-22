@@ -6,10 +6,9 @@
 #include "Material.h"
 #include "Mesh.h"
 
-Sprite2D::Sprite2D() {
+Sprite2D::Sprite2D() : size(glm::vec2(100.0f, 100.0f)) {
     name = "Sprite2D";
     sprite = "missing_2d";
-    size = glm::vec2(100.0f, 100.0f);
 }
 
 void Sprite2D::ImGuiDraw() {
@@ -23,6 +22,7 @@ void Sprite2D::ImGuiDraw() {
 }
 
 void Sprite2D::Draw(AppState& appState, SDL_GPUCommandBuffer* commandBuffer) {
+    if (!appState.current_camera_2d) return;
     const Mesh* quadMesh = appState.quadMesh;
 
     if (!quadMesh->isOnGPU) return;

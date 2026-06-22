@@ -15,9 +15,7 @@ void FreeCam2D::Event(AppState &appState, SDL_Event &event) {
         localTransform.move(glm::vec2(-event.motion.xrel, -event.motion.yrel));
     }
 
-    if (!appState.debug) return;
-
-    if (event.button.button == SDL_BUTTON_RIGHT) {
+    if (event.button.button == SDL_BUTTON_RIGHT && appState.debug) {
         appState.isMouseRelative = event.type == SDL_EVENT_MOUSE_BUTTON_DOWN;
         SDL_SetWindowRelativeMouseMode(appState.window, appState.isMouseRelative);
     }

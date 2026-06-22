@@ -12,7 +12,7 @@ void MeshInstance3D::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffe
     const Mesh* _mesh = appState.GetMesh(this->mesh);
     if (!_mesh || !_mesh->isOnGPU) return;
 
-    // Bind this mesh's vertex/index buffers (same buffers for all instances)
+    // Bind this editorMesh's vertex/index buffers (same buffers for all instances)
     const SDL_GPUBufferBinding vertexBinding = { .buffer = _mesh->vertexBuffer, .offset = 0 };
     SDL_BindGPUVertexBuffers(appState.renderPass, 0, &vertexBinding, 1);
     if (!_mesh->indices.empty()) {

@@ -3,7 +3,7 @@
 
 #include "Material.h"
 
-struct MaterialUnlitTextured : public Material {
+struct MaterialUnlitTextured : Material {
     MaterialUnlitTextured(AppState* appState, const std::string &name, const std::string &pipeline);
     std::string textureAlbedo = "dummy_white.png";
     std::string samplerAlbedo = "anisotropic_repeat";

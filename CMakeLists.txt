@@ -93,6 +93,8 @@ add_executable(FigmentEngine
         src/PointLight3D.cpp
         src/MaterialLit.cpp
         src/MaterialLit.h
+        src/MaterialLitTextured.cpp
+        src/MaterialLitTextured.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

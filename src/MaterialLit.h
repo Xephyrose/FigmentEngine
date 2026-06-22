@@ -3,7 +3,7 @@
 
 #include "Material.h"
 
-struct MaterialLit : public Material {
+struct MaterialLit : Material {
     MaterialLit(AppState* appState, const std::string &name, const std::string &pipeline);
     void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer) override;
 };

@@ -34,11 +34,6 @@ struct AppState {
     Camera3D* current_camera_3d;
     Transform3D modelTransform;
 
-    bool debug = true;
-    Node* editorSelected = nullptr;
-    std::string mesh;
-    std::string sprite;
-
     int windowWidth = 1600;
     int windowHeight = 900;
     float sensitivity = 0.05f;
@@ -96,6 +91,12 @@ struct AppState {
     void CreateDefaultBlendStates();
     void CreateDefaultRasterizerStates();
     void CreateDefaultMultisampleStates();
+
+    // EDITOR
+    bool debug = true;
+    Node* editorSelected = nullptr;
+    std::string editorMesh;
+    std::string editorSprite;
 };
 
 

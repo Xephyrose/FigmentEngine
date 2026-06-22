@@ -5,6 +5,7 @@
 #include <SDL3_image/SDL_image.h>
 
 #include "MaterialLit.h"
+#include "MaterialLitTextured.h"
 #include "MaterialUnlitTextured.h"
 #include "Mesh.h"
 #include "PointLight3DGPU.h"
@@ -150,13 +151,13 @@ bool AppState::LoadMesh(const std::string& path) {
 
     Mesh result;
 
-    // NEW: Build node-to-mesh mapping
+    // NEW: Build node-to-editorMesh mapping
     std::vector<std::pair<int, std::string>> meshToNodeName; // meshIndex -> (nodeIndex, nodeName)
 
     for (const auto & node : model.nodes) {
         if (node.mesh >= 0) {
             meshToNodeName.emplace_back(node.mesh, node.name);
-            // SDL_Log("Node[%zu]: name='%s' -> mesh=%d", nodeIdx, node.name.c_str(), node.mesh);
+            // SDL_Log("Node[%zu]: name='%s' -> editorMesh=%d", nodeIdx, node.name.c_str(), node.editorMesh);
         }
     }
 
@@ -164,7 +165,7 @@ bool AppState::LoadMesh(const std::string& path) {
     for (int meshIdx = 0; meshIdx < static_cast<int>(model.meshes.size()); meshIdx++) {
         const auto& gltfMesh = model.meshes[meshIdx];
 
-        // Find which node(s) use this mesh
+        // Find which node(s) use this editorMesh
         std::string objectName = "Unnamed";
         for (const auto& mapping : meshToNodeName) {
             if (mapping.first == meshIdx) {
@@ -173,7 +174,7 @@ bool AppState::LoadMesh(const std::string& path) {
             }
         }
 
-        // SDL_Log("Processing mesh %d: name='%s' (object: '%s')", meshIdx, gltfMesh.name.c_str(), objectName.c_str());
+        // SDL_Log("Processing editorMesh %d: name='%s' (object: '%s')", meshIdx, gltfMesh.name.c_str(), objectName.c_str());
 
         for (const auto& primitive : gltfMesh.primitives) {
             Submesh submesh;
@@ -465,8 +466,9 @@ void AppState::CreateDefaultShaders() {
 
     // frag
     LoadShader("UnlitTextured.frag", 0, 1, 1);
-    LoadShader("UnlitUVs.frag", 0);
-    LoadShader("Lit.frag", 1, 0);
+    LoadShader("UnlitUVs.frag");
+    LoadShader("Lit.frag", 1);
+    LoadShader("LitTextured.frag", 1, 1, 1);
 }
 
 SDL_GPUColorTargetBlendState AppState::GetBlendState(const std::string &key) const {
@@ -532,11 +534,11 @@ void AppState::CreateDefaultMaterials() {
     auto* missing = new MaterialUnlitTextured(this, "missing", "UnlitTextured");
     missing->setTextureAlbedo(this, "missing.png");
     missing->setSamplerAlbedo(this, "anisotropic_repeat");
-    auto* lit = new MaterialLit(this, "lit", "Lit");
+    new MaterialLit(this, "lit", "Lit");
     auto* line = new MaterialUnlitTextured(this, "line", "Line");
     line->setTextureAlbedo(this, "missing.png");
     line->setSamplerAlbedo(this, "anisotropic_repeat");
-    auto* concrete_bricks = new MaterialUnlitTextured(this, "concrete_bricks", "UnlitTextured");
+    auto* concrete_bricks = new MaterialLitTextured(this, "concrete_bricks", "LitTextured");
     concrete_bricks->setTextureAlbedo(this, "brick_concrete_albedo.png");
     concrete_bricks->setSamplerAlbedo(this, "anisotropic_repeat");
     auto* concrete_bricks_with_specks = new MaterialUnlitTextured(this, "concrete_bricks_with_specks", "UnlitTextured");
@@ -705,7 +707,8 @@ void AppState::CreateDefaultPipelines() {
     CreatePipeline("UnlitTexturedAlpha", "UnlitTextured", "UnlitTextured", "Fill", "Alpha", true, false);
     CreatePipeline("UnlitUVs", "UnlitTextured", "UnlitUVs", "Fill", "Default", true, true);
     CreatePipeline("2D", "UnlitTextured", "UnlitTextured", "FillNoBack", "Alpha", false, false);
-    CreatePipeline("Lit", "UnlitTextured", "Lit", "FillNoBack", "Default", true, true);
+    CreatePipeline("Lit", "UnlitTextured", "Lit", "Fill", "Default", true, true);
+    CreatePipeline("LitTextured", "UnlitTextured", "LitTextured", "Fill", "Default", true, true);
 }
 
 void AppState::CreateDefaultRasterizerStates() {

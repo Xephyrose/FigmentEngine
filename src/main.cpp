@@ -74,8 +74,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->root.addChild(std::unique_ptr<Node>(freeCam));
 
     auto* pointLight = new PointLight3D(appState);
-    pointLight->localTransform.position = glm::vec3(-51, 1, -17);
-    pointLight->intensity = 100.0f;
+    pointLight->intensity = 5.0f;
     appState->root.addChild(std::unique_ptr<Node>(pointLight));
 
     // auto* camera2d = new Camera2D();
@@ -149,9 +148,9 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     // auto* physicsBody = new PhysicsBody2D(*appState, b2_staticBody, 800, 100, appState->windowWidth / 2.0f, 800);
     // appState->root.addChild(std::unique_ptr<Node>(physicsBody));
     //
-    // auto* sprite = new Sprite2D();
-    // sprite->size.x = appState->windowWidth;
-    // physicsBody->addChild(std::unique_ptr<Node>(sprite));
+    // auto* editorSprite = new Sprite2D();
+    // editorSprite->size.x = appState->windowWidth;
+    // physicsBody->addChild(std::unique_ptr<Node>(editorSprite));
     //
     // auto* player = new Player2D(*appState, 100, 100, appState->windowWidth / 2.0f, 0);
     // appState->root.addChild(std::unique_ptr<Node>(player));
@@ -243,22 +242,22 @@ SDL_AppResult RenderFrame(AppState* appState) {
 
         ImGui::Begin("Debug");
         ImGui::Text("Mesh Spawner");
-        ImGui::InputText("Mesh", &appState->mesh);
+        ImGui::InputText("Mesh", &appState->editorMesh);
         ImGui::SameLine();
         if (ImGui::Button("Spawn Mesh")) {
             auto* meshInstance = new MeshInstance3D();
-            meshInstance->mesh = appState->mesh;
-            SDL_Log("Mesh spawned: %s", appState->mesh.c_str());
+            meshInstance->mesh = appState->editorMesh;
+            SDL_Log("Mesh spawned: %s", appState->editorMesh.c_str());
             meshInstance->localTransform.position = appState->current_camera_3d->GetGlobalTransform().position;
             meshInstance->localTransform.rotation = appState->current_camera_3d->GetGlobalTransform().rotation * glm::vec3(0.0f, 1.0f, 0.0f);
             appState->root.addChild(std::unique_ptr<Node>(meshInstance));
         }
         ImGui::Text("Sprite Spawner");
-        ImGui::InputText("Sprite", &appState->sprite);
+        ImGui::InputText("Sprite", &appState->editorSprite);
         ImGui::SameLine();
         if (ImGui::Button("Spawn Sprite")) {
             auto* sprite = new Sprite2D();
-            SDL_Log("Sprite spawned: %s", appState->sprite.c_str());
+            // SDL_Log("Sprite spawned: %s", appState->editorSprite.c_str());
             appState->root.addChild(std::unique_ptr<Node>(sprite));
         }
         ImGui::End();
@@ -269,7 +268,7 @@ SDL_AppResult RenderFrame(AppState* appState) {
         }
 
         ImGui::Begin("Rendering Overrides");
-        static const char* items[] = { "", "lit", "missing", "line", "uvs" };
+        static const char* items[] = { "", "lit", "lit_textured", "missing", "line", "uvs" };
         static int selected_idx = 0;
         ImGui::Combo("Override", &selected_idx, items, IM_ARRAYSIZE(items));
         appState->material_override = items[selected_idx];
