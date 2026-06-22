@@ -21,6 +21,7 @@
 #include "Sprite2D.h"
 #include "Vertex.h"
 #include "thirdparty/tiny_gltf.h"
+#include <SDL3_shadercross/SDL_shadercross.h>
 
 #ifdef __linux__
 #include <dlfcn.h>
@@ -103,6 +104,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     SDL_SetWindowAspectRatio(appState->window, 1.777f, 1.777f);
     SDL_MaximizeWindow(appState->window);
 
+    SDL_ShaderCross_Init();
+
     constexpr SDL_GPUShaderFormat formatFlags = SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL;
     appState->device = SDL_CreateGPUDevice(formatFlags, true, nullptr);
     if (appState->device == nullptr)
@@ -119,7 +122,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     SDL_SetGPUSwapchainParameters(appState->device, appState->window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_IMMEDIATE);
 
-    appState->CreateDefaultShaders();
     appState->CreateDefaultBlendStates();
     appState->CreateDefaultMultisampleStates();
     appState->CreateDefaultMeshes();

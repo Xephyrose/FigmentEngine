@@ -23,7 +23,26 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SDL3_image)
 
-# Box2D physics library
+FetchContent_Declare(
+        SPIRV-Cross
+        GIT_REPOSITORY https://github.com/KhronosGroup/SPIRV-Cross
+        GIT_TAG main
+        GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(SPIRV-Cross)
+
+set(SDLSHADERCROSS_DXC OFF CACHE BOOL "Disable HLSL compilation via DXC" FORCE)
+set(SDLSHADERCROSS_GLSLANG OFF CACHE BOOL "Disable GLSL compilation" FORCE)
+set(SDLSHADERCROSS_VENDORED OFF CACHE BOOL "Use system dependencies" FORCE)
+
+FetchContent_Declare(
+        SDL3_shadercross
+        GIT_REPOSITORY https://github.com/libsdl-org/SDL_shadercross.git
+        GIT_TAG main
+        GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(SDL3_shadercross)
+
 FetchContent_Declare(
         box2d
         GIT_REPOSITORY https://github.com/erincatto/box2d.git
@@ -102,6 +121,7 @@ target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(FigmentEngine PRIVATE
         SDL3::SDL3
         SDL3_image::SDL3_image
+        SDL3_shadercross::SDL3_shadercross
         box2d
         ${CMAKE_DL_LIBS}
         pthread

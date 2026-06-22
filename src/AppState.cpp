@@ -11,6 +11,7 @@
 #include "PointLight3DGPU.h"
 #include "Vertex.h"
 #include "SDL3/SDL_log.h"
+#include "SDL3_shadercross/SDL_shadercross.h"
 
 bool AppState::CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader, const std::string& rasterizerState, const std::string &blendState, const
                               bool &depth_test, const bool &depth_write) {
@@ -290,7 +291,7 @@ bool AppState::LoadMesh(const std::string& path) {
     return true;
 }
 
-bool AppState::LoadShader(const std::string& path, const Uint32 storageBufferCount, const Uint32 uniformBufferCount, const Uint32 samplerBufferCount) {
+bool AppState::LoadShader(const std::string& path) {
     const std::string fullPath = (std::filesystem::path(SDL_GetBasePath()) / "assets" / "shaders" / path).string();
     SDL_GPUShaderStage stage;
     if (fullPath.contains(".vert"))
@@ -346,17 +347,18 @@ bool AppState::LoadShader(const std::string& path, const Uint32 storageBufferCou
         SDL_Log("Couldn't load shader file from disk!\n\t%s", SDL_GetError());
         return false;
     }
-    SDL_Log("Creating shader %s, storageBufferCount is %u, uniformBufferCount is %u, samplerBufferCount is %u", path.c_str(), storageBufferCount, uniformBufferCount, samplerBufferCount);
+    SDL_ShaderCross_GraphicsShaderMetadata* shader_meta = SDL_ShaderCross_ReflectGraphicsSPIRV(static_cast<Uint8*>(code), fileSize, 0);
+    SDL_Log("Creating shader %s, num_samplers is %u, num_storage_textures is %u, num_storage_buffers is %u, num_uniform_buffers is %u", path.c_str(), shader_meta->resource_info.num_samplers, shader_meta->resource_info.num_storage_textures, shader_meta->resource_info.num_storage_buffers, shader_meta->resource_info.num_uniform_buffers);
     const auto shaderInfo = SDL_GPUShaderCreateInfo{
         .code_size = fileSize,
         .code = static_cast<Uint8*>(code),
         .entrypoint = entrypoint,
         .format = format,
         .stage = stage,
-        .num_samplers = samplerBufferCount,
-        .num_storage_textures = 0u,
-        .num_storage_buffers = storageBufferCount,
-        .num_uniform_buffers = uniformBufferCount,
+        .num_samplers = shader_meta->resource_info.num_samplers,
+        .num_storage_textures = shader_meta->resource_info.num_storage_textures,
+        .num_storage_buffers = shader_meta->resource_info.num_storage_buffers,
+        .num_uniform_buffers = shader_meta->resource_info.num_uniform_buffers,
     };
 
     SDL_GPUShader* shader = SDL_CreateGPUShader(device, &shaderInfo);
@@ -411,7 +413,7 @@ bool AppState::LoadTexture(const std::string& path) {
 Mesh* AppState::GetMesh(const std::string& path) {
     if (!meshes.contains(path)) {
         if (!LoadMesh(path)) {
-            SDL_Log("Couldn't load shader %s: %s", path.c_str(), SDL_GetError());
+            SDL_Log("Couldn't load mesh %s: %s", path.c_str(), SDL_GetError());
             return nullptr;
         }
     }
@@ -425,10 +427,12 @@ Material* AppState::GetMaterial(const std::string& key) const {
     return materials.at(key);
 }
 
-SDL_GPUShader* AppState::GetShader(const std::string& path) const {
+SDL_GPUShader* AppState::GetShader(const std::string& path) {
     if (!shaders.contains(path)) {
-        SDL_Log("Shader %s not loaded!", path.c_str());
-        return nullptr;
+        if (!LoadShader(path)) {
+            SDL_Log("Couldn't load shader %s: %s", path.c_str(), SDL_GetError());
+            return nullptr;
+        }
     }
     return shaders.at(path);
 }
@@ -458,17 +462,6 @@ SDL_GPURasterizerState AppState::GetRasterizerState(const std::string &key) cons
 SDL_GPUMultisampleState AppState::GetMultisampleState(const std::string& key) const
 {
     return multisampleStates.at(key);
-}
-
-void AppState::CreateDefaultShaders() {
-    // vert
-    LoadShader("UnlitTextured.vert", 0, 1);
-
-    // frag
-    LoadShader("UnlitTextured.frag", 0, 1, 1);
-    LoadShader("UnlitUVs.frag");
-    LoadShader("Lit.frag", 1);
-    LoadShader("LitTextured.frag", 1, 1, 1);
 }
 
 SDL_GPUColorTargetBlendState AppState::GetBlendState(const std::string &key) const {
