@@ -48,6 +48,12 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
             .buffer_slot = 0,
             .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2,
             .offset = offsetof(Vertex, uv),
+        },
+        SDL_GPUVertexAttribute{
+            .location = 2,
+            .buffer_slot = 0,
+            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
+            .offset = offsetof(Vertex, normal),
         }
     };
 
@@ -152,7 +158,6 @@ bool AppState::LoadMesh(const std::string& path) {
 
     Mesh result;
 
-    // NEW: Build node-to-editorMesh mapping
     std::vector<std::pair<int, std::string>> meshToNodeName; // meshIndex -> (nodeIndex, nodeName)
 
     for (const auto & node : model.nodes) {
@@ -166,7 +171,6 @@ bool AppState::LoadMesh(const std::string& path) {
     for (int meshIdx = 0; meshIdx < static_cast<int>(model.meshes.size()); meshIdx++) {
         const auto& gltfMesh = model.meshes[meshIdx];
 
-        // Find which node(s) use this editorMesh
         std::string objectName = "Unnamed";
         for (const auto& mapping : meshToNodeName) {
             if (mapping.first == meshIdx) {
@@ -174,8 +178,6 @@ bool AppState::LoadMesh(const std::string& path) {
                 break;
             }
         }
-
-        // SDL_Log("Processing editorMesh %d: name='%s' (object: '%s')", meshIdx, gltfMesh.name.c_str(), objectName.c_str());
 
         for (const auto& primitive : gltfMesh.primitives) {
             Submesh submesh;
@@ -186,7 +188,6 @@ bool AppState::LoadMesh(const std::string& path) {
 
             size_t startVertex = result.vertices.size();
 
-            // Read POSITION attribute
             auto posIt = primitive.attributes.find("POSITION");
             if (posIt != primitive.attributes.end()) {
                 std::vector<float> positions = ReadAttributeData(model, posIt->second);
@@ -204,20 +205,17 @@ bool AppState::LoadMesh(const std::string& path) {
                 submesh.vertexCount = vertexCount;
             }
 
-            // Read NORMAL attribute (add this for better lighting)
             auto normIt = primitive.attributes.find("NORMAL");
             if (normIt != primitive.attributes.end()) {
                 std::vector<float> normals = ReadAttributeData(model, normIt->second);
                 size_t vertexCount = normals.size() / 3;
                 for (size_t i = 0; i < vertexCount && i < submesh.vertexCount; i++) {
-                    // You'll need to add a 'normal' member to your Vertex struct
-                    // result.vertices[startVertex + i].normal = glm::vec3(
-                    //     normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]
-                    // );
+                    result.vertices[startVertex + i].normal = glm::vec3(
+                        normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]
+                    );
                 }
             }
 
-            // Read TEXCOORD_0 attribute (UVs)
             auto uvIt = primitive.attributes.find("TEXCOORD_0");
             if (uvIt != primitive.attributes.end()) {
                 std::vector<float> uvs = ReadAttributeData(model, uvIt->second);
@@ -520,15 +518,15 @@ void AppState::CreateLightBuffers() {
 
 void AppState::CreateDefaultMaterials() {
     SDL_Log("Creating default materials...");
-    new MaterialUnlitTextured(this, "uvs", "UnlitUVs");
-    auto* missing_2d = new MaterialUnlitTextured(this, "missing_2d", "2D");
+    new MaterialLitTextured(this, "uvs", "UnlitUVs");
+    auto* missing_2d = new MaterialLitTextured(this, "missing_2d", "2D");
     missing_2d->setTextureAlbedo(this, "missing.png");
     missing_2d->setSamplerAlbedo(this, "nearest_repeat");
     auto* missing = new MaterialLitTextured(this, "missing", "LitTextured");
     missing->setTextureAlbedo(this, "missing.png");
     missing->setSamplerAlbedo(this, "anisotropic_repeat");
     new MaterialLit(this, "lit", "Lit");
-    auto* line = new MaterialUnlitTextured(this, "line", "Line");
+    auto* line = new MaterialLitTextured(this, "line", "Line");
     line->setTextureAlbedo(this, "missing.png");
     line->setSamplerAlbedo(this, "anisotropic_repeat");
     auto* concrete_bricks = new MaterialLitTextured(this, "concrete_bricks", "LitTextured");
@@ -695,13 +693,13 @@ void AppState::CreateDefaultTextures() {
 void AppState::CreateDefaultPipelines() {
     SDL_Log("Creating default pipelines...");
 
-    CreatePipeline("Line", "UnlitTextured", "UnlitTextured", "Line", "Default", true, true);
-    CreatePipeline("UnlitTextured", "UnlitTextured", "UnlitTextured", "Fill", "Default", true, true);
-    CreatePipeline("UnlitTexturedAlpha", "UnlitTextured", "UnlitTextured", "Fill", "Alpha", true, false);
-    CreatePipeline("UnlitUVs", "UnlitTextured", "UnlitUVs", "Fill", "Default", true, true);
-    CreatePipeline("2D", "UnlitTextured", "UnlitTextured", "FillNoBack", "Alpha", false, false);
-    CreatePipeline("Lit", "UnlitTextured", "Lit", "Fill", "Default", true, true);
-    CreatePipeline("LitTextured", "UnlitTextured", "LitTextured", "Fill", "Default", true, true);
+    CreatePipeline("Line", "Default", "UnlitTextured", "Line", "Default", true, true);
+    CreatePipeline("UnlitTextured", "Default", "UnlitTextured", "Fill", "Default", true, true);
+    CreatePipeline("UnlitTexturedAlpha", "Default", "UnlitTextured", "Fill", "Alpha", true, false);
+    CreatePipeline("UnlitUVs", "Default", "UnlitUVs", "Fill", "Default", true, true);
+    CreatePipeline("2D", "Default", "UnlitTextured", "FillNoBack", "Alpha", false, false);
+    CreatePipeline("Lit", "Default", "Lit", "Fill", "Default", true, true);
+    CreatePipeline("LitTextured", "Default", "LitTextured", "Fill", "Default", true, true);
 }
 
 void AppState::CreateDefaultRasterizerStates() {

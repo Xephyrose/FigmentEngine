@@ -74,10 +74,13 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     auto* freeCam = new FreeCam3D();
     appState->current_camera_3d = freeCam;
+    freeCam->localTransform.position = glm::vec3(-43, 8, 14);
+    freeCam->localTransform.setRotation(glm::vec3(-34, 0, 0));
     appState->root.addChild(std::unique_ptr<Node>(freeCam));
 
     auto* pointLight = new PointLight3D(appState);
-    pointLight->intensity = 5.0f;
+    pointLight->localTransform.position.x = -43;
+    pointLight->localTransform.position.y = 5;
     appState->root.addChild(std::unique_ptr<Node>(pointLight));
 
     // auto* camera2d = new Camera2D();

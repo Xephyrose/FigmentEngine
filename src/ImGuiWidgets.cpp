@@ -6,7 +6,7 @@
 #include "thirdparty/imgui/imgui.h"
 
 namespace ImGui {
-    void ColoredDragFloat(const char *label, float v, const bool drawText)
+    void ColoredDragFloat(const char *label, float *v, const bool drawText)
     {
         PushID(label);
 
@@ -48,7 +48,7 @@ namespace ImGui {
 
         char id[32];
         sprintf(id, "##%s_%d", label, 0);
-        DragFloat(id, &v);
+        DragFloat(id, v);
 
         const auto lineStart = ImVec2(cursorPos.x + boxWidth, cursorPos.y + 2.0f);
         const auto lineEnd = ImVec2(cursorPos.x + boxWidth, cursorPos.y + lineHeight - 2.0f);
