@@ -520,78 +520,107 @@ void AppState::CreateLightBuffers() {
 void AppState::CreateDefaultMaterials() {
     SDL_Log("Creating default materials...");
     new MaterialLitTextured(this, "uvs", "UnlitUVs");
+
     auto* missing_2d = new MaterialLitTextured(this, "missing_2d", "2D");
     missing_2d->setTextureAlbedo(this, "missing.png");
     missing_2d->setSampler(this, "nearest_repeat");
+
     auto* missing = new MaterialLitTextured(this, "missing", "LitTextured");
     missing->setTextureAlbedo(this, "missing.png");
     missing->setSampler(this, "anisotropic_repeat");
+
     new MaterialLit(this, "lit", "Lit");
+
     auto* line = new MaterialLitTextured(this, "line", "Line");
     line->setTextureAlbedo(this, "missing.png");
     line->setSampler(this, "anisotropic_repeat");
+
     auto* concrete_bricks = new MaterialLitTextured(this, "concrete_bricks", "LitTextured");
     concrete_bricks->setTextureAlbedo(this, "brick_concrete_albedo.png");
     concrete_bricks->setSampler(this, "anisotropic_repeat");
+    concrete_bricks->setTextureSpecular(this, "brick_concrete_metallic.png");
+
     auto* concrete_bricks_with_specks = new MaterialLitTextured(this, "concrete_bricks_with_specks", "LitTextured");
     concrete_bricks_with_specks->setTextureAlbedo(this, "brick_concrete_specks_albedo.png");
     concrete_bricks_with_specks->setSampler(this, "anisotropic_repeat");
+
     new MaterialLitTextured(this, "plaster", "LitTextured");
+
     auto* reinforced_glass = new MaterialLitTextured(this, "reinforced_glass", "LitTextured");
     reinforced_glass->setTextureAlbedo(this, "reinforced_glass_albedo.png");
     reinforced_glass->setSampler(this, "anisotropic_repeat");
+
     auto* fence = new MaterialLitTextured(this, "fence", "UnlitTexturedAlpha");
     fence->setTextureAlbedo(this, "fence_albedo.png");
     fence->setSampler(this, "anisotropic_repeat");
+
     auto* asphalt = new MaterialLitTextured(this, "asphalt", "LitTextured");
     asphalt->setTextureAlbedo(this, "asphalt_albedo.png");
     asphalt->setSampler(this, "anisotropic_repeat");
+
     auto* asphalt_2 = new MaterialLitTextured(this, "asphalt_2", "LitTextured");
     asphalt_2->setTextureAlbedo(this, "asphalt_2_albedo.png");
     asphalt_2->setSampler(this, "anisotropic_repeat");
+
     auto* concrete = new MaterialLitTextured(this, "concrete", "LitTextured");
     concrete->setTextureAlbedo(this, "concrete_albedo.png");
     concrete->setSampler(this, "anisotropic_repeat");
+
     auto* concrete_with_specks = new MaterialLitTextured(this, "concrete_with_specks", "LitTextured");
     concrete_with_specks->setTextureAlbedo(this, "concrete_specks_albedo.png");
     concrete_with_specks->setSampler(this, "anisotropic_repeat");
+
     auto* hardwood_dark = new MaterialLitTextured(this, "hardwood_dark", "LitTextured");
     hardwood_dark->setTextureAlbedo(this, "hardwood_dark_albedo.png");
     hardwood_dark->setSampler(this, "anisotropic_repeat");
+
     auto* hardwood_light = new MaterialLitTextured(this, "hardwood_light", "LitTextured");
     hardwood_light->setTextureAlbedo(this, "hardwood_light_albedo.png");
     hardwood_light->setSampler(this, "anisotropic_repeat");
+
     auto* pine_end = new MaterialLitTextured(this, "pine_end", "LitTextured");
     pine_end->setTextureAlbedo(this, "pine_end_albedo.png");
     pine_end->setSampler(this, "anisotropic_repeat");
+
     auto* pine_wood_dark = new MaterialLitTextured(this, "pine_wood_dark", "LitTextured");
     pine_wood_dark->setTextureAlbedo(this, "pine_wood_dark_albedo.png");
     pine_wood_dark->setSampler(this, "anisotropic_repeat");
+
     auto* pine_wood_light = new MaterialLitTextured(this, "pine_wood_light", "LitTextured");
     pine_wood_light->setTextureAlbedo(this, "pine_wood_light_albedo.png");
     pine_wood_light->setSampler(this, "anisotropic_repeat");
+
     auto* roof_tile = new MaterialLitTextured(this, "roof_tile", "LitTextured");
     roof_tile->setTextureAlbedo(this, "roof_tile_albedo.png");
     roof_tile->setSampler(this, "anisotropic_repeat");
+
     auto* wood_plank = new MaterialLitTextured(this, "wood_plank", "LitTextured");
     wood_plank->setTextureAlbedo(this, "wood_plank_albedo.png");
     wood_plank->setSampler(this, "anisotropic_repeat");
+
     auto* grid_grey = new MaterialLitTextured(this, "grid_grey", "LitTextured");
     grid_grey->setTextureAlbedo(this, "grid_grey_albedo.png");
     grid_grey->setSampler(this, "anisotropic_repeat");
+
     auto* grid_orange = new MaterialLitTextured(this, "grid_orange", "LitTextured");
     grid_orange->setTextureAlbedo(this, "grid_orange_albedo.png");
     grid_orange->setSampler(this, "anisotropic_repeat");
+
     auto* paint_red = new MaterialLitTextured(this, "paint_red", "LitTextured");
     paint_red->setColorAlbedo(glm::vec4(0.5f, 0.25f, 0.25f, 1.0f));
+
     auto* paint_beige = new MaterialLitTextured(this, "paint_beige", "LitTextured");
     paint_beige->setColorAlbedo(glm::vec4(0.75f, 0.55f, 0.45f, 1.0f));
+
     auto* clip = new MaterialLitTextured(this, "clip", "UnlitTexturedAlpha");
     clip->setColorAlbedo(glm::vec4(1.0f, 0.0f, 0.0f, 0.5f));
+
     auto* glass = new MaterialLitTextured(this, "glass", "UnlitTexturedAlpha");
     glass->setColorAlbedo(glm::vec4(0.0f, 0.0f, 0.0f, 0.5f));
+
     auto* metal_silver = new MaterialLitTextured(this, "metal_silver", "LitTextured");
     metal_silver->setColorAlbedo(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+
     auto* blend_brick_concrete = new MaterialLitTextured(this, "blend_brick_concrete", "LitTextured");
     blend_brick_concrete->setColorAlbedo(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
 }

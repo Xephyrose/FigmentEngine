@@ -12,6 +12,11 @@ struct MaterialLitTextured : MaterialUnlitTextured {
     glm::vec3 colorSpecular = glm::vec3(1.0f);
 
     void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer) override;
+
+    void setColorAmbient(glm::vec4 color);
+    void setTextureAmbient(AppState* appState, const std::string &texture);
+    void setColorSpecular(glm::vec4 color);
+    void setTextureSpecular(AppState* appState, const std::string &texture);
 };
 
 

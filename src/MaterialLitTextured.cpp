@@ -55,3 +55,25 @@ void MaterialLitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *command
         1
     );
 }
+
+void MaterialLitTextured::setColorAmbient(glm::vec4 color) {
+    colorAmbient = color;
+}
+
+void MaterialLitTextured::setTextureAmbient(AppState *appState, const std::string &texture) {
+    textureAmbient = texture;
+    if (textureAmbient != "none") {
+        appState->LoadTexture(textureAmbient);
+    }
+}
+
+void MaterialLitTextured::setColorSpecular(glm::vec4 color) {
+    colorSpecular = color;
+}
+
+void MaterialLitTextured::setTextureSpecular(AppState *appState, const std::string &texture) {
+    textureSpecular = texture;
+    if (textureSpecular != "none") {
+        appState->LoadTexture(textureSpecular);
+    }
+}
