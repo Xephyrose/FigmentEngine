@@ -553,11 +553,11 @@ void AppState::CreateDefaultMaterials() {
 
     new MaterialPhongTextured(this, "plaster", "BlinnPhongTextured");
 
-    auto* reinforced_glass = new MaterialPhongTextured(this, "reinforced_glass", "BlinnPhongTextured");
+    auto* reinforced_glass = new MaterialPhongTextured(this, "reinforced_glass", "BlinnPhongTexturedAlpha");
     reinforced_glass->setTextureAlbedo(this, "reinforced_glass_albedo.png");
     reinforced_glass->setSampler(this, "anisotropic_repeat");
 
-    auto* fence = new MaterialPhongTextured(this, "fence", "UnlitTexturedAlpha");
+    auto* fence = new MaterialPhongTextured(this, "fence", "BlinnPhongTexturedAlpha");
     fence->setTextureAlbedo(this, "fence_albedo.png");
     fence->setSampler(this, "anisotropic_repeat");
 
@@ -619,10 +619,10 @@ void AppState::CreateDefaultMaterials() {
     auto* paint_beige = new MaterialPhongTextured(this, "paint_beige", "BlinnPhongTextured");
     paint_beige->setColorAlbedo(glm::vec4(0.75f, 0.55f, 0.45f, 1.0f));
 
-    auto* clip = new MaterialPhongTextured(this, "clip", "UnlitTexturedAlpha");
+    auto* clip = new MaterialPhongTextured(this, "clip", "BlinnPhongTexturedAlpha");
     clip->setColorAlbedo(glm::vec4(1.0f, 0.0f, 0.0f, 0.5f));
 
-    auto* glass = new MaterialPhongTextured(this, "glass", "UnlitTexturedAlpha");
+    auto* glass = new MaterialPhongTextured(this, "glass", "BlinnPhongTexturedAlpha");
     glass->setColorAlbedo(glm::vec4(0.0f, 0.0f, 0.0f, 0.5f));
 
     auto* metal_silver = new MaterialPhongTextured(this, "metal_silver", "BlinnPhongTextured");
@@ -731,14 +731,29 @@ void AppState::CreateDefaultPipelines() {
     SDL_Log("Creating default pipelines...");
 
     CreatePipeline("Line", "Default", "UnlitTextured", "Line", "Default", true, true);
-    CreatePipeline("UnlitTextured", "Default", "UnlitTextured", "Fill", "Default", true, true);
-    CreatePipeline("UnlitTexturedAlpha", "Default", "UnlitTextured", "Fill", "Alpha", true, false);
     CreatePipeline("UnlitUVs", "Default", "UnlitUVs", "Fill", "Default", true, true);
     CreatePipeline("2D", "Default", "UnlitTextured", "FillNoBack", "Alpha", false, false);
+
+    CreatePipeline("UnlitTextured", "Default", "UnlitTextured", "Fill", "Default", true, true);
+    CreatePipeline("UnlitTexturedAlpha", "Default", "UnlitTextured", "Fill", "Alpha", true, false);
+
     CreatePipeline("Phong", "Default", "Phong", "Fill", "Default", true, true);
     CreatePipeline("PhongTextured", "Default", "PhongTextured", "Fill", "Default", true, true);
     CreatePipeline("BlinnPhong", "Default", "BlinnPhong", "Fill", "Default", true, true);
     CreatePipeline("BlinnPhongTextured", "Default", "BlinnPhongTextured", "Fill", "Default", true, true);
+    CreatePipeline("Phong", "Default", "Phong", "Fill", "Default", true, true);
+    CreatePipeline("PhongTextured", "Default", "PhongTextured", "Fill", "Default", true, true);
+    CreatePipeline("BlinnPhong", "Default", "BlinnPhong", "Fill", "Default", true, true);
+    CreatePipeline("BlinnPhongTextured", "Default", "BlinnPhongTextured", "Fill", "Default", true, true);
+
+    CreatePipeline("PhongAlpha", "Default", "Phong", "Fill", "Alpha", true, false);
+    CreatePipeline("PhongTexturedAlpha", "Default", "PhongTextured", "Fill", "Alpha", true, false);
+    CreatePipeline("BlinnPhongAlpha", "Default", "BlinnPhong", "Fill", "Alpha", true, false);
+    CreatePipeline("BlinnPhongTexturedAlpha", "Default", "BlinnPhongTextured", "Fill", "Alpha", true, false);
+    CreatePipeline("PhongAlpha", "Default", "Phong", "Fill", "Alpha", true, false);
+    CreatePipeline("PhongTexturedAlpha", "Default", "PhongTextured", "Fill", "Alpha", true, false);
+    CreatePipeline("BlinnPhongAlpha", "Default", "BlinnPhong", "Fill", "Alpha", true, false);
+    CreatePipeline("BlinnPhongTexturedAlpha", "Default", "BlinnPhongTextured", "Fill", "Alpha", true, false);
 }
 
 void AppState::CreateDefaultRasterizerStates() {
