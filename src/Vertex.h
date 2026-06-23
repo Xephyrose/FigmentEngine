@@ -1,6 +1,6 @@
 #ifndef FIGMENTENGINE_VERTEX_H
 #define FIGMENTENGINE_VERTEX_H
-#include <glm/glm.hpp>
+#include <thirdparty/glm/glm.hpp>
 
 struct Vertex {
     glm::vec3 position;    // x, y, z

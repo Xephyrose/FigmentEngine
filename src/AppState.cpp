@@ -27,6 +27,8 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
         return false;
     }
 
+    SDL_Log("Starting VBD!");
+
     constexpr std::array vertexBufferDescriptions{
         SDL_GPUVertexBufferDescription{
             .slot = 0,
@@ -35,6 +37,8 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
             .instance_step_rate = 0,
         },
     };
+
+    SDL_Log("Starting vertex attributes!");
 
     constexpr std::array vertexAttributes{
         SDL_GPUVertexAttribute{
@@ -56,6 +60,8 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
             .offset = offsetof(Vertex, normal),
         }
     };
+
+    SDL_Log("Halfway there!");
 
     const std::array colorTargetDescriptions{
         SDL_GPUColorTargetDescription{
@@ -290,6 +296,7 @@ bool AppState::LoadMesh(const std::string& path) {
 }
 
 bool AppState::LoadShader(const std::string& path) {
+    SDL_Log("Loading shader %s...", path.c_str());
     const std::string fullPath = (std::filesystem::path(SDL_GetBasePath()) / "assets" / "shaders" / path).string();
     SDL_GPUShaderStage stage;
     if (fullPath.contains(".vert"))
@@ -337,6 +344,8 @@ bool AppState::LoadShader(const std::string& path) {
         return false;
     }
 
+    SDL_Log("test 1");
+
     // Store the size of the data we're loading, to be reused later
     size_t fileSize;
     void* code = SDL_LoadFile((fullPath + extension).c_str(), &fileSize);
@@ -345,19 +354,24 @@ bool AppState::LoadShader(const std::string& path) {
         SDL_Log("Couldn't load shader file from disk!\n\t%s", SDL_GetError());
         return false;
     }
-    const SDL_ShaderCross_GraphicsShaderMetadata* shader_meta = SDL_ShaderCross_ReflectGraphicsSPIRV(static_cast<Uint8*>(code), fileSize, 0);
-    SDL_Log("Creating shader %s, num_samplers is %u, num_storage_textures is %u, num_storage_buffers is %u, num_uniform_buffers is %u", path.c_str(), shader_meta->resource_info.num_samplers, shader_meta->resource_info.num_storage_textures, shader_meta->resource_info.num_storage_buffers, shader_meta->resource_info.num_uniform_buffers);
+
+    // const SDL_ShaderCross_GraphicsShaderMetadata* shader_meta = SDL_ShaderCross_ReflectGraphicsSPIRV(static_cast<Uint8*>(code), fileSize, 0);
+    // SDL_Log("Creating shader %s, num_samplers is %u, num_storage_textures is %u, num_storage_buffers is %u, num_uniform_buffers is %u", path.c_str(), shader_meta->resource_info.num_samplers, shader_meta->resource_info.num_storage_textures, shader_meta->resource_info.num_storage_buffers, shader_meta->resource_info.num_uniform_buffers);
     const auto shaderInfo = SDL_GPUShaderCreateInfo{
         .code_size = fileSize,
         .code = static_cast<Uint8*>(code),
         .entrypoint = entrypoint,
         .format = format,
         .stage = stage,
-        .num_samplers = shader_meta->resource_info.num_samplers,
-        .num_storage_textures = shader_meta->resource_info.num_storage_textures,
-        .num_storage_buffers = shader_meta->resource_info.num_storage_buffers,
-        .num_uniform_buffers = shader_meta->resource_info.num_uniform_buffers,
+        .num_samplers = 4u,
+        .num_storage_textures = 0u,
+        .num_storage_buffers = 1u,
+        .num_uniform_buffers = 1u,
     };
+
+    // SDL_free(&shader_meta);
+
+    SDL_Log("test 2");
 
     SDL_GPUShader* shader = SDL_CreateGPUShader(device, &shaderInfo);
     if (shader == nullptr)

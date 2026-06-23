@@ -1,9 +1,9 @@
 #ifndef FIGMENTENGINE_TRANSFORM_H
 #define FIGMENTENGINE_TRANSFORM_H
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include <thirdparty/glm/glm.hpp>
+#include <thirdparty/glm/gtc/matrix_transform.hpp>
+#include <thirdparty/glm/gtc/quaternion.hpp>
 
 struct Transform3D {
     void ImGuiDraw();

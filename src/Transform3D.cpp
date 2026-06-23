@@ -1,6 +1,6 @@
 #include "Transform3D.h"
 #define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/quaternion.hpp>
+#include <thirdparty/glm/gtx/quaternion.hpp>
 
 #include "ImGuiWidgets.h"
 

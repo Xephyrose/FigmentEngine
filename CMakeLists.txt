@@ -3,7 +3,15 @@ project(FigmentEngine)
 
 set(CMAKE_CXX_STANDARD 26)
 
+if(WIN32)
+    set(SDL_PRECOMPILED_HEADERS OFF CACHE BOOL "Disable precompiled headers" FORCE)
+endif()
+
 include(FetchContent)
+
+if(WIN32)
+    set(SDL_PRECOMPILED_HEADERS OFF CACHE BOOL "Disable precompiled headers on Windows" FORCE)
+endif()
 
 FetchContent_Declare(
         SDL3
@@ -23,17 +31,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SDL3_image)
 
-FetchContent_Declare(
-        SPIRV-Cross
-        GIT_REPOSITORY https://github.com/KhronosGroup/SPIRV-Cross
-        GIT_TAG main
-        GIT_SHALLOW TRUE
-)
-FetchContent_MakeAvailable(SPIRV-Cross)
-
+set(SDLSHADERCROSS_VENDORED ON CACHE BOOL "Use vendored dependencies" FORCE)
 set(SDLSHADERCROSS_DXC OFF CACHE BOOL "Disable HLSL compilation via DXC" FORCE)
 set(SDLSHADERCROSS_GLSLANG OFF CACHE BOOL "Disable GLSL compilation" FORCE)
-set(SDLSHADERCROSS_VENDORED OFF CACHE BOOL "Use system dependencies" FORCE)
 
 FetchContent_Declare(
         SDL3_shadercross
@@ -131,25 +131,24 @@ target_link_libraries(FigmentEngine PRIVATE
         pthread
 )
 
-if(WIN32)
-    add_custom_command(TARGET FigmentEngine POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_RUNTIME_DLLS:FigmentEngine>
-            $<TARGET_FILE_DIR:FigmentEngine>
-            COMMENT "Deploying runtime DLLs"
-    )
-endif()
+add_custom_command(TARGET FigmentEngine POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_RUNTIME_DLLS:FigmentEngine>
+        $<TARGET_FILE_DIR:FigmentEngine>
+        COMMAND_EXPAND_LISTS
+        COMMENT "Deploying runtime DLLs"
+)
 
 if(MINGW)
     find_program(GCC_EXECUTABLE gcc)
     if(GCC_EXECUTABLE)
         get_filename_component(GCC_BIN_DIR ${GCC_EXECUTABLE} DIRECTORY)
         add_custom_command(TARGET FigmentEngine POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${GCC_BIN_DIR}/libgcc_s_seh-1.dll"
-                "${GCC_BIN_DIR}/libstdc++-6.dll"
-                $<TARGET_FILE_DIR:FigmentEngine>
-                COMMENT "Deploying MinGW runtime DLLs"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${GCC_BIN_DIR}/libgcc_s_seh-1.dll"
+            "${GCC_BIN_DIR}/libstdc++-6.dll"
+            $<TARGET_FILE_DIR:FigmentEngine>
+            COMMENT "Deploying MinGW runtime DLLs"
         )
     endif()
 endif()
