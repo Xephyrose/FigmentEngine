@@ -545,7 +545,8 @@ void AppState::CreateDefaultMaterials() {
     auto* concrete_bricks = new MaterialPhongTextured(this, "concrete_bricks", "BlinnPhongTextured");
     concrete_bricks->setTextureAlbedo(this, "brick_concrete_albedo.png");
     concrete_bricks->setSampler(this, "anisotropic_repeat");
-    concrete_bricks->setTextureSpecular(this, "brick_concrete_metallic.png");
+    // concrete_bricks->setTextureSpecular(this, "brick_concrete_metallic.png");
+    concrete_bricks->setTextureNormalMap(this, "brick_concrete_normal.png");
 
     auto* concrete_bricks_with_specks = new MaterialPhongTextured(this, "concrete_bricks_with_specks", "BlinnPhongTextured");
     concrete_bricks_with_specks->setTextureAlbedo(this, "brick_concrete_specks_albedo.png");

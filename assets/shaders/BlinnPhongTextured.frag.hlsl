@@ -1,9 +1,11 @@
 Texture2D g_albedo : register(t0, space2);
 Texture2D g_ambient : register(t1, space2);
 Texture2D g_specular : register(t2, space2);
+Texture2D g_normal_map : register(t3, space2);
 SamplerState g_sampler0 : register(s0, space2);
 SamplerState g_sampler1 : register(s1, space2);
 SamplerState g_sampler2 : register(s2, space2);
+SamplerState g_sampler3 : register(s3, space2);
 
 cbuffer PushConstants : register(b0, space3)
 {
@@ -13,10 +15,9 @@ cbuffer PushConstants : register(b0, space3)
     bool    useAlbedoTexture;
     float3  colorAmbient;
     bool    useAmbientTexture;
-    float3  colorDiffuse;
-    bool    useDiffuseTexture;
     float3  colorSpecular;
     bool    useSpecularTexture;
+    bool    useNormalMap;
 }
 
 struct PSInput {
@@ -25,9 +26,13 @@ struct PSInput {
     float3 worldNormal : TEXCOORD2;
 };
 
-StructuredBuffer<float4> pointLights : register(t3, space2);
+StructuredBuffer<float4> pointLights : register(t4, space2);
 
 float4 main(PSInput input) : SV_TARGET {
+
+    if (useNormalMap == true) {
+        return g_normal_map.Sample(g_sampler3, input.uv);
+    }
 
     float4 calcAlbedo;
     if (useAlbedoTexture == true) {
