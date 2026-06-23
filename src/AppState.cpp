@@ -4,8 +4,8 @@
 #include <filesystem>
 #include <SDL3_image/SDL_image.h>
 
-#include "MaterialLit.h"
-#include "MaterialLitTextured.h"
+#include "MaterialPhong.h"
+#include "MaterialPhongTextured.h"
 #include "MaterialUnlitTextured.h"
 #include "Mesh.h"
 #include "PointLight3DGPU.h"
@@ -443,7 +443,7 @@ SDL_GPUTexture* AppState::GetTexture(const std::string &path) {
     if (path == "none") return textures.at("missing.png");
     if (!textures.contains(path)) {
         if (!LoadTexture(path)) {
-            SDL_Log("Couldn't load shader %s: %s", path.c_str(), SDL_GetError());
+            SDL_Log("Couldn't load texture %s: %s", path.c_str(), SDL_GetError());
             return textures.at("missing.png");
         }
     }
@@ -519,109 +519,116 @@ void AppState::CreateLightBuffers() {
 
 void AppState::CreateDefaultMaterials() {
     SDL_Log("Creating default materials...");
-    new MaterialLitTextured(this, "uvs", "UnlitUVs");
+    new MaterialPhongTextured(this, "uvs", "UnlitUVs");
 
-    auto* missing_2d = new MaterialLitTextured(this, "missing_2d", "2D");
+    auto* missing_2d = new MaterialPhongTextured(this, "missing_2d", "2D");
     missing_2d->setTextureAlbedo(this, "missing.png");
     missing_2d->setSampler(this, "nearest_repeat");
 
-    auto* missing = new MaterialLitTextured(this, "missing", "LitTextured");
+    auto* missing = new MaterialPhongTextured(this, "missing", "BlinnPhongTextured");
     missing->setTextureAlbedo(this, "missing.png");
     missing->setSampler(this, "anisotropic_repeat");
 
-    new MaterialLit(this, "lit", "Lit");
+    new MaterialPhong(this, "phong", "Phong");
+    const auto phong_tex = new MaterialPhongTextured(this, "phong_textured", "BlinnPhongTextured");
+    phong_tex->setTextureAlbedo(this, "missing.png");
+    phong_tex->setSampler(this, "nearest_repeat");
+    new MaterialPhong(this, "blinn_phong", "Phong");
+    const auto blinn_phong_tex = new MaterialPhongTextured(this, "blinn_phong_textured", "BlinnPhongTextured");
+    blinn_phong_tex->setTextureAlbedo(this, "missing.png");
+    blinn_phong_tex->setSampler(this, "nearest_repeat");
 
-    auto* line = new MaterialLitTextured(this, "line", "Line");
+    auto* line = new MaterialPhongTextured(this, "line", "Line");
     line->setTextureAlbedo(this, "missing.png");
     line->setSampler(this, "anisotropic_repeat");
 
-    auto* concrete_bricks = new MaterialLitTextured(this, "concrete_bricks", "LitTextured");
+    auto* concrete_bricks = new MaterialPhongTextured(this, "concrete_bricks", "BlinnPhongTextured");
     concrete_bricks->setTextureAlbedo(this, "brick_concrete_albedo.png");
     concrete_bricks->setSampler(this, "anisotropic_repeat");
     concrete_bricks->setTextureSpecular(this, "brick_concrete_metallic.png");
 
-    auto* concrete_bricks_with_specks = new MaterialLitTextured(this, "concrete_bricks_with_specks", "LitTextured");
+    auto* concrete_bricks_with_specks = new MaterialPhongTextured(this, "concrete_bricks_with_specks", "BlinnPhongTextured");
     concrete_bricks_with_specks->setTextureAlbedo(this, "brick_concrete_specks_albedo.png");
     concrete_bricks_with_specks->setSampler(this, "anisotropic_repeat");
 
-    new MaterialLitTextured(this, "plaster", "LitTextured");
+    new MaterialPhongTextured(this, "plaster", "BlinnPhongTextured");
 
-    auto* reinforced_glass = new MaterialLitTextured(this, "reinforced_glass", "LitTextured");
+    auto* reinforced_glass = new MaterialPhongTextured(this, "reinforced_glass", "BlinnPhongTextured");
     reinforced_glass->setTextureAlbedo(this, "reinforced_glass_albedo.png");
     reinforced_glass->setSampler(this, "anisotropic_repeat");
 
-    auto* fence = new MaterialLitTextured(this, "fence", "UnlitTexturedAlpha");
+    auto* fence = new MaterialPhongTextured(this, "fence", "UnlitTexturedAlpha");
     fence->setTextureAlbedo(this, "fence_albedo.png");
     fence->setSampler(this, "anisotropic_repeat");
 
-    auto* asphalt = new MaterialLitTextured(this, "asphalt", "LitTextured");
+    auto* asphalt = new MaterialPhongTextured(this, "asphalt", "BlinnPhongTextured");
     asphalt->setTextureAlbedo(this, "asphalt_albedo.png");
     asphalt->setSampler(this, "anisotropic_repeat");
 
-    auto* asphalt_2 = new MaterialLitTextured(this, "asphalt_2", "LitTextured");
+    auto* asphalt_2 = new MaterialPhongTextured(this, "asphalt_2", "BlinnPhongTextured");
     asphalt_2->setTextureAlbedo(this, "asphalt_2_albedo.png");
     asphalt_2->setSampler(this, "anisotropic_repeat");
 
-    auto* concrete = new MaterialLitTextured(this, "concrete", "LitTextured");
+    auto* concrete = new MaterialPhongTextured(this, "concrete", "BlinnPhongTextured");
     concrete->setTextureAlbedo(this, "concrete_albedo.png");
     concrete->setSampler(this, "anisotropic_repeat");
 
-    auto* concrete_with_specks = new MaterialLitTextured(this, "concrete_with_specks", "LitTextured");
+    auto* concrete_with_specks = new MaterialPhongTextured(this, "concrete_with_specks", "BlinnPhongTextured");
     concrete_with_specks->setTextureAlbedo(this, "concrete_specks_albedo.png");
     concrete_with_specks->setSampler(this, "anisotropic_repeat");
 
-    auto* hardwood_dark = new MaterialLitTextured(this, "hardwood_dark", "LitTextured");
+    auto* hardwood_dark = new MaterialPhongTextured(this, "hardwood_dark", "BlinnPhongTextured");
     hardwood_dark->setTextureAlbedo(this, "hardwood_dark_albedo.png");
     hardwood_dark->setSampler(this, "anisotropic_repeat");
 
-    auto* hardwood_light = new MaterialLitTextured(this, "hardwood_light", "LitTextured");
+    auto* hardwood_light = new MaterialPhongTextured(this, "hardwood_light", "BlinnPhongTextured");
     hardwood_light->setTextureAlbedo(this, "hardwood_light_albedo.png");
     hardwood_light->setSampler(this, "anisotropic_repeat");
 
-    auto* pine_end = new MaterialLitTextured(this, "pine_end", "LitTextured");
+    auto* pine_end = new MaterialPhongTextured(this, "pine_end", "BlinnPhongTextured");
     pine_end->setTextureAlbedo(this, "pine_end_albedo.png");
     pine_end->setSampler(this, "anisotropic_repeat");
 
-    auto* pine_wood_dark = new MaterialLitTextured(this, "pine_wood_dark", "LitTextured");
+    auto* pine_wood_dark = new MaterialPhongTextured(this, "pine_wood_dark", "BlinnPhongTextured");
     pine_wood_dark->setTextureAlbedo(this, "pine_wood_dark_albedo.png");
     pine_wood_dark->setSampler(this, "anisotropic_repeat");
 
-    auto* pine_wood_light = new MaterialLitTextured(this, "pine_wood_light", "LitTextured");
+    auto* pine_wood_light = new MaterialPhongTextured(this, "pine_wood_light", "BlinnPhongTextured");
     pine_wood_light->setTextureAlbedo(this, "pine_wood_light_albedo.png");
     pine_wood_light->setSampler(this, "anisotropic_repeat");
 
-    auto* roof_tile = new MaterialLitTextured(this, "roof_tile", "LitTextured");
+    auto* roof_tile = new MaterialPhongTextured(this, "roof_tile", "BlinnPhongTextured");
     roof_tile->setTextureAlbedo(this, "roof_tile_albedo.png");
     roof_tile->setSampler(this, "anisotropic_repeat");
 
-    auto* wood_plank = new MaterialLitTextured(this, "wood_plank", "LitTextured");
+    auto* wood_plank = new MaterialPhongTextured(this, "wood_plank", "BlinnPhongTextured");
     wood_plank->setTextureAlbedo(this, "wood_plank_albedo.png");
     wood_plank->setSampler(this, "anisotropic_repeat");
 
-    auto* grid_grey = new MaterialLitTextured(this, "grid_grey", "LitTextured");
+    auto* grid_grey = new MaterialPhongTextured(this, "grid_grey", "BlinnPhongTextured");
     grid_grey->setTextureAlbedo(this, "grid_grey_albedo.png");
     grid_grey->setSampler(this, "anisotropic_repeat");
 
-    auto* grid_orange = new MaterialLitTextured(this, "grid_orange", "LitTextured");
+    auto* grid_orange = new MaterialPhongTextured(this, "grid_orange", "BlinnPhongTextured");
     grid_orange->setTextureAlbedo(this, "grid_orange_albedo.png");
     grid_orange->setSampler(this, "anisotropic_repeat");
 
-    auto* paint_red = new MaterialLitTextured(this, "paint_red", "LitTextured");
+    auto* paint_red = new MaterialPhongTextured(this, "paint_red", "BlinnPhongTextured");
     paint_red->setColorAlbedo(glm::vec4(0.5f, 0.25f, 0.25f, 1.0f));
 
-    auto* paint_beige = new MaterialLitTextured(this, "paint_beige", "LitTextured");
+    auto* paint_beige = new MaterialPhongTextured(this, "paint_beige", "BlinnPhongTextured");
     paint_beige->setColorAlbedo(glm::vec4(0.75f, 0.55f, 0.45f, 1.0f));
 
-    auto* clip = new MaterialLitTextured(this, "clip", "UnlitTexturedAlpha");
+    auto* clip = new MaterialPhongTextured(this, "clip", "UnlitTexturedAlpha");
     clip->setColorAlbedo(glm::vec4(1.0f, 0.0f, 0.0f, 0.5f));
 
-    auto* glass = new MaterialLitTextured(this, "glass", "UnlitTexturedAlpha");
+    auto* glass = new MaterialPhongTextured(this, "glass", "UnlitTexturedAlpha");
     glass->setColorAlbedo(glm::vec4(0.0f, 0.0f, 0.0f, 0.5f));
 
-    auto* metal_silver = new MaterialLitTextured(this, "metal_silver", "LitTextured");
+    auto* metal_silver = new MaterialPhongTextured(this, "metal_silver", "BlinnPhongTextured");
     metal_silver->setColorAlbedo(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
 
-    auto* blend_brick_concrete = new MaterialLitTextured(this, "blend_brick_concrete", "LitTextured");
+    auto* blend_brick_concrete = new MaterialPhongTextured(this, "blend_brick_concrete", "BlinnPhongTextured");
     blend_brick_concrete->setColorAlbedo(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
 }
 
@@ -728,8 +735,10 @@ void AppState::CreateDefaultPipelines() {
     CreatePipeline("UnlitTexturedAlpha", "Default", "UnlitTextured", "Fill", "Alpha", true, false);
     CreatePipeline("UnlitUVs", "Default", "UnlitUVs", "Fill", "Default", true, true);
     CreatePipeline("2D", "Default", "UnlitTextured", "FillNoBack", "Alpha", false, false);
-    CreatePipeline("Lit", "Default", "Lit", "Fill", "Default", true, true);
-    CreatePipeline("LitTextured", "Default", "LitTextured", "Fill", "Default", true, true);
+    CreatePipeline("Phong", "Default", "Phong", "Fill", "Default", true, true);
+    CreatePipeline("PhongTextured", "Default", "PhongTextured", "Fill", "Default", true, true);
+    CreatePipeline("BlinnPhong", "Default", "BlinnPhong", "Fill", "Default", true, true);
+    CreatePipeline("BlinnPhongTextured", "Default", "BlinnPhongTextured", "Fill", "Default", true, true);
 }
 
 void AppState::CreateDefaultRasterizerStates() {

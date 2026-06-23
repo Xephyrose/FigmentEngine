@@ -274,7 +274,7 @@ SDL_AppResult RenderFrame(AppState* appState) {
         }
 
         ImGui::Begin("Rendering Overrides");
-        static const char* items[] = { "", "lit", "lit_textured", "missing", "line", "uvs" };
+        static const char* items[] = { "", "phong", "phong_textured", "blinn_phong", "blinn_phong_textured", "missing", "line", "uvs" };
         static int selected_idx = 0;
         ImGui::Combo("Override", &selected_idx, items, IM_ARRAYSIZE(items));
         appState->material_override = items[selected_idx];

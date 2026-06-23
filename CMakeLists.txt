@@ -110,10 +110,10 @@ add_executable(FigmentEngine
         PointLight3DGPU.cpp
         PointLight3DGPU.h
         src/PointLight3D.cpp
-        src/MaterialLit.cpp
-        src/MaterialLit.h
-        src/MaterialLitTextured.cpp
-        src/MaterialLitTextured.h
+        src/MaterialPhong.cpp
+        src/MaterialPhong.h
+        src/MaterialPhongTextured.cpp
+        src/MaterialPhongTextured.h
         src/EditorThemeManager.cpp
         src/EditorThemeManager.h
         src/ImGuiWidgets.cpp

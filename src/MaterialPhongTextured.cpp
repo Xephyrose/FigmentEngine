@@ -1,9 +1,9 @@
-#include "MaterialLitTextured.h"
+#include "MaterialPhongTextured.h"
 #include <SDL3/SDL_log.h>
 
 #include "Camera3D.h"
 
-void MaterialLitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer) {
+void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer) {
     SDL_GPUGraphicsPipeline* gotPipeline = appState->GetPipeline(pipeline);
     if (!gotPipeline) {
         SDL_Log("ERROR: Pipeline '%s' not found!", pipeline.c_str());
@@ -56,22 +56,22 @@ void MaterialLitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *command
     );
 }
 
-void MaterialLitTextured::setColorAmbient(glm::vec4 color) {
+void MaterialPhongTextured::setColorAmbient(glm::vec4 color) {
     colorAmbient = color;
 }
 
-void MaterialLitTextured::setTextureAmbient(AppState *appState, const std::string &texture) {
+void MaterialPhongTextured::setTextureAmbient(AppState *appState, const std::string &texture) {
     textureAmbient = texture;
     if (textureAmbient != "none") {
         appState->LoadTexture(textureAmbient);
     }
 }
 
-void MaterialLitTextured::setColorSpecular(glm::vec4 color) {
+void MaterialPhongTextured::setColorSpecular(glm::vec4 color) {
     colorSpecular = color;
 }
 
-void MaterialLitTextured::setTextureSpecular(AppState *appState, const std::string &texture) {
+void MaterialPhongTextured::setTextureSpecular(AppState *appState, const std::string &texture) {
     textureSpecular = texture;
     if (textureSpecular != "none") {
         appState->LoadTexture(textureSpecular);

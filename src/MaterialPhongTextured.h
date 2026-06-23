@@ -3,7 +3,7 @@
 
 #include "MaterialUnlitTextured.h"
 
-struct MaterialLitTextured : MaterialUnlitTextured {
+struct MaterialPhongTextured : MaterialUnlitTextured {
     using MaterialUnlitTextured::MaterialUnlitTextured;
     float shininess = 64;
     std::string textureAmbient = "none";
