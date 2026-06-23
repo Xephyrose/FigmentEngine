@@ -71,10 +71,9 @@ float4 main(PSInput input) : SV_TARGET {
     float3 diffuse = lightColor * diff * calcAlbedo;
 
     // Specular
-    float specularStrength = 0.5;
     float3 viewDir = normalize(viewPos - input.worldPos);
     float3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(norm, halfwayDir), 0.0), shininess);
+    float spec = pow(max(dot(norm, halfwayDir), 0.0), shininess * 4);
     float3 specular = lightColor * (spec * calcSpecular);
 
     float3 result = ambient + diffuse + specular;

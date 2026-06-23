@@ -29,8 +29,8 @@ float4 main(PSInput input) : SV_TARGET {
     float specularStrength = 0.5;
     float3 viewDir = normalize(viewPos - input.worldPos);
     float3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(norm, halfwayDir), 0.0), 32.0);
-    float3 specular = specularStrength * spec * lightColor;
+    float spec = pow(max(dot(norm, halfwayDir), 0.0), 128);
+    float3 specular = specularStrength * spec;
 
     float3 result = ambient + diffuse + specular;
     return float4(result, 1.0);

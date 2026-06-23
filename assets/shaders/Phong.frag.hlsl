@@ -30,7 +30,7 @@ float4 main(PSInput input) : SV_TARGET {
     float3 viewDir = normalize(viewPos - input.worldPos);
     float3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-    float3 specular = specularStrength * spec * lightColor;
+    float3 specular = specularStrength * spec;
 
     float3 result = ambient + diffuse + specular;
     return float4(result, 1.0);

@@ -530,10 +530,10 @@ void AppState::CreateDefaultMaterials() {
     missing->setSampler(this, "anisotropic_repeat");
 
     new MaterialPhong(this, "phong", "Phong");
-    const auto phong_tex = new MaterialPhongTextured(this, "phong_textured", "BlinnPhongTextured");
+    const auto phong_tex = new MaterialPhongTextured(this, "phong_textured", "PhongTextured");
     phong_tex->setTextureAlbedo(this, "missing.png");
     phong_tex->setSampler(this, "nearest_repeat");
-    new MaterialPhong(this, "blinn_phong", "Phong");
+    new MaterialPhong(this, "blinn_phong", "BlinnPhong");
     const auto blinn_phong_tex = new MaterialPhongTextured(this, "blinn_phong_textured", "BlinnPhongTextured");
     blinn_phong_tex->setTextureAlbedo(this, "missing.png");
     blinn_phong_tex->setSampler(this, "nearest_repeat");
