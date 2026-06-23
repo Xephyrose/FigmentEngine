@@ -5,15 +5,15 @@
 
 struct MaterialUnlitTextured : Material {
     MaterialUnlitTextured(AppState* appState, const std::string &name, const std::string &pipeline);
-    std::string textureAlbedo = "dummy_white.png";
-    std::string samplerAlbedo = "anisotropic_repeat";
+    std::string textureAlbedo = "none";
+    std::string sampler = "anisotropic_repeat";
     glm::vec4 colorAlbedo = glm::vec4(1.0f);
 
     void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer) override;
 
     void setColorAlbedo(glm::vec4 color);
     void setTextureAlbedo(AppState* appState, const std::string &texture);
-    void setSamplerAlbedo(AppState* appState, const std::string &sampler);
+    void setSampler(AppState* appState, const std::string &new_sampler);
 };
 
 #endif //FIGMENTENGINE_MATERIAL_UNLIT_TEXTURED_H

@@ -1,6 +1,8 @@
 #include "MaterialLit.h"
 #include <SDL3/SDL_log.h>
 
+#include "Camera3D.h"
+
 MaterialLit::MaterialLit(AppState *appState, const std::string &name, const std::string &pipeline) {
     this->name = name;
     this->pipeline = pipeline;
@@ -22,4 +24,12 @@ void MaterialLit::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer) 
         &appState->lightBuffer,
         1
     );
+
+    struct PushData {
+        glm::vec3 viewPos;
+    };
+    PushData push{};
+    push.viewPos = appState->current_camera_3d->GetGlobalTransform().position;
+
+    SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
 }

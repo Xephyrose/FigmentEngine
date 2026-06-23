@@ -17,7 +17,7 @@ void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* comma
     SDL_BindGPUGraphicsPipeline(appState->renderPass, gotPipeline);
 
     SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
-    SDL_GPUSampler* getSampler = appState->GetSampler(samplerAlbedo);
+    SDL_GPUSampler* getSampler = appState->GetSampler(sampler);
 
     const SDL_GPUTextureSamplerBinding binding = {getAlbedo, getSampler};
     SDL_BindGPUFragmentSamplers(appState->renderPass, 0, &binding, 1);
@@ -44,6 +44,6 @@ void MaterialUnlitTextured::setTextureAlbedo(AppState* appState, const std::stri
     }
 }
 
-void MaterialUnlitTextured::setSamplerAlbedo(AppState* appState, const std::string &sampler) {
-    samplerAlbedo = sampler;
+void MaterialUnlitTextured::setSampler(AppState* appState, const std::string &new_sampler) {
+    sampler = new_sampler;
 }

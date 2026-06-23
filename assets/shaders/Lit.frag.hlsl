@@ -1,5 +1,10 @@
 StructuredBuffer<float4> pointLights : register(t0, space2);
 
+cbuffer PushConstants : register(b0, space3)
+{
+    float3 viewPos;
+}
+
 struct PSInput {
     float2 uv : TEXCOORD0;
     float3 worldPos : TEXCOORD1;
@@ -20,6 +25,13 @@ float4 main(PSInput input) : SV_TARGET {
     float diff = max(dot(norm, lightDir), 0.0);
     float3 diffuse = diff * lightColor;
 
-    float3 result = ambient + diffuse;
+    // Specular
+    float specularStrength = 0.5;
+    float3 viewDir = normalize(viewPos - input.worldPos);
+    float3 reflectDir = reflect(-lightDir, norm);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+    float3 specular = specularStrength * spec * lightColor;
+
+    float3 result = ambient + diffuse + specular;
     return float4(result, 1.0);
 }
