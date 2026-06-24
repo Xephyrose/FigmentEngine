@@ -363,8 +363,6 @@ bool AppState::LoadShader(const std::string& path) {
         .num_uniform_buffers = shader_meta->resource_info.num_uniform_buffers,
     };
 
-    SDL_free(&shader_meta);
-
     SDL_GPUShader* shader = SDL_CreateGPUShader(device, &shaderInfo);
     if (shader == nullptr)
     {
@@ -374,6 +372,8 @@ bool AppState::LoadShader(const std::string& path) {
     }
 
     shaders.insert_or_assign(path, shader);
+
+    SDL_free(code);
 
     return true;
 }

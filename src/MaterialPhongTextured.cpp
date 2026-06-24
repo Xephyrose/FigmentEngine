@@ -61,7 +61,7 @@ void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *comma
     );
 }
 
-void MaterialPhongTextured::setColorAmbient(glm::vec4 color) {
+void MaterialPhongTextured::setColorAmbient(const glm::vec4 color) {
     colorAmbient = color;
 }
 
@@ -72,7 +72,7 @@ void MaterialPhongTextured::setTextureAmbient(AppState *appState, const std::str
     }
 }
 
-void MaterialPhongTextured::setColorSpecular(glm::vec4 color) {
+void MaterialPhongTextured::setColorSpecular(const glm::vec4 color) {
     colorSpecular = color;
 }
 
