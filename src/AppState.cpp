@@ -13,6 +13,7 @@
 #include "Vertex.h"
 #include "SDL3/SDL_log.h"
 #include "SDL3_shadercross/SDL_shadercross.h"
+#include "thirdparty/json.hpp"
 
 bool AppState::CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader, const std::string& rasterizerState, const std::string &blendState, const
                               bool &depth_test, const bool &depth_write) {
@@ -356,7 +357,6 @@ bool AppState::LoadShader(const std::string& path) {
         return false;
     }
 
-    // Store the size of the data we're loading, to be reused later
     size_t fileSize;
     void* code = SDL_LoadFile((fullPath + extension).c_str(), &fileSize);
     if (code == nullptr)
@@ -365,33 +365,57 @@ bool AppState::LoadShader(const std::string& path) {
         return false;
     }
 
-    const SDL_ShaderCross_GraphicsShaderMetadata* shader_meta = SDL_ShaderCross_ReflectGraphicsSPIRV(static_cast<Uint8*>(code), fileSize, 0);
-    SDL_Log("Creating shader %s, num_samplers is %u, num_storage_textures is %u, num_storage_buffers is %u, num_uniform_buffers is %u", path.c_str(), shader_meta->resource_info.num_samplers, shader_meta->resource_info.num_storage_textures, shader_meta->resource_info.num_storage_buffers, shader_meta->resource_info.num_uniform_buffers);
-    const auto shaderInfo = SDL_GPUShaderCreateInfo{
-        .code_size = fileSize,
-        .code = static_cast<Uint8*>(code),
-        .entrypoint = entrypoint,
-        .format = format,
-        .stage = stage,
-        .num_samplers = shader_meta->resource_info.num_samplers,
-        .num_storage_textures = shader_meta->resource_info.num_storage_textures,
-        .num_storage_buffers = shader_meta->resource_info.num_storage_buffers,
-        .num_uniform_buffers = shader_meta->resource_info.num_uniform_buffers,
-    };
-
-    SDL_GPUShader* shader = SDL_CreateGPUShader(device, &shaderInfo);
-    if (shader == nullptr)
-    {
-        SDL_Log("Couldn't create shader from file %s: %s", fullPath.c_str(), SDL_GetError());
+    std::string jsonPath = fullPath + ".json";
+    size_t jsonSize;
+    void* jsonData = SDL_LoadFile(jsonPath.c_str(), &jsonSize);
+    if (jsonData == nullptr) {
+        SDL_Log("Couldn't load shader metadata JSON from disk!\n\t%s", SDL_GetError());
         SDL_free(code);
         return false;
     }
 
-    shaders.insert_or_assign(path, shader);
+    std::string jsonString(static_cast<char*>(jsonData), jsonSize);
+    SDL_free(jsonData);
 
-    SDL_free(code);
+    try {
+        nlohmann::json metadata = nlohmann::json::parse(jsonString);
 
-    return true;
+        const uint32_t numSamplers = metadata.value("samplers", 0);
+        const uint32_t numStorageTextures = metadata.value("storage_textures", 0);
+        const uint32_t numStorageBuffers = metadata.value("storage_buffers", 0);
+        const uint32_t numUniformBuffers = metadata.value("uniform_buffers", 0);
+
+        SDL_Log("Creating shader %s, num_samplers is %u, num_storage_textures is %u, num_storage_buffers is %u, num_uniform_buffers is %u",
+                path.c_str(), numSamplers, numStorageTextures, numStorageBuffers, numUniformBuffers);
+
+        const auto shaderInfo = SDL_GPUShaderCreateInfo{
+            .code_size = fileSize,
+            .code = static_cast<Uint8*>(code),
+            .entrypoint = entrypoint,
+            .format = format,
+            .stage = stage,
+            .num_samplers = numSamplers,
+            .num_storage_textures = numStorageTextures,
+            .num_storage_buffers = numStorageBuffers,
+            .num_uniform_buffers = numUniformBuffers,
+        };
+
+        SDL_GPUShader* shader = SDL_CreateGPUShader(device, &shaderInfo);
+        if (shader == nullptr) {
+            SDL_Log("Couldn't create shader from file %s: %s", fullPath.c_str(), SDL_GetError());
+            SDL_free(code);
+            return false;
+        }
+
+        shaders.insert_or_assign(path, shader);
+        SDL_free(code);
+        return true;
+
+    } catch (const nlohmann::json::parse_error& e) {
+        SDL_Log("Failed to parse shader metadata JSON: %s", e.what());
+        SDL_free(code);
+        return false;
+    }
 }
 
 bool AppState::LoadTexture(const std::string& path) {
