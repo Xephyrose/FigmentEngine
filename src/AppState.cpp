@@ -54,10 +54,20 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
             .buffer_slot = 0,
             .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
             .offset = offsetof(Vertex, normal),
+        },
+        SDL_GPUVertexAttribute{
+            .location = 3,
+            .buffer_slot = 0,
+            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
+            .offset = offsetof(Vertex, tangent),
+        },
+        SDL_GPUVertexAttribute{
+            .location = 4,
+            .buffer_slot = 0,
+            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
+            .offset = offsetof(Vertex, bitangent),
         }
     };
-
-    SDL_Log("Halfway there!");
 
     const std::array colorTargetDescriptions{
         SDL_GPUColorTargetDescription{
@@ -214,6 +224,18 @@ bool AppState::LoadMesh(const std::string& path) {
                 for (size_t i = 0; i < vertexCount && i < submesh.vertexCount; i++) {
                     result.vertices[startVertex + i].normal = glm::vec3(
                         normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]
+                    );
+                }
+            }
+
+            auto tanIt = primitive.attributes.find("TANGENT");
+            if (tanIt != primitive.attributes.end()) {
+                SDL_Log("HAS TAN");
+                std::vector<float> tangents = ReadAttributeData(model, tanIt->second);
+                size_t vertexCount = tangents.size() / 3;
+                for (size_t i = 0; i < vertexCount && i < submesh.vertexCount; i++) {
+                    result.vertices[startVertex + i].normal = glm::vec3(
+                        tangents[i * 3], tangents[i * 3 + 1], tangents[i * 3 + 2]
                     );
                 }
             }
@@ -426,6 +448,7 @@ Mesh* AppState::GetMesh(const std::string& path) {
 
 Material* AppState::GetMaterial(const std::string& key) const {
     if (!materials.contains(key)) {
+        SDL_Log("Couldn't find material %s", key.c_str());
         return nullptr;
     }
     return materials.at(key);
@@ -551,14 +574,15 @@ void AppState::CreateDefaultMaterials() {
     auto* concrete_bricks = new MaterialPhongTextured(this, "concrete_bricks", "BlinnPhongTextured");
     concrete_bricks->setTextureAlbedo(this, "brick_concrete_albedo.png");
     concrete_bricks->setSampler(this, "anisotropic_repeat");
-    // concrete_bricks->setTextureSpecular(this, "brick_concrete_metallic.png");
     concrete_bricks->setTextureNormalMap(this, "brick_concrete_normal.png");
 
     auto* concrete_bricks_with_specks = new MaterialPhongTextured(this, "concrete_bricks_with_specks", "BlinnPhongTextured");
     concrete_bricks_with_specks->setTextureAlbedo(this, "brick_concrete_specks_albedo.png");
     concrete_bricks_with_specks->setSampler(this, "anisotropic_repeat");
 
-    new MaterialPhongTextured(this, "plaster", "BlinnPhongTextured");
+    auto* plaster = new MaterialPhongTextured(this, "plaster", "BlinnPhongTextured");
+    plaster->setSampler(this, "anisotropic_repeat");
+    plaster->setTextureNormalMap(this, "plaster_normal.png");
 
     auto* reinforced_glass = new MaterialPhongTextured(this, "reinforced_glass", "BlinnPhongTexturedAlpha");
     reinforced_glass->setTextureAlbedo(this, "reinforced_glass_albedo.png");

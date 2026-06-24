@@ -24,14 +24,33 @@ struct PSInput {
     float2 uv : TEXCOORD0;
     float3 worldPos : TEXCOORD1;
     float3 worldNormal : TEXCOORD2;
+    float3 worldTangent : TEXCOORD3;
+    float3 worldBitangent : TEXCOORD4;
 };
 
 StructuredBuffer<float4> pointLights : register(t4, space2);
 
 float4 main(PSInput input) : SV_TARGET {
+//    Visualize world normal as color (maps from [-1,1] to [0,1])
+//    float3 normalColor = input.worldNormal * 0.5 + 0.5;
+//    return float4(normalColor, 1.0);
 
+    float3 worldNormal;
     if (useNormalMap == true) {
-        return g_normal_map.Sample(g_sampler3, input.uv);
+        float3 sampledNormal = g_normal_map.Sample(g_sampler3, input.uv).rgb;
+        float3 tangentNormal = sampledNormal * 2.0 - 1.0;
+
+        float3 N = normalize(input.worldNormal);
+        float3 T = normalize(input.worldTangent);
+        float3 B = normalize(input.worldBitangent);
+
+        T = normalize(T - dot(T, N) * N);
+        B = cross(N, T);
+
+        worldNormal = normalize(T * tangentNormal.x + B * tangentNormal.y + N * tangentNormal.z);
+    }
+    else {
+        worldNormal = normalize(input.worldNormal);
     }
 
     float4 calcAlbedo;
@@ -47,8 +66,6 @@ float4 main(PSInput input) : SV_TARGET {
     if (useAmbientTexture == true) {
         float3 texColor = g_ambient.Sample(g_sampler1, input.uv).xyz;
         calcAmbient = texColor * colorAmbient;
-
-        return float4(texColor.rgb, 1.0);
     }
     else {
         calcAmbient = colorAmbient;
@@ -70,15 +87,14 @@ float4 main(PSInput input) : SV_TARGET {
     float3 ambient = lightColor * calcAmbient;
 
     // Diffuse
-    float3 norm = normalize(input.worldNormal);
     float3 lightDir = normalize(lightPos - input.worldPos);
-    float diff = max(dot(norm, lightDir), 0.0);
+    float diff = max(dot(worldNormal, lightDir), 0.0);
     float3 diffuse = lightColor * diff * calcAlbedo.xyz;
 
     // Specular
     float3 viewDir = normalize(viewPos - input.worldPos);
     float3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(norm, halfwayDir), 0.0), shininess * 4);
+    float spec = pow(max(dot(worldNormal, halfwayDir), 0.0), shininess * 4);
     float3 specular = lightColor * (spec * calcSpecular);
 
     float3 result = ambient + diffuse + specular;
