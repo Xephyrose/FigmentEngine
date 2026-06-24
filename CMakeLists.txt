@@ -118,6 +118,8 @@ add_executable(FigmentEngine
     src/EditorThemeManager.h
     src/ImGuiWidgets.cpp
     src/ImGuiWidgets.h
+        src/MaterialPhongTexturedNormalMap.cpp
+        src/MaterialPhongTexturedNormalMap.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

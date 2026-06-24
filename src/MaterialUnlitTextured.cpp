@@ -1,13 +1,33 @@
 #include "MaterialUnlitTextured.h"
 #include <SDL3/SDL_log.h>
 
+#include "Camera3D.h"
+
 MaterialUnlitTextured::MaterialUnlitTextured(AppState* appState, const std::string &name, const std::string &pipeline) {
     this->name = name;
     this->pipeline = pipeline;
     appState->materials.insert_or_assign(name, this);
 }
 
-void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* commandBuffer) {
+void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* commandBuffer, const glm::mat4 model) {
+    const glm::mat4 view = appState->current_camera_3d->GetViewMatrix();
+    const glm::mat4 proj = appState->current_camera_3d->GetProjectionMatrix(appState->currentAspectRatio);
+    const glm::mat4 mvp = proj * view * model;
+    // const glm::mat4 normalMatrix = glm::transpose(glm::inverse(model));
+
+    struct TransformData {
+        glm::mat4 mvp;
+        glm::mat4 model;
+        // glm::mat4 normalMatrix;
+    };
+
+    TransformData data{};
+    data.mvp = mvp;
+    data.model = model;
+    // data.normalMatrix = normalMatrix;
+
+    SDL_PushGPUVertexUniformData(commandBuffer, 0, &data, sizeof(data));
+
     SDL_GPUGraphicsPipeline* gotPipeline = appState->GetPipeline(pipeline);
     if (!gotPipeline) {
         SDL_Log("ERROR: Pipeline '%s' not found!", pipeline.c_str());

@@ -6,6 +6,7 @@
 
 #include "MaterialPhong.h"
 #include "MaterialPhongTextured.h"
+#include "MaterialPhongTexturedNormalMap.h"
 #include "MaterialUnlitTextured.h"
 #include "Mesh.h"
 #include "PointLight3DGPU.h"
@@ -58,14 +59,8 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
         SDL_GPUVertexAttribute{
             .location = 3,
             .buffer_slot = 0,
-            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
+            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT4,
             .offset = offsetof(Vertex, tangent),
-        },
-        SDL_GPUVertexAttribute{
-            .location = 4,
-            .buffer_slot = 0,
-            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
-            .offset = offsetof(Vertex, bitangent),
         }
     };
 
@@ -230,12 +225,11 @@ bool AppState::LoadMesh(const std::string& path) {
 
             auto tanIt = primitive.attributes.find("TANGENT");
             if (tanIt != primitive.attributes.end()) {
-                SDL_Log("HAS TAN");
                 std::vector<float> tangents = ReadAttributeData(model, tanIt->second);
-                size_t vertexCount = tangents.size() / 3;
+                size_t vertexCount = tangents.size() / 4;
                 for (size_t i = 0; i < vertexCount && i < submesh.vertexCount; i++) {
-                    result.vertices[startVertex + i].normal = glm::vec3(
-                        tangents[i * 3], tangents[i * 3 + 1], tangents[i * 3 + 2]
+                    result.vertices[startVertex + i].tangent = glm::vec4(
+                        tangents[i * 3], tangents[i * 3 + 1], tangents[i * 3 + 2], tangents[i * 3 + 3]
                     );
                 }
             }
@@ -550,7 +544,7 @@ void AppState::CreateDefaultMaterials() {
     SDL_Log("Creating default materials...");
     new MaterialPhongTextured(this, "uvs", "UnlitUVs");
 
-    auto* missing_2d = new MaterialPhongTextured(this, "missing_2d", "2D");
+    auto* missing_2d = new MaterialUnlitTextured(this, "missing_2d", "2D");
     missing_2d->setTextureAlbedo(this, "missing.png");
     missing_2d->setSampler(this, "nearest_repeat");
 
@@ -571,7 +565,7 @@ void AppState::CreateDefaultMaterials() {
     line->setTextureAlbedo(this, "missing.png");
     line->setSampler(this, "anisotropic_repeat");
 
-    auto* concrete_bricks = new MaterialPhongTextured(this, "concrete_bricks", "BlinnPhongTextured");
+    auto* concrete_bricks = new MaterialPhongTexturedNormalMap(this, "concrete_bricks", "BlinnPhongTexturedNormalMapped");
     concrete_bricks->setTextureAlbedo(this, "brick_concrete_albedo.png");
     concrete_bricks->setSampler(this, "anisotropic_repeat");
     concrete_bricks->setTextureNormalMap(this, "brick_concrete_normal.png");
@@ -580,7 +574,7 @@ void AppState::CreateDefaultMaterials() {
     concrete_bricks_with_specks->setTextureAlbedo(this, "brick_concrete_specks_albedo.png");
     concrete_bricks_with_specks->setSampler(this, "anisotropic_repeat");
 
-    auto* plaster = new MaterialPhongTextured(this, "plaster", "BlinnPhongTextured");
+    auto* plaster = new MaterialPhongTexturedNormalMap(this, "plaster", "BlinnPhongTexturedNormalMapped");
     plaster->setSampler(this, "anisotropic_repeat");
     plaster->setTextureNormalMap(this, "plaster_normal.png");
 
@@ -784,7 +778,9 @@ void AppState::CreateDefaultPipelines() {
     CreatePipeline("PhongAlpha", "Default", "Phong", "Fill", "Alpha", true, false);
     CreatePipeline("PhongTexturedAlpha", "Default", "PhongTextured", "Fill", "Alpha", true, false);
     CreatePipeline("BlinnPhongAlpha", "Default", "BlinnPhong", "Fill", "Alpha", true, false);
-    CreatePipeline("BlinnPhongTexturedAlpha", "Default", "BlinnPhongTextured", "Fill", "Alpha", true, false);
+
+    CreatePipeline("BlinnPhongTexturedNormalMapped", "NormalMap", "BlinnPhongTexturedNormalMap", "Fill", "Default", true, true);
+    CreatePipeline("BlinnPhongTexturedNormalMappedAlpha", "NormalMap", "BlinnPhongTexturedNormalMap", "Fill", "Alpha", true, false);
 }
 
 void AppState::CreateDefaultRasterizerStates() {

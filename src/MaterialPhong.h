@@ -5,7 +5,7 @@
 
 struct MaterialPhong : Material {
     MaterialPhong(AppState* appState, const std::string &name, const std::string &pipeline);
-    void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer) override;
+    void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer, glm::mat4 model) override;
 };
 
 #endif //FIGMENTENGINE_MATERIALLIT_H

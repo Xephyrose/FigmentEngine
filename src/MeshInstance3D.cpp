@@ -19,25 +19,6 @@ void MeshInstance3D::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffe
         SDL_BindGPUIndexBuffer(appState.renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
     }
 
-    const glm::mat4 model = GetGlobalTransform().getMatrix();
-    const glm::mat4 view = appState.current_camera_3d->GetViewMatrix();
-    const glm::mat4 proj = appState.current_camera_3d->GetProjectionMatrix(appState.currentAspectRatio);
-    const glm::mat4 mvp = proj * view * model;
-    // const glm::mat4 normalMatrix = glm::transpose(glm::inverse(model));
-
-    struct TransformData {
-        glm::mat4 mvp;
-        glm::mat4 model;
-        // glm::mat4 normalMatrix;
-    };
-
-    TransformData data{};
-    data.mvp = mvp;
-    data.model = model;
-    // data.normalMatrix = normalMatrix;
-
-    SDL_PushGPUVertexUniformData(commandBuffer, 0, &data, sizeof(data));
-
     for (const auto& submesh : _mesh->submeshes) {
         Material* material = nullptr;
         if (!appState.material_override.empty()) {
@@ -53,7 +34,7 @@ void MeshInstance3D::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffe
         else {
             material = appState.GetMaterial(submesh.material);
         }
-        material->Bind(&appState, commandBuffer);
+        material->Bind(&appState, commandBuffer, GetGlobalTransform().getMatrix());
         if (!_mesh->indices.empty()) {
             SDL_DrawGPUIndexedPrimitives(appState.renderPass, submesh.indexCount, 1, submesh.startIndex, 0, 0);
         } else {

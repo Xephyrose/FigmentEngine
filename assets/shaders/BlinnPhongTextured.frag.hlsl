@@ -1,11 +1,9 @@
 Texture2D g_albedo : register(t0, space2);
 Texture2D g_ambient : register(t1, space2);
 Texture2D g_specular : register(t2, space2);
-Texture2D g_normal_map : register(t3, space2);
 SamplerState g_sampler0 : register(s0, space2);
 SamplerState g_sampler1 : register(s1, space2);
 SamplerState g_sampler2 : register(s2, space2);
-SamplerState g_sampler3 : register(s3, space2);
 
 cbuffer PushConstants : register(b0, space3)
 {
@@ -17,41 +15,19 @@ cbuffer PushConstants : register(b0, space3)
     bool    useAmbientTexture;
     float3  colorSpecular;
     bool    useSpecularTexture;
-    bool    useNormalMap;
 }
 
 struct PSInput {
     float2 uv : TEXCOORD0;
     float3 worldPos : TEXCOORD1;
     float3 worldNormal : TEXCOORD2;
-    float3 worldTangent : TEXCOORD3;
-    float3 worldBitangent : TEXCOORD4;
 };
 
-StructuredBuffer<float4> pointLights : register(t4, space2);
+StructuredBuffer<float4> pointLights : register(t3, space2);
 
 float4 main(PSInput input) : SV_TARGET {
-//    Visualize world normal as color (maps from [-1,1] to [0,1])
-//    float3 normalColor = input.worldNormal * 0.5 + 0.5;
-//    return float4(normalColor, 1.0);
 
-    float3 worldNormal;
-    if (useNormalMap == true) {
-        float3 sampledNormal = g_normal_map.Sample(g_sampler3, input.uv).rgb;
-        float3 tangentNormal = sampledNormal * 2.0 - 1.0;
-
-        float3 N = normalize(input.worldNormal);
-        float3 T = normalize(input.worldTangent);
-        float3 B = normalize(input.worldBitangent);
-
-        T = normalize(T - dot(T, N) * N);
-        B = cross(N, T);
-
-        worldNormal = normalize(T * tangentNormal.x + B * tangentNormal.y + N * tangentNormal.z);
-    }
-    else {
-        worldNormal = normalize(input.worldNormal);
-    }
+    float3 worldNormal = normalize(input.worldNormal);
 
     float4 calcAlbedo;
     if (useAlbedoTexture == true) {

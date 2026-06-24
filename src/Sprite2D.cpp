@@ -51,7 +51,7 @@ void Sprite2D::Draw(AppState& appState, SDL_GPUCommandBuffer* commandBuffer) {
 
     Material* material = appState.GetMaterial(sprite);
     if (material == nullptr) material = appState.GetMaterial("missing_2d");
-    material->Bind(&appState, commandBuffer);
+    material->Bind(&appState, commandBuffer, transform.getMatrix());
 
     SDL_DrawGPUIndexedPrimitives(appState.renderPass, quadMesh->indices.size(), 1, 0, 0, 0);
 }

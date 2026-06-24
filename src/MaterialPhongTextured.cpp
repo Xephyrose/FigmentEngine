@@ -3,7 +3,25 @@
 
 #include "Camera3D.h"
 
-void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer) {
+void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, const glm::mat4 model) {
+    const glm::mat4 view = appState->current_camera_3d->GetViewMatrix();
+    const glm::mat4 proj = appState->current_camera_3d->GetProjectionMatrix(appState->currentAspectRatio);
+    const glm::mat4 mvp = proj * view * model;
+    // const glm::mat4 normalMatrix = glm::transpose(glm::inverse(model));
+
+    struct TransformData {
+        glm::mat4 mvp;
+        glm::mat4 model;
+        // glm::mat4 normalMatrix;
+    };
+
+    TransformData data{};
+    data.mvp = mvp;
+    data.model = model;
+    // data.normalMatrix = normalMatrix;
+
+    SDL_PushGPUVertexUniformData(commandBuffer, 0, &data, sizeof(data));
+
     SDL_GPUGraphicsPipeline* gotPipeline = appState->GetPipeline(pipeline);
     if (!gotPipeline) {
         SDL_Log("ERROR: Pipeline '%s' not found!", pipeline.c_str());
@@ -15,17 +33,14 @@ void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *comma
     SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
     SDL_GPUTexture* getAmbient = appState->GetTexture(textureAmbient);
     SDL_GPUTexture* getSpecular = appState->GetTexture(textureSpecular);
-    SDL_GPUTexture* getNormalMap = appState->GetTexture(textureNormalMap);
     SDL_GPUSampler* getSampler0 = appState->GetSampler(sampler);
     SDL_GPUSampler* getSampler1 = appState->GetSampler(sampler);
     SDL_GPUSampler* getSampler2 = appState->GetSampler(sampler);
-    SDL_GPUSampler* getSampler3 = appState->GetSampler(sampler);
 
     const SDL_GPUTextureSamplerBinding bindings[] = {
-        {getAlbedo, getSampler0},      // t0
-        {getAmbient, getSampler1},    // t1
-        {getSpecular, getSampler2},  // t2
-        {getNormalMap, getSampler3} // t3
+        {getAlbedo, getSampler0},     // t0
+        {getAmbient, getSampler1},   // t1
+        {getSpecular, getSampler2}, // t2
     };
     SDL_BindGPUFragmentSamplers(appState->renderPass, 0, bindings, std::size(bindings));
 
@@ -38,7 +53,6 @@ void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *comma
         uint32_t  useAmbientTexture;
         glm::vec3 colorSpecular;
         uint32_t  useSpecularTexture;
-        uint32_t  useNormalMap;
     };
     PushData push{};
     push.viewPos = appState->current_camera_3d->GetGlobalTransform().position;
@@ -49,7 +63,6 @@ void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *comma
     push.useAmbientTexture = (textureAmbient == "none" ? 0 : 1);
     push.colorSpecular = glm::vec4(colorSpecular, 1.0f);
     push.useSpecularTexture = (textureSpecular == "none" ? 0 : 1);
-    push.useNormalMap = (textureNormalMap == "none" ? 0 : 1);
 
     SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
 
@@ -80,12 +93,5 @@ void MaterialPhongTextured::setTextureSpecular(AppState *appState, const std::st
     textureSpecular = texture;
     if (textureSpecular != "none") {
         appState->LoadTexture(textureSpecular);
-    }
-}
-
-void MaterialPhongTextured::setTextureNormalMap(AppState *appState, const std::string &texture) {
-    textureNormalMap = texture;
-    if (textureNormalMap != "none") {
-        appState->LoadTexture(textureNormalMap);
     }
 }

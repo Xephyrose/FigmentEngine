@@ -2,7 +2,7 @@ cbuffer TransformUBO : register(b0, space1)
 {
     float4x4 ModelViewProjection;
     float4x4 Model;
-    float4x4 NormalMatrix;
+//    float4x4 NormalMatrix;
 };
 
 struct VSInput
@@ -10,6 +10,7 @@ struct VSInput
     float3 pos : POSITION0;
     float2 uv : TEXCOORD0;
     float3 normal : TEXCOORD1;
+    float4 tangent : TANGENT0;
 };
 
 struct VSOutput

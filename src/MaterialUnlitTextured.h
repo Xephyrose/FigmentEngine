@@ -9,7 +9,7 @@ struct MaterialUnlitTextured : Material {
     std::string sampler = "anisotropic_repeat";
     glm::vec4 colorAlbedo = glm::vec4(1.0f);
 
-    void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer) override;
+    void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer, glm::mat4 model) override;
 
     void setColorAlbedo(glm::vec4 color);
     void setTextureAlbedo(AppState* appState, const std::string &texture);
