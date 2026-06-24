@@ -333,7 +333,13 @@ bool AppState::LoadShader(const std::string& path) {
 
     std::string extension;
     SDL_GPUShaderFormat backendFormats = SDL_GetGPUShaderFormats(device);
-    if (backendFormats & SDL_GPU_SHADERFORMAT_SPIRV)
+    if (backendFormats & SDL_GPU_SHADERFORMAT_DXIL)
+    {
+        extension = ".dxil";
+        format = SDL_GPU_SHADERFORMAT_DXIL;
+        entrypoint = "main";
+    }
+    else if (backendFormats & SDL_GPU_SHADERFORMAT_SPIRV)
     {
         extension = ".spv";
         format = SDL_GPU_SHADERFORMAT_SPIRV;
@@ -344,12 +350,6 @@ bool AppState::LoadShader(const std::string& path) {
         extension = ".msl";
         format = SDL_GPU_SHADERFORMAT_MSL;
         entrypoint = "main0";
-    }
-    else if (backendFormats & SDL_GPU_SHADERFORMAT_DXIL)
-    {
-        extension = ".dxil";
-        format = SDL_GPU_SHADERFORMAT_DXIL;
-        entrypoint = "main";
     }
     else
     {
