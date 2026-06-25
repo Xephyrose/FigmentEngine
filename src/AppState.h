@@ -24,6 +24,8 @@ struct AppState {
     SDL_GPUDevice* device = nullptr;
     SDL_GPURenderPass *renderPass;
     SDL_GPUTexture* depthTexture = nullptr;
+    SDL_GPUTexture* msaaColorTarget = nullptr;
+    int msaaSamples = 4;
     bool isMouseRelative = false;
 
     Node root = Node("root");
@@ -82,6 +84,7 @@ struct AppState {
 
     void CreateDefaultMeshes();
     void CreateDepthTexture();
+    void CreateMSAAColorTarget();
     void CreateLightBuffers();
     void CreateDefaultMaterials();
     void CreateDefaultSamplers();

@@ -135,6 +135,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->CreateDefaultSamplers();
     appState->CreateDefaultRasterizerStates();
     appState->CreateDefaultPipelines();
+    appState->CreateMSAAColorTarget();
     appState->CreateDepthTexture();
     appState->CreateLightBuffers();
 
@@ -203,6 +204,7 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
         case SDL_EVENT_WINDOW_RESIZED:
             appState->windowWidth = event->window.data1;
             appState->windowHeight = event->window.data2;
+            appState->CreateMSAAColorTarget();
             appState->CreateDepthTexture();
             return SDL_APP_CONTINUE;
         case SDL_EVENT_MOUSE_MOTION:
@@ -306,10 +308,17 @@ SDL_AppResult RenderFrame(AppState* appState) {
     if (swapchainTexture != nullptr) {
         // Here we create the first render pass, which just clears the screen
         const SDL_GPUColorTargetInfo colorTargetInfo = {
-            .texture = swapchainTexture,
+            .texture = appState->msaaColorTarget,
+            .mip_level = 0,
+            .layer_or_depth_plane = 0,
             .clear_color = SDL_FColor{0.4f, 0.6f, 0.9f, 1.0f},
             .load_op = SDL_GPU_LOADOP_CLEAR,
-            .store_op = SDL_GPU_STOREOP_STORE,
+            .store_op = SDL_GPU_STOREOP_RESOLVE,
+            .resolve_texture = swapchainTexture,
+            .resolve_mip_level = 0,
+            .resolve_layer = 0,
+            .cycle = false,
+            .cycle_resolve_texture = false
         };
 
         const SDL_GPUDepthStencilTargetInfo depthTarget = {

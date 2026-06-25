@@ -526,7 +526,7 @@ void AppState::CreateDepthTexture() {
         SDL_ReleaseGPUTexture(device, depthTexture);
         depthTexture = nullptr;
     }
-    SDL_Log("Creating depth texture...");
+    SDL_Log("Creating depth texture with sample count %d...", msaaSamples);
     const SDL_GPUTextureCreateInfo depthInfo = {
         .type = SDL_GPU_TEXTURETYPE_2D,
         .format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT_S8_UINT,
@@ -535,11 +535,35 @@ void AppState::CreateDepthTexture() {
         .height = static_cast<Uint32>(windowHeight),
         .layer_count_or_depth = 1,
         .num_levels = 1,
-        .sample_count = SDL_GPU_SAMPLECOUNT_1
+        .sample_count = static_cast<SDL_GPUSampleCount>(msaaSamples)
     };
     depthTexture = SDL_CreateGPUTexture(device, &depthInfo);
     if (!depthTexture) {
         SDL_Log("CreateDepthTexture: %s", SDL_GetError());
+    }
+}
+
+void AppState::CreateMSAAColorTarget() {
+    if (msaaColorTarget != nullptr) {
+        SDL_Log("Freeing MSAA color target...");
+        SDL_WaitForGPUIdle(device);
+        SDL_ReleaseGPUTexture(device, msaaColorTarget);
+        msaaColorTarget = nullptr;
+    }
+    SDL_Log("Creating MSAA color target with sample count %d...", msaaSamples);
+    const SDL_GPUTextureCreateInfo colorInfo = {
+        .type = SDL_GPU_TEXTURETYPE_2D,
+        .format = SDL_GetGPUSwapchainTextureFormat(device, window),
+        .usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET,
+        .width = static_cast<Uint32>(windowWidth),
+        .height = static_cast<Uint32>(windowHeight),
+        .layer_count_or_depth = 1,
+        .num_levels = 1,
+        .sample_count = static_cast<SDL_GPUSampleCount>(msaaSamples)
+    };
+    msaaColorTarget = SDL_CreateGPUTexture(device, &colorInfo);
+    if (!msaaColorTarget) {
+        SDL_Log("CreateMSAAColorTarget: %s", SDL_GetError());
     }
 }
 
@@ -847,7 +871,7 @@ void AppState::CreateDefaultBlendStates() {
 void AppState::CreateDefaultMultisampleStates()
 {
     SDL_GPUMultisampleState defaultMultisampleState = {};
-    defaultMultisampleState.sample_count = SDL_GPU_SAMPLECOUNT_1;
+    defaultMultisampleState.sample_count = static_cast<SDL_GPUSampleCount>(msaaSamples);
     defaultMultisampleState.enable_mask = false;
     defaultMultisampleState.enable_alpha_to_coverage = true;
     defaultMultisampleState.sample_mask = 0;
