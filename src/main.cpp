@@ -137,6 +137,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->CreateDefaultPipelines();
     appState->CreateMSAAColorTarget();
     appState->CreateDepthTexture();
+    appState->CreateResolveTexture();
     appState->CreateLightBuffers();
 
     appState->quadMesh = new Mesh();
@@ -206,6 +207,7 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
             appState->windowHeight = event->window.data2;
             appState->CreateMSAAColorTarget();
             appState->CreateDepthTexture();
+            appState->CreateResolveTexture();
             return SDL_APP_CONTINUE;
         case SDL_EVENT_MOUSE_MOTION:
             return SDL_APP_CONTINUE;
@@ -305,8 +307,7 @@ SDL_AppResult RenderFrame(AppState* appState) {
         return SDL_APP_FAILURE;
     }
 
-    if (swapchainTexture != nullptr) {
-        // Here we create the first render pass, which just clears the screen
+    if (swapchainTexture != nullptr && appState->msaaColorTarget != nullptr) {
         const SDL_GPUColorTargetInfo colorTargetInfo = {
             .texture = appState->msaaColorTarget,
             .mip_level = 0,
@@ -314,7 +315,7 @@ SDL_AppResult RenderFrame(AppState* appState) {
             .clear_color = SDL_FColor{0.4f, 0.6f, 0.9f, 1.0f},
             .load_op = SDL_GPU_LOADOP_CLEAR,
             .store_op = SDL_GPU_STOREOP_RESOLVE,
-            .resolve_texture = swapchainTexture,
+            .resolve_texture = appState->resolveTexture,
             .resolve_mip_level = 0,
             .resolve_layer = 0,
             .cycle = false,
@@ -379,6 +380,22 @@ SDL_AppResult RenderFrame(AppState* appState) {
 
         SDL_EndGPURenderPass(appState->renderPass);
         appState->renderPass = nullptr;
+
+        SDL_GPUBlitInfo blitInfo = {
+            .source = {
+                .texture = appState->resolveTexture,
+                .w = static_cast<Uint32>(appState->windowWidth),
+                .h = static_cast<Uint32>(appState->windowHeight),
+            },
+            .destination = {
+                .texture = swapchainTexture,
+                .w = static_cast<Uint32>(appState->windowWidth),
+                .h = static_cast<Uint32>(appState->windowHeight),
+            },
+            .load_op = SDL_GPU_LOADOP_DONT_CARE,
+            .filter = SDL_GPU_FILTER_LINEAR
+        };
+        SDL_BlitGPUTexture(commandBuffer, &blitInfo);
     }
     // Send the command buffer to the GPU for drawing
     SDL_SubmitGPUCommandBuffer(commandBuffer);

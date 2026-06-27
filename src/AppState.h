@@ -25,6 +25,7 @@ struct AppState {
     SDL_GPURenderPass *renderPass;
     SDL_GPUTexture* depthTexture = nullptr;
     SDL_GPUTexture* msaaColorTarget = nullptr;
+    SDL_GPUTexture* resolveTexture = nullptr;
     int msaaSamples = 4;
     bool isMouseRelative = false;
 
@@ -85,6 +86,7 @@ struct AppState {
     void CreateDefaultMeshes();
     void CreateDepthTexture();
     void CreateMSAAColorTarget();
+    void CreateResolveTexture();
     void CreateLightBuffers();
     void CreateDefaultMaterials();
     void CreateDefaultSamplers();
@@ -95,7 +97,7 @@ struct AppState {
     void CreateDefaultMultisampleStates();
 
     // EDITOR
-    bool debug = true;
+    bool debug = false;
     Node* editorSelected = nullptr;
     std::string editorMesh;
     std::string editorSprite;

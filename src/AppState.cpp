@@ -567,6 +567,30 @@ void AppState::CreateMSAAColorTarget() {
     }
 }
 
+void AppState::CreateResolveTexture() {
+    if (resolveTexture != nullptr) {
+        SDL_Log("Freeing resolve texture...");
+        SDL_WaitForGPUIdle(device);
+        SDL_ReleaseGPUTexture(device, resolveTexture);
+        resolveTexture = nullptr;
+    }
+    SDL_Log("Creating resolve texture...");
+    const SDL_GPUTextureCreateInfo resolveInfo = {
+        .type = SDL_GPU_TEXTURETYPE_2D,
+        .format = SDL_GetGPUSwapchainTextureFormat(device, window),
+        .usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER,
+        .width = static_cast<Uint32>(windowWidth),
+        .height = static_cast<Uint32>(windowHeight),
+        .layer_count_or_depth = 1,
+        .num_levels = 1,
+        .sample_count = SDL_GPU_SAMPLECOUNT_1
+    };
+    resolveTexture = SDL_CreateGPUTexture(device, &resolveInfo);
+    if (!resolveTexture) {
+        SDL_Log("CreateResolveTexture: %s", SDL_GetError());
+    }
+}
+
 void AppState::CreateLightBuffers() {
     SDL_Log("Creating light buffers...");
     SDL_GPUBufferCreateInfo bufferInfo = {};
