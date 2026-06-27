@@ -277,6 +277,10 @@ SDL_AppResult RenderFrame(AppState* appState) {
             ImGui::End();
         }
 
+        ImGui::Begin("Project Settings");
+        ImGui::InputInt("MSAA Samples", &appState->msaaSamples);
+        ImGui::End();
+
         ImGui::Begin("Rendering Overrides");
         static const char* items[] = { "", "phong", "phong_textured", "blinn_phong", "blinn_phong_textured", "missing", "line", "uvs" };
         static int selected_idx = 0;
@@ -314,8 +318,8 @@ SDL_AppResult RenderFrame(AppState* appState) {
             .layer_or_depth_plane = 0,
             .clear_color = SDL_FColor{0.4f, 0.6f, 0.9f, 1.0f},
             .load_op = SDL_GPU_LOADOP_CLEAR,
-            .store_op = SDL_GPU_STOREOP_RESOLVE,
-            .resolve_texture = appState->resolveTexture,
+            .store_op = (appState->msaaSamples > 1) ? SDL_GPU_STOREOP_RESOLVE : SDL_GPU_STOREOP_STORE,
+            .resolve_texture = (appState->msaaSamples > 1) ? appState->resolveTexture : nullptr,
             .resolve_mip_level = 0,
             .resolve_layer = 0,
             .cycle = false,
@@ -381,21 +385,23 @@ SDL_AppResult RenderFrame(AppState* appState) {
         SDL_EndGPURenderPass(appState->renderPass);
         appState->renderPass = nullptr;
 
-        SDL_GPUBlitInfo blitInfo = {
-            .source = {
-                .texture = appState->resolveTexture,
-                .w = static_cast<Uint32>(appState->windowWidth),
-                .h = static_cast<Uint32>(appState->windowHeight),
-            },
-            .destination = {
-                .texture = swapchainTexture,
-                .w = static_cast<Uint32>(appState->windowWidth),
-                .h = static_cast<Uint32>(appState->windowHeight),
-            },
-            .load_op = SDL_GPU_LOADOP_DONT_CARE,
-            .filter = SDL_GPU_FILTER_LINEAR
-        };
-        SDL_BlitGPUTexture(commandBuffer, &blitInfo);
+        if (appState->msaaSamples > 1) {
+            SDL_GPUBlitInfo blitInfo = {
+                .source = {
+                    .texture = appState->resolveTexture,
+                    .w = static_cast<Uint32>(appState->windowWidth),
+                    .h = static_cast<Uint32>(appState->windowHeight),
+                },
+                .destination = {
+                    .texture = swapchainTexture,
+                    .w = static_cast<Uint32>(appState->windowWidth),
+                    .h = static_cast<Uint32>(appState->windowHeight),
+                },
+                .load_op = SDL_GPU_LOADOP_DONT_CARE,
+                .filter = SDL_GPU_FILTER_LINEAR
+            };
+            SDL_BlitGPUTexture(commandBuffer, &blitInfo);
+        }
     }
     // Send the command buffer to the GPU for drawing
     SDL_SubmitGPUCommandBuffer(commandBuffer);
