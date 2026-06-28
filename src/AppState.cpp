@@ -364,7 +364,7 @@ bool AppState::LoadShader(const std::string& path) {
         return false;
     }
 
-    std::string jsonPath = fullPath + ".json";
+    const std::string jsonPath = fullPath + ".json";
     size_t jsonSize;
     void* jsonData = SDL_LoadFile(jsonPath.c_str(), &jsonSize);
     if (jsonData == nullptr) {
@@ -377,7 +377,7 @@ bool AppState::LoadShader(const std::string& path) {
     SDL_free(jsonData);
 
     try {
-        nlohmann::json metadata = nlohmann::json::parse(jsonString);
+        const nlohmann::json metadata = nlohmann::json::parse(jsonString);
 
         const uint32_t numSamplers = metadata.value("samplers", 0);
         const uint32_t numStorageTextures = metadata.value("storage_textures", 0);
@@ -479,7 +479,7 @@ bool AppState::LoadTexture(const std::string& path) {
     }
 
     // 4. Create a transfer buffer for the pixel data
-    size_t pixelDataSize = converted->h * converted->pitch;
+    const size_t pixelDataSize = converted->h * converted->pitch;
     SDL_GPUTransferBufferCreateInfo transferInfo = {};
     transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
     transferInfo.size = pixelDataSize;
@@ -739,6 +739,7 @@ void AppState::CreateDefaultMaterials() {
     auto* plaster = new MaterialPhongTexturedNormalMap(this, "plaster", "BlinnPhongTexturedNormalMapped");
     plaster->setSampler(this, "anisotropic_repeat");
     plaster->setTextureNormalMap(this, "plaster_normal.png");
+    plaster->setColorSpecular(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
 
     auto* reinforced_glass = new MaterialPhongTextured(this, "reinforced_glass", "BlinnPhongTexturedAlpha");
     reinforced_glass->setTextureAlbedo(this, "reinforced_glass_albedo.png");
@@ -800,8 +801,10 @@ void AppState::CreateDefaultMaterials() {
     grid_orange->setTextureAlbedo(this, "grid_orange_albedo.png");
     grid_orange->setSampler(this, "anisotropic_repeat");
 
-    auto* paint_red = new MaterialPhongTextured(this, "paint_red", "BlinnPhongTextured");
+    auto* paint_red = new MaterialPhongTexturedNormalMap(this, "paint_red", "BlinnPhongTexturedNormalMapped");
     paint_red->setColorAlbedo(glm::vec4(0.5f, 0.25f, 0.25f, 1.0f));
+    paint_red->setTextureNormalMap(this, "plaster_normal.png");
+    paint_red->setColorSpecular(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
 
     auto* paint_beige = new MaterialPhongTextured(this, "paint_beige", "BlinnPhongTextured");
     paint_beige->setColorAlbedo(glm::vec4(0.75f, 0.55f, 0.45f, 1.0f));
