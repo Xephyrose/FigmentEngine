@@ -205,7 +205,6 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
             appState->CreateMSAAColorTarget();
             appState->CreateDepthTexture();
             appState->CreateResolveTexture();
-            appState->RecreateAllMultisampleStates();
             appState->RecreateAllPipelines();
             return SDL_APP_CONTINUE;
         case SDL_EVENT_MOUSE_MOTION:
@@ -281,7 +280,6 @@ SDL_AppResult RenderFrame(AppState* appState) {
             appState->CreateMSAAColorTarget();
             appState->CreateDepthTexture();
             appState->CreateResolveTexture();
-            appState->RecreateAllMultisampleStates();
             appState->RecreateAllPipelines();
         }
         ImGui::End();
@@ -316,20 +314,33 @@ SDL_AppResult RenderFrame(AppState* appState) {
         return SDL_APP_FAILURE;
     }
 
-    if (swapchainTexture != nullptr && appState->msaaColorTarget != nullptr) {
-        const SDL_GPUColorTargetInfo colorTargetInfo = {
-            .texture = appState->msaaColorTarget,
-            .mip_level = 0,
-            .layer_or_depth_plane = 0,
-            .clear_color = SDL_FColor{0.4f, 0.6f, 0.9f, 1.0f},
-            .load_op = SDL_GPU_LOADOP_CLEAR,
-            .store_op = (appState->msaaSamples > 1) ? SDL_GPU_STOREOP_RESOLVE : SDL_GPU_STOREOP_STORE,
-            .resolve_texture = (appState->msaaSamples > 1) ? appState->resolveTexture : nullptr,
-            .resolve_mip_level = 0,
-            .resolve_layer = 0,
-            .cycle = false,
-            .cycle_resolve_texture = false
-        };
+    if (swapchainTexture != nullptr) {
+        // const SDL_GPUColorTargetInfo colorTargetInfo = {
+        //     .texture = appState->msaaColorTarget,
+        //     .mip_level = 0,
+        //     .layer_or_depth_plane = 0,
+        //     .clear_color = SDL_FColor{0.4f, 0.6f, 0.9f, 1.0f},
+        //     .load_op = SDL_GPU_LOADOP_CLEAR,
+        //     .store_op = (appState->msaaSamples > 0) ? SDL_GPU_STOREOP_RESOLVE : SDL_GPU_STOREOP_STORE,
+        //     .resolve_texture = (appState->msaaSamples > 0) ? appState->resolveTexture : nullptr,
+        //     .resolve_mip_level = 0,
+        //     .resolve_layer = 0,
+        //     .cycle = false,
+        //     .cycle_resolve_texture = false
+        // };
+
+        SDL_GPUColorTargetInfo colorTargetInfo = {};
+        colorTargetInfo.texture = appState->msaaColorTarget;
+        colorTargetInfo.mip_level = 0;
+        colorTargetInfo.layer_or_depth_plane = 0;
+        colorTargetInfo.clear_color = SDL_FColor{0.4f, 0.6f, 0.9f, 1.0f};
+        colorTargetInfo.load_op = SDL_GPU_LOADOP_CLEAR;
+        colorTargetInfo.store_op = SDL_GPU_STOREOP_RESOLVE;
+        colorTargetInfo.resolve_texture = appState->resolveTexture;
+        colorTargetInfo.resolve_mip_level = 0;
+        colorTargetInfo.resolve_layer = 0;
+        colorTargetInfo.cycle = false;
+        colorTargetInfo.cycle_resolve_texture = false;
 
         const SDL_GPUDepthStencilTargetInfo depthTarget = {
             .texture = appState->depthTexture,
@@ -390,23 +401,21 @@ SDL_AppResult RenderFrame(AppState* appState) {
         SDL_EndGPURenderPass(appState->renderPass);
         appState->renderPass = nullptr;
 
-        if (appState->msaaSamples > 1) {
-            SDL_GPUBlitInfo blitInfo = {
-                .source = {
-                    .texture = appState->resolveTexture,
-                    .w = static_cast<Uint32>(appState->windowWidth),
-                    .h = static_cast<Uint32>(appState->windowHeight),
-                },
-                .destination = {
-                    .texture = swapchainTexture,
-                    .w = static_cast<Uint32>(appState->windowWidth),
-                    .h = static_cast<Uint32>(appState->windowHeight),
-                },
-                .load_op = SDL_GPU_LOADOP_DONT_CARE,
-                .filter = SDL_GPU_FILTER_LINEAR
-            };
-            SDL_BlitGPUTexture(commandBuffer, &blitInfo);
-        }
+        SDL_GPUBlitInfo blitInfo = {
+            .source = {
+                .texture = appState->resolveTexture,
+                .w = static_cast<Uint32>(appState->windowWidth),
+                .h = static_cast<Uint32>(appState->windowHeight),
+            },
+            .destination = {
+                .texture = swapchainTexture,
+                .w = static_cast<Uint32>(appState->windowWidth),
+                .h = static_cast<Uint32>(appState->windowHeight),
+            },
+            .load_op = SDL_GPU_LOADOP_DONT_CARE,
+            .filter = SDL_GPU_FILTER_LINEAR
+        };
+        SDL_BlitGPUTexture(commandBuffer, &blitInfo);
     }
     // Send the command buffer to the GPU for drawing
     SDL_SubmitGPUCommandBuffer(commandBuffer);

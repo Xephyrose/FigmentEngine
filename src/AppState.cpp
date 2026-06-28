@@ -909,6 +909,7 @@ void AppState::RecreateAllMultisampleStates() {
 
 void AppState::RecreateAllPipelines() {
     SDL_Log("Recreating all pipelines...");
+    RecreateAllMultisampleStates();
     for (const auto &pipeline: pipelines | std::views::values) {
         SDL_ReleaseGPUGraphicsPipeline(device, pipeline);
     }

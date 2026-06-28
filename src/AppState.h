@@ -26,7 +26,7 @@ struct AppState {
     SDL_GPUTexture* depthTexture = nullptr;
     SDL_GPUTexture* msaaColorTarget = nullptr;
     SDL_GPUTexture* resolveTexture = nullptr;
-    int msaaSamples = 4;
+    int msaaSamples = 3;
     bool isMouseRelative = false;
 
     Node root = Node("root");
