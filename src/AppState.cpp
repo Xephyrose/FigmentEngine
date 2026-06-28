@@ -12,7 +12,6 @@
 #include "PointLight3DGPU.h"
 #include "Vertex.h"
 #include "SDL3/SDL_log.h"
-#include "SDL3_shadercross/SDL_shadercross.h"
 #include "thirdparty/json.hpp"
 
 bool AppState::CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader, const std::string& rasterizerState, const std::string &blendState, const
@@ -900,4 +899,20 @@ void AppState::CreateDefaultMultisampleStates()
     defaultMultisampleState.enable_alpha_to_coverage = true;
     defaultMultisampleState.sample_mask = 0;
     multisampleStates.insert_or_assign("Multisample", defaultMultisampleState);
+}
+
+void AppState::RecreateAllMultisampleStates() {
+    SDL_Log("Recreating all multisample states...");
+    multisampleStates.clear();
+    CreateDefaultMultisampleStates();
+}
+
+void AppState::RecreateAllPipelines() {
+    SDL_Log("Recreating all pipelines...");
+    for (const auto &pipeline: pipelines | std::views::values) {
+        SDL_ReleaseGPUGraphicsPipeline(device, pipeline);
+    }
+    pipelines.clear();
+
+    CreateDefaultPipelines();
 }

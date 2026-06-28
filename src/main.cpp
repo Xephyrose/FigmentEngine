@@ -21,7 +21,6 @@
 #include "Sprite2D.h"
 #include "Vertex.h"
 #include "thirdparty/tiny_gltf.h"
-#include <SDL3_shadercross/SDL_shadercross.h>
 
 #include "EditorThemeManager.h"
 
@@ -108,8 +107,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     }
     SDL_SetWindowAspectRatio(appState->window, 1.777f, 1.777f);
     SDL_MaximizeWindow(appState->window);
-
-    SDL_ShaderCross_Init();
 
     constexpr SDL_GPUShaderFormat formatFlags = SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL;
     appState->device = SDL_CreateGPUDevice(formatFlags, true, nullptr);
@@ -208,6 +205,8 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
             appState->CreateMSAAColorTarget();
             appState->CreateDepthTexture();
             appState->CreateResolveTexture();
+            appState->RecreateAllMultisampleStates();
+            appState->RecreateAllPipelines();
             return SDL_APP_CONTINUE;
         case SDL_EVENT_MOUSE_MOTION:
             return SDL_APP_CONTINUE;
@@ -278,7 +277,13 @@ SDL_AppResult RenderFrame(AppState* appState) {
         }
 
         ImGui::Begin("Project Settings");
-        ImGui::InputInt("MSAA Samples", &appState->msaaSamples);
+        if (ImGui::InputInt("MSAA Samples", &appState->msaaSamples)) {
+            appState->CreateMSAAColorTarget();
+            appState->CreateDepthTexture();
+            appState->CreateResolveTexture();
+            appState->RecreateAllMultisampleStates();
+            appState->RecreateAllPipelines();
+        }
         ImGui::End();
 
         ImGui::Begin("Rendering Overrides");

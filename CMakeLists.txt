@@ -31,18 +31,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SDL3_image)
 
-set(SDLSHADERCROSS_VENDORED ON CACHE BOOL "Use vendored dependencies" FORCE)
-set(SDLSHADERCROSS_DXC OFF CACHE BOOL "Disable HLSL compilation via DXC" FORCE)
-set(SDLSHADERCROSS_GLSLANG OFF CACHE BOOL "Disable GLSL compilation" FORCE)
-
-FetchContent_Declare(
-    SDL3_shadercross
-    GIT_REPOSITORY https://github.com/libsdl-org/SDL_shadercross.git
-    GIT_TAG main
-    GIT_SHALLOW TRUE
-)
-FetchContent_MakeAvailable(SDL3_shadercross)
-
 FetchContent_Declare(
     box2d
     GIT_REPOSITORY https://github.com/erincatto/box2d.git
@@ -107,8 +95,8 @@ add_executable(FigmentEngine
     src/Player2D.cpp
     src/Player2D.h
     src/PointLight3D.h
-        src/PointLight3DGPU.cpp
-        src/PointLight3DGPU.h
+    src/PointLight3DGPU.cpp
+    src/PointLight3DGPU.h
     src/PointLight3D.cpp
     src/MaterialPhong.cpp
     src/MaterialPhong.h
@@ -118,8 +106,8 @@ add_executable(FigmentEngine
     src/EditorThemeManager.h
     src/ImGuiWidgets.cpp
     src/ImGuiWidgets.h
-        src/MaterialPhongTexturedNormalMap.cpp
-        src/MaterialPhongTexturedNormalMap.h
+    src/MaterialPhongTexturedNormalMap.cpp
+    src/MaterialPhongTexturedNormalMap.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
@@ -127,7 +115,6 @@ target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(FigmentEngine PRIVATE
     SDL3::SDL3
     SDL3_image::SDL3_image
-    SDL3_shadercross::SDL3_shadercross
     box2d
     ${CMAKE_DL_LIBS}
     pthread

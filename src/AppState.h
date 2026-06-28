@@ -26,7 +26,7 @@ struct AppState {
     SDL_GPUTexture* depthTexture = nullptr;
     SDL_GPUTexture* msaaColorTarget = nullptr;
     SDL_GPUTexture* resolveTexture = nullptr;
-    int msaaSamples = 2;
+    int msaaSamples = 4;
     bool isMouseRelative = false;
 
     Node root = Node("root");
@@ -95,6 +95,9 @@ struct AppState {
     void CreateDefaultBlendStates();
     void CreateDefaultRasterizerStates();
     void CreateDefaultMultisampleStates();
+
+    void RecreateAllMultisampleStates();
+    void RecreateAllPipelines();
 
     // EDITOR
     bool debug = true;
