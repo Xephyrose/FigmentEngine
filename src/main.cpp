@@ -134,7 +134,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->CreateDefaultPipelines();
     appState->CreateMSAAColorTarget();
     appState->CreateDepthTexture();
-    appState->CreateResolveTexture();
     appState->CreateLightBuffers();
 
     appState->quadMesh = new Mesh();
@@ -204,7 +203,6 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
             appState->windowHeight = event->window.data2;
             appState->CreateMSAAColorTarget();
             appState->CreateDepthTexture();
-            appState->CreateResolveTexture();
             appState->RecreateAllPipelines();
             return SDL_APP_CONTINUE;
         case SDL_EVENT_MOUSE_MOTION:
@@ -279,7 +277,6 @@ SDL_AppResult RenderFrame(AppState* appState) {
         if (ImGui::InputInt("MSAA Samples", &appState->msaaSamples)) {
             appState->CreateMSAAColorTarget();
             appState->CreateDepthTexture();
-            appState->CreateResolveTexture();
             appState->RecreateAllPipelines();
         }
         ImGui::End();
@@ -389,12 +386,27 @@ SDL_AppResult RenderFrame(AppState* appState) {
 
         appState->root.Draw(*appState, commandBuffer);
 
-        if (appState->debug) {
-            ImGui_ImplSDLGPU3_RenderDrawData(draw_data, commandBuffer, appState->renderPass);
-        }
-
         SDL_EndGPURenderPass(appState->renderPass);
         appState->renderPass = nullptr;
+
+        if (appState->debug) {
+            // Start a new render pass targeting the swapchain directly
+            SDL_GPUColorTargetInfo uiTargetInfo = {};
+            uiTargetInfo.texture = swapchainTexture;
+            uiTargetInfo.mip_level = 0;
+            uiTargetInfo.layer_or_depth_plane = 0;
+            uiTargetInfo.clear_color = SDL_FColor{0.0f, 0.0f, 0.0f, 0.0f}; // Don't clear
+            uiTargetInfo.load_op = SDL_GPU_LOADOP_LOAD;   // Preserve the 3D scene
+            uiTargetInfo.store_op = SDL_GPU_STOREOP_STORE;
+            uiTargetInfo.resolve_texture = nullptr;
+            uiTargetInfo.cycle = false;
+
+            SDL_GPURenderPass* uiPass = SDL_BeginGPURenderPass(commandBuffer, &uiTargetInfo, 1, nullptr);
+            if (uiPass) {
+                ImGui_ImplSDLGPU3_RenderDrawData(draw_data, commandBuffer, uiPass);
+                SDL_EndGPURenderPass(uiPass);
+            }
+        }
     }
     // Send the command buffer to the GPU for drawing
     SDL_SubmitGPUCommandBuffer(commandBuffer);
