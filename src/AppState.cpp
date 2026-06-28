@@ -419,36 +419,151 @@ bool AppState::LoadShader(const std::string& path) {
 
 bool AppState::LoadTexture(const std::string& path) {
     const std::string fullPath = (std::filesystem::path(SDL_GetBasePath()) / "assets" / "textures" / path).string();
+
+    // 1. Load the image surface
+    SDL_Surface* surface = IMG_Load(fullPath.c_str());
+    if (!surface) {
+        SDL_Log("Couldn't load image: %s", SDL_GetError());
+        return false;
+    }
+
+    // Convert to RGBA32 (SDL_ConvertSurface doesn't take a third argument anymore)
+    SDL_Surface* converted = SDL_ConvertSurface(surface, SDL_PIXELFORMAT_RGBA32);
+    SDL_DestroySurface(surface);
+    if (!converted) {
+        SDL_Log("Failed to convert surface format: %s", SDL_GetError());
+        return false;
+    }
+
+    // 2. Acquire command buffer and begin copy pass
     SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(device);
     if (!uploadCmdBuf) {
         SDL_Log("Couldn't acquire command buffer: %s", SDL_GetError());
+        SDL_DestroySurface(converted);
         return false;
     }
 
     SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
     if (!copyPass) {
         SDL_Log("Couldn't begin copy pass: %s", SDL_GetError());
+        SDL_DestroySurface(converted);
         SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
         return false;
     }
 
-    // Load image
-    SDL_GPUTexture* texture = IMG_LoadGPUTexture(device, copyPass, fullPath.c_str(), nullptr, nullptr);
+    int mipLevels = 1;
+    int maxDimension = std::max(converted->w, converted->h);
+    while (maxDimension > 1) {
+        maxDimension /= 2;
+        mipLevels++;
+    }
 
-    // End the copy pass
+    // 3. Create the texture with num_levels = 0 (auto-generate all mip levels)
+    SDL_GPUTextureCreateInfo textureInfo = {};
+    textureInfo.type = SDL_GPU_TEXTURETYPE_2D;
+    textureInfo.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
+    textureInfo.width = converted->w;
+    textureInfo.height = converted->h;
+    textureInfo.layer_count_or_depth = 1;
+    textureInfo.num_levels = mipLevels;  // Generate all mip levels
+    textureInfo.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER | SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
+    textureInfo.props = 0;
+
+    SDL_GPUTexture* texture = SDL_CreateGPUTexture(device, &textureInfo);
+    if (!texture) {
+        SDL_Log("Couldn't create texture: %s", SDL_GetError());
+        SDL_DestroySurface(converted);
+        SDL_EndGPUCopyPass(copyPass);
+        SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
+        return false;
+    }
+
+    // 4. Create a transfer buffer for the pixel data
+    size_t pixelDataSize = converted->h * converted->pitch;
+    SDL_GPUTransferBufferCreateInfo transferInfo = {};
+    transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
+    transferInfo.size = pixelDataSize;
+    transferInfo.props = 0;
+
+    SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(device, &transferInfo);
+    if (!transferBuffer) {
+        SDL_Log("Couldn't create transfer buffer: %s", SDL_GetError());
+        SDL_DestroySurface(converted);
+        SDL_EndGPUCopyPass(copyPass);
+        SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
+        return false;
+    }
+
+    // 5. Map the transfer buffer and copy the pixel data
+    void* mapped = SDL_MapGPUTransferBuffer(device, transferBuffer, false);
+    if (!mapped) {
+        SDL_Log("Couldn't map transfer buffer: %s", SDL_GetError());
+        SDL_DestroySurface(converted);
+        SDL_EndGPUCopyPass(copyPass);
+        SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
+        SDL_ReleaseGPUTransferBuffer(device, transferBuffer);
+        return false;
+    }
+
+    memcpy(mapped, converted->pixels, pixelDataSize);
+    SDL_UnmapGPUTransferBuffer(device, transferBuffer);
+
+    // 6. Upload from transfer buffer to texture
+    SDL_GPUTextureTransferInfo uploadInfo = {};
+    uploadInfo.transfer_buffer = transferBuffer;
+    uploadInfo.offset = 0;
+    uploadInfo.pixels_per_row = converted->pitch / 4;  // RGBA32 = 4 bytes per pixel
+    uploadInfo.rows_per_layer = converted->h;
+
+    SDL_GPUTextureRegion region = {};
+    region.texture = texture;
+    region.x = 0;
+    region.y = 0;
+    region.w = converted->w;
+    region.h = converted->h;
+    region.d = 1;
+    region.mip_level = 0;
+    region.layer = 0;
+
+    SDL_UploadToGPUTexture(copyPass, &uploadInfo, &region, false);
+
+    SDL_DestroySurface(converted);
+
+    // 7. End the copy pass and submit
     SDL_EndGPUCopyPass(copyPass);
 
-    if (!texture) {
-        SDL_Log("Couldn't load texture: %s", path.c_str());
-        SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
+    // 2. Submit the upload command buffer and wait for it to complete
+    SDL_GPUFence* fence = SDL_SubmitGPUCommandBufferAndAcquireFence(uploadCmdBuf);
+    if (!fence) {
+        SDL_Log("Couldn't acquire fence: %s", SDL_GetError());
+        SDL_ReleaseGPUTransferBuffer(device, transferBuffer);
+        return false;
+    }
+    SDL_WaitForGPUFences(device, true, &fence, 1);
+    SDL_ReleaseGPUFence(device, fence);
+
+    // 3. Release the transfer buffer (upload is complete)
+    SDL_ReleaseGPUTransferBuffer(device, transferBuffer);
+
+    // 4. Acquire a NEW command buffer for mipmap generation
+    SDL_GPUCommandBuffer* mipCmdBuf = SDL_AcquireGPUCommandBuffer(device);
+    if (!mipCmdBuf) {
+        SDL_Log("Couldn't acquire command buffer for mipmap generation");
         return false;
     }
 
-    textures.insert_or_assign(path, texture);
+    // 5. Generate mipmaps using the new command buffer
+    SDL_GenerateMipmapsForGPUTexture(mipCmdBuf, texture);
 
-    SDL_GPUFence* fence = SDL_SubmitGPUCommandBufferAndAcquireFence(uploadCmdBuf);
-    SDL_WaitForGPUFences(device, true, &fence, 1);
-    SDL_ReleaseGPUFence(device, fence);
+    // 6. Submit the mipmap command buffer
+    SDL_GPUFence* mipFence = SDL_SubmitGPUCommandBufferAndAcquireFence(mipCmdBuf);
+    if (mipFence) {
+        SDL_WaitForGPUFences(device, true, &mipFence, 1);
+        SDL_ReleaseGPUFence(device, mipFence);
+    }
+
+    // 7. Store the texture
+    textures.insert_or_assign(path, texture);
 
     return true;
 }
