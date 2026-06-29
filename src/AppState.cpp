@@ -229,7 +229,7 @@ bool AppState::LoadMesh(const std::string& path) {
                 size_t vertexCount = tangents.size() / 4;
                 for (size_t i = 0; i < vertexCount && i < submesh.vertexCount; i++) {
                     result.vertices[startVertex + i].tangent = glm::vec4(
-                        tangents[i * 3], tangents[i * 3 + 1], tangents[i * 3 + 2], tangents[i * 3 + 3]
+                        tangents[i * 4], tangents[i * 4 + 1], tangents[i * 4 + 2], tangents[i * 4 + 3]
                     );
                 }
             }
@@ -704,13 +704,13 @@ void AppState::CreateLightBuffers() {
 
 void AppState::CreateDefaultMaterials() {
     SDL_Log("Creating default materials...");
-    new MaterialPhongTextured(this, "uvs", "UnlitUVs");
+    new MaterialUnlitTextured(this, "uvs", "UnlitUVs");
 
     auto* missing_2d = new MaterialUnlitTextured(this, "missing_2d", "2D");
     missing_2d->setTextureAlbedo(this, "missing.png");
     missing_2d->setSampler(this, "nearest_repeat");
 
-    auto* missing = new MaterialPhongTextured(this, "missing", "BlinnPhongTextured");
+    auto* missing = new MaterialUnlitTextured(this, "missing", "UnlitTextured");
     missing->setTextureAlbedo(this, "missing.png");
     missing->setSampler(this, "anisotropic_repeat");
 
@@ -732,26 +732,30 @@ void AppState::CreateDefaultMaterials() {
     concrete_bricks->setSampler(this, "anisotropic_repeat");
     concrete_bricks->setTextureNormalMap(this, "brick_concrete_normal.png");
 
-    auto* concrete_bricks_with_specks = new MaterialPhongTextured(this, "concrete_bricks_with_specks", "BlinnPhongTextured");
+    auto* concrete_bricks_with_specks = new MaterialPhongTexturedNormalMap(this, "concrete_bricks_with_specks", "BlinnPhongTexturedNormalMapped");
     concrete_bricks_with_specks->setTextureAlbedo(this, "brick_concrete_specks_albedo.png");
     concrete_bricks_with_specks->setSampler(this, "anisotropic_repeat");
+    concrete_bricks_with_specks->setTextureNormalMap(this, "brick_concrete_normal.png");
 
     auto* plaster = new MaterialPhongTexturedNormalMap(this, "plaster", "BlinnPhongTexturedNormalMapped");
     plaster->setSampler(this, "anisotropic_repeat");
     plaster->setTextureNormalMap(this, "plaster_normal.png");
     plaster->setColorSpecular(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
 
-    auto* reinforced_glass = new MaterialPhongTextured(this, "reinforced_glass", "BlinnPhongTexturedAlpha");
+    auto* reinforced_glass = new MaterialPhongTexturedNormalMap(this, "reinforced_glass", "BlinnPhongTexturedNormalMapped");
     reinforced_glass->setTextureAlbedo(this, "reinforced_glass_albedo.png");
     reinforced_glass->setSampler(this, "anisotropic_repeat");
+    reinforced_glass->setTextureNormalMap(this, "reinforced_glass_normal.png");
 
-    auto* fence = new MaterialPhongTextured(this, "fence", "BlinnPhongTexturedAlpha");
+    auto* fence = new MaterialPhongTexturedNormalMap(this, "fence", "BlinnPhongTexturedNormalMapped");
     fence->setTextureAlbedo(this, "fence_albedo.png");
     fence->setSampler(this, "anisotropic_repeat");
+    fence->setTextureNormalMap(this, "fence_normal.png");
 
-    auto* asphalt = new MaterialPhongTextured(this, "asphalt", "BlinnPhongTextured");
+    auto* asphalt = new MaterialPhongTexturedNormalMap(this, "asphalt", "BlinnPhongTexturedNormalMapped");
     asphalt->setTextureAlbedo(this, "asphalt_albedo.png");
     asphalt->setSampler(this, "anisotropic_repeat");
+    asphalt->setTextureNormalMap(this, "asphalt_normal.png");
 
     auto* asphalt_2 = new MaterialPhongTextured(this, "asphalt_2", "BlinnPhongTextured");
     asphalt_2->setTextureAlbedo(this, "asphalt_2_albedo.png");
@@ -765,33 +769,40 @@ void AppState::CreateDefaultMaterials() {
     concrete_with_specks->setTextureAlbedo(this, "concrete_specks_albedo.png");
     concrete_with_specks->setSampler(this, "anisotropic_repeat");
 
-    auto* hardwood_dark = new MaterialPhongTextured(this, "hardwood_dark", "BlinnPhongTextured");
+    auto* hardwood_dark = new MaterialPhongTexturedNormalMap(this, "hardwood_dark", "BlinnPhongTexturedNormalMapped");
     hardwood_dark->setTextureAlbedo(this, "hardwood_dark_albedo.png");
     hardwood_dark->setSampler(this, "anisotropic_repeat");
+    hardwood_dark->setTextureNormalMap(this, "hardwood_dark_normal.png");
 
-    auto* hardwood_light = new MaterialPhongTextured(this, "hardwood_light", "BlinnPhongTextured");
+    auto* hardwood_light = new MaterialPhongTexturedNormalMap(this, "hardwood_light", "BlinnPhongTexturedNormalMapped");
     hardwood_light->setTextureAlbedo(this, "hardwood_light_albedo.png");
     hardwood_light->setSampler(this, "anisotropic_repeat");
+    hardwood_light->setTextureNormalMap(this, "hardwood_light_normal.png");
 
-    auto* pine_end = new MaterialPhongTextured(this, "pine_end", "BlinnPhongTextured");
+    auto* pine_end = new MaterialPhongTexturedNormalMap(this, "pine_end", "BlinnPhongTexturedNormalMapped");
     pine_end->setTextureAlbedo(this, "pine_end_albedo.png");
     pine_end->setSampler(this, "anisotropic_repeat");
+    pine_end->setTextureNormalMap(this, "pine_end_normal.png");
 
-    auto* pine_wood_dark = new MaterialPhongTextured(this, "pine_wood_dark", "BlinnPhongTextured");
+    auto* pine_wood_dark = new MaterialPhongTexturedNormalMap(this, "pine_wood_dark", "BlinnPhongTexturedNormalMapped");
     pine_wood_dark->setTextureAlbedo(this, "pine_wood_dark_albedo.png");
     pine_wood_dark->setSampler(this, "anisotropic_repeat");
+    pine_wood_dark->setTextureNormalMap(this, "pine_wood_dark_normal.png");
 
-    auto* pine_wood_light = new MaterialPhongTextured(this, "pine_wood_light", "BlinnPhongTextured");
+    auto* pine_wood_light = new MaterialPhongTexturedNormalMap(this, "pine_wood_light", "BlinnPhongTexturedNormalMapped");
     pine_wood_light->setTextureAlbedo(this, "pine_wood_light_albedo.png");
     pine_wood_light->setSampler(this, "anisotropic_repeat");
+    pine_wood_light->setTextureNormalMap(this, "pine_wood_light_normal.png");
 
-    auto* roof_tile = new MaterialPhongTextured(this, "roof_tile", "BlinnPhongTextured");
+    auto* roof_tile = new MaterialPhongTexturedNormalMap(this, "roof_tile", "BlinnPhongTexturedNormalMapped");
     roof_tile->setTextureAlbedo(this, "roof_tile_albedo.png");
     roof_tile->setSampler(this, "anisotropic_repeat");
+    roof_tile->setTextureNormalMap(this, "roof_tile_normal.png");
 
-    auto* wood_plank = new MaterialPhongTextured(this, "wood_plank", "BlinnPhongTextured");
+    auto* wood_plank = new MaterialPhongTexturedNormalMap(this, "wood_plank", "BlinnPhongTexturedNormalMapped");
     wood_plank->setTextureAlbedo(this, "wood_plank_albedo.png");
     wood_plank->setSampler(this, "anisotropic_repeat");
+    wood_plank->setTextureNormalMap(this, "wood_plank_normal.png");
 
     auto* grid_grey = new MaterialPhongTextured(this, "grid_grey", "BlinnPhongTextured");
     grid_grey->setTextureAlbedo(this, "grid_grey_albedo.png");
@@ -806,8 +817,10 @@ void AppState::CreateDefaultMaterials() {
     paint_red->setTextureNormalMap(this, "plaster_normal.png");
     paint_red->setColorSpecular(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
 
-    auto* paint_beige = new MaterialPhongTextured(this, "paint_beige", "BlinnPhongTextured");
+    auto* paint_beige = new MaterialPhongTexturedNormalMap(this, "paint_beige", "BlinnPhongTexturedNormalMapped");
     paint_beige->setColorAlbedo(glm::vec4(0.75f, 0.55f, 0.45f, 1.0f));
+    paint_beige->setTextureNormalMap(this, "plaster_normal.png");
+    paint_beige->setColorSpecular(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
 
     auto* clip = new MaterialPhongTextured(this, "clip", "BlinnPhongTexturedAlpha");
     clip->setColorAlbedo(glm::vec4(1.0f, 0.0f, 0.0f, 0.5f));
