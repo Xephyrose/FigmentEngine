@@ -17,7 +17,8 @@ void Sprite2D::ImGuiDraw() {
     if (ImGui::CollapsingHeader("Sprite2D", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::InputText("Sprite", &sprite);
         float _size[2] = {size.x, size.y};
-        ImGui::ColoredDragFloat2("Size", _size, true);
+        const char *xy[2] = {"X", "Y"};
+        ImGui::ColoredDragFloat("Size", _size, xy);
         size.x = _size[0];
         size.y = _size[1];
     }

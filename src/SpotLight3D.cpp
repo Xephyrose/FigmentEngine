@@ -16,24 +16,24 @@ void SpotLight3D::ImGuiDraw() {
         float col[3] = { color.x, color.y, color.z };
         ImGui::ColoredDragFloat3RGB("RGB", col);
         color = glm::vec3(col[0], col[1], col[2]);
-        ImGui::Text("Brightness");
-        ImGui::SameLine();
-        ImGui::ColoredDragFloat("Brightness", &brightness, false);
-        ImGui::Text("Constant");
-        ImGui::SameLine();
-        ImGui::ColoredDragFloat("Constant", &constant, false);
-        ImGui::Text("Linear");
-        ImGui::SameLine();
-        ImGui::ColoredDragFloat("Linear", &linear, false);
-        ImGui::Text("Quadratic");
-        ImGui::SameLine();
-        ImGui::ColoredDragFloat("Quadratic", &quadratic, false);
-        ImGui::Text("Inner Falloff");
-        ImGui::SameLine();
-        ImGui::ColoredDragFloat("Inner Falloff", &cutoff, false);
-        ImGui::Text("Outer Falloff");
-        ImGui::SameLine();
-        ImGui::ColoredDragFloat("Outer Falloff", &outerCutoff, false);
+        // ImGui::Text("Brightness");
+        // ImGui::SameLine();
+        // ImGui::ColoredDragFloat("Brightness", &brightness, nullptr);
+        // ImGui::Text("Constant");
+        // ImGui::SameLine();
+        // ImGui::ColoredDragFloat("Constant", &constant, false);
+        // ImGui::Text("Linear");
+        // ImGui::SameLine();
+        // ImGui::ColoredDragFloat("Linear", &linear, false);
+        // ImGui::Text("Quadratic");
+        // ImGui::SameLine();
+        // ImGui::ColoredDragFloat("Quadratic", &quadratic, false);
+        // ImGui::Text("Inner Falloff");
+        // ImGui::SameLine();
+        // ImGui::ColoredDragFloat("Inner Falloff", &cutoff, false);
+        // ImGui::Text("Outer Falloff");
+        // ImGui::SameLine();
+        // ImGui::ColoredDragFloat("Outer Falloff", &outerCutoff, false);
     }
 }
 

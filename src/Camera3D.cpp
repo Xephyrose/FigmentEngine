@@ -9,11 +9,11 @@ Camera3D::Camera3D() {
 
 void Camera3D::ImGuiDraw() {
     Node3D::ImGuiDraw();
-    if (ImGui::CollapsingHeader("Camera3D", ImGuiTreeNodeFlags_DefaultOpen)) {
-        ImGui::ColoredDragFloat("FOV", &fov, false);
-        ImGui::ColoredDragFloat("Near", &nearPlane, false);
-        ImGui::ColoredDragFloat("Far", &farPlane, false);
-    }
+    // if (ImGui::CollapsingHeader("Camera3D", ImGuiTreeNodeFlags_DefaultOpen)) {
+    //     ImGui::ColoredDragFloat("FOV", &fov, false);
+    //     ImGui::ColoredDragFloat("Near", &nearPlane, false);
+    //     ImGui::ColoredDragFloat("Far", &farPlane, false);
+    // }
 }
 
 glm::mat4 Camera3D::GetViewMatrix() const {

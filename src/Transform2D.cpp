@@ -4,12 +4,14 @@
 #include "SDL3/SDL_log.h"
 
 void Transform2D::ImGuiDraw() {
+    const char *xy[2] = {"X", "Y"};
+
     float _position[2] = { position.x, position.y };
-    ImGui::ColoredDragFloat2("##Position", _position, true);
+    ImGui::ColoredDragFloat("##Position", _position, xy);
     position = glm::vec2(_position[0], _position[1]);
 
     float _scale[2] = { scale.x, scale.y };
-    ImGui::ColoredDragFloat2("##Scale", _scale, true);
+    ImGui::ColoredDragFloat("##Scale", _scale, xy);
     scale = glm::vec2(_scale[0], _scale[1]);
 }
 
