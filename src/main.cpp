@@ -153,9 +153,9 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->root.addChild(std::unique_ptr<Node>(directionalLight));
 
     auto* spotLight = new SpotLight3D(appState);
-    pointLight->localTransform.position.x = -53;
-    pointLight->localTransform.position.y = 6;
-    pointLight->localTransform.position.z = -26;
+    spotLight->localTransform.position.x = -53;
+    spotLight->localTransform.position.y = 6;
+    spotLight->localTransform.position.z = -26;
     // spotLight->intensity = 0;
     appState->root.addChild(std::unique_ptr<Node>(spotLight));
 
@@ -336,8 +336,8 @@ void PrepareSpotLightBuffer(AppState *appState, SDL_GPUCommandBuffer *commandBuf
     for (const SpotLight3D* light : appState->spotLights) {
         SpotLight3DGPU gpu;
         gpu.color = glm::vec4(light->color, 0);
-        gpu.position = glm::vec4(light->GetGlobalTransform().position, light->cutoff);
-        gpu.direction = glm::vec4(light->GetGlobalTransform().rotation, light->outerCutoff);
+        gpu.position = glm::vec4(light->GetGlobalTransform().position, glm::cos(glm::radians(light->cutoff)));
+        gpu.direction = glm::vec4(light->GetGlobalTransform().getForward(), glm::cos(glm::radians(light->outerCutoff)));
         gpu.params = glm::vec4(light->constant, light->linear, light->quadratic, 0);
         appState->spotLightGPUs.push_back(gpu);
     }
