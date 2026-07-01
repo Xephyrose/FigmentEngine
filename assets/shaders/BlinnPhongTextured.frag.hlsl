@@ -15,6 +15,9 @@ cbuffer PushConstants : register(b0, space3)
     bool    useAmbientTexture;
     float3  colorSpecular;
     bool    useSpecularTexture;
+    int     num_point_lights;
+    int     num_dir_lights;
+    int     num_spot_lights;
 }
 
 struct PSInput {
@@ -23,7 +26,25 @@ struct PSInput {
     float3 worldNormal : TEXCOORD2;
 };
 
-StructuredBuffer<float4> pointLights : register(t3, space2);
+struct PointLight {
+    float4 color;
+    float4 position; // 3 for pos, 1 for padding
+};
+
+struct DirectionalLight {
+    float4 rgb;
+    float4 direction; // 3 for dir, 1 for padding
+};
+
+//struct SpotLight {
+//    float4 rgb;
+//    float4 position; // 3 for pos, 1 for padding
+//    float4 direction; // 3 for dir, 1 for padding
+//};
+
+StructuredBuffer<PointLight> pointLights : register(t3, space2);
+StructuredBuffer<DirectionalLight> directionalLights : register(t4, space2);
+//StructuredBuffer<SpotLight> spotLights : register(t5, space2);
 
 float4 main(PSInput input) : SV_TARGET {
 

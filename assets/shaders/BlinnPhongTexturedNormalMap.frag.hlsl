@@ -69,13 +69,15 @@ float3 CalcPointLight(PointLight light, float3 normal, float3 fragPos, float3 vi
 
 float3 CalcDirectionalLight(DirectionalLight light, float3 normal, float3 fragPos, float3 viewDir, float3 calcAlbedo, float3 calcSpecular)
 {
+    float3 lightColor = light.rgb.xyz * light.rgb.w;
+
     float3 lightDir = normalize(-light.direction.xyz);
     float diff = max(dot(normal, lightDir), 0.0);
     float3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess * 4);
 
-    float3 diffuse = diff * calcAlbedo;
-    float3 specular = spec * calcSpecular;
+    float3 diffuse = lightColor * diff * calcAlbedo;
+    float3 specular = lightColor * spec * calcSpecular;
     return diffuse + specular;
 }
 
@@ -85,7 +87,7 @@ float4 main(PSInput input) : SV_TARGET {
 
     float3 N = normalize(input.worldNormal);
     float3 T = normalize(input.worldTangent);
-    float3 B = normalize(input.worldTangent);
+    float3 B = normalize(input.worldBitangent);
 
     T = normalize(T - dot(T, N) * N);
     B = cross(N, T);
