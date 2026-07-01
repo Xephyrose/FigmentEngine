@@ -20,27 +20,22 @@ struct SpotLight {
     float4 direction; // 3 for dir, 1 for padding
 };
 
-float CalcPhongSpecular(float3 lightDir, float3 norm, float3 viewDir) {
+float CalcPhongSpecular(float3 lightDir, float3 norm, float3 viewDir, float shininess) {
     float3 reflectDir = reflect(-lightDir, norm);
-    return pow(max(dot(viewDir, reflectDir), 0.0), 32);
+    return pow(max(dot(viewDir, reflectDir), 0.0), shininess);
 }
 
-float CalcBlinnPhongSpecular(float3 lightDir, float3 norm, float3 viewDir) {
+float CalcBlinnPhongSpecular(float3 lightDir, float3 norm, float3 viewDir, float shininess) {
     float3 halfwayDir = normalize(lightDir + viewDir);
-    return pow(max(dot(norm, halfwayDir), 0.0), 128);
+    return pow(max(dot(norm, halfwayDir), 0.0), shininess * 4);
 }
 
-float3 CalcPointLight(PointLight light, float3 normal, float3 fragPos, float3 viewDir, float3 calcAlbedo, float3 calcSpecular, float shininess) {
+float3 CalcPointLight(PointLight light, float3 normal, float3 fragPos, float3 calcAlbedo, float3 calcSpecular, float spec) {
     float3 lightColor = light.color.xyz * light.color.w;
 
-    // Diffuse
     float3 lightDir = normalize(light.position.xyz - fragPos);
     float diff = max(dot(normal, lightDir), 0.0);
     float3 diffuse = lightColor * diff * calcAlbedo.xyz;
-
-    // Specular
-    float3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
     float3 specular = lightColor * (spec * calcSpecular);
 
     return diffuse + specular;
