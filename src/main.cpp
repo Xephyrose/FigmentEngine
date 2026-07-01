@@ -352,6 +352,17 @@ SDL_AppResult RenderFrame(AppState* appState) {
             // SDL_Log("Sprite spawned: %s", appState->editorSprite.c_str());
             appState->root.addChild(std::unique_ptr<Node>(sprite));
         }
+        if (ImGui::Button("Spawn 100 Lights")) {
+            for (int i = 0; i < 100; i++) {
+                auto* pointLight = new PointLight3D(appState);
+                pointLight->localTransform.position.x = rand() % 10;
+                pointLight->localTransform.position.y = rand() % 10;
+                pointLight->localTransform.position.z = rand() % 10;
+                pointLight->color.x = 0.5f;
+                appState->root.addChild(std::unique_ptr<Node>(pointLight));
+            }
+        }
+
         ImGui::End();
         if (appState->editorSelected != nullptr) {
             ImGui::Begin("Inspector");

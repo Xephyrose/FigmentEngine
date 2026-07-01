@@ -682,7 +682,7 @@ void AppState::CreateMSAAColorTarget() {
 }
 
 void AppState::CreatePointLightBuffer() {
-    SDL_Log("Creating point light buffer...");
+    SDL_Log("Creating point light buffer of size %i", pointLights.size());
     if (pointLightBuffer != nullptr) {
         SDL_Log("Freeing point light buffer...");
         SDL_WaitForGPUIdle(device);
@@ -708,7 +708,7 @@ void AppState::CreatePointLightBuffer() {
 }
 
 void AppState::CreateDirectionalLightBuffer() {
-    SDL_Log("Creating directional light buffer...");
+    SDL_Log("Creating directional light buffer of size %i", pointLights.size());
 
     if (directionalLightBuffer != nullptr) {
         SDL_Log("Freeing Directional light buffer...");
