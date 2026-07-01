@@ -9,17 +9,17 @@ SamplerState g_sampler2 : register(s2, space2);
 
 cbuffer PushConstants : register(b0, space3)
 {
-    float3  viewPos;
-    float   shininess;
-    float4  colorAlbedo;
-    bool    useAlbedoTexture;
-    float3  colorAmbient;
-    bool    useAmbientTexture;
-    float3  colorSpecular;
-    bool    useSpecularTexture;
-    int     num_point_lights;
-    int     num_dir_lights;
-    int     num_spot_lights;
+    float3 viewPos;
+    float  shininess;
+    float4 colorAlbedo;
+    bool   useAlbedoTexture;
+    float3 colorAmbient;
+    bool   useAmbientTexture;
+    float3 colorSpecular;
+    bool   useSpecularTexture;
+    int    num_point_lights;
+    int    num_dir_lights;
+    int    num_spot_lights;
 }
 
 struct PSInput {
@@ -65,7 +65,6 @@ float4 main(PSInput input) : SV_TARGET {
     float3 result = float3(0.0f, 0.0f, 0.0f);
     for(int i = 0; i < num_point_lights; i++) {
         result += CalcPointLight(pointLights[i], input.worldNormal, input.worldPos, calcAlbedo.xyz, calcSpecular, CalcBlinnPhongSpecular(normalize(pointLights[i].position.xyz - input.worldPos), input.worldNormal, normalize(viewPos - input.worldPos), shininess));
-//        result += CalcPointLight(pointLights[i], input.worldNormal, input.worldPos, normalize(viewPos - input.worldPos), calcAlbedo.xyz, calcSpecular, shininess);
     }
     for(int i = 0; i < num_dir_lights; i++) {
         result += CalcDirectionalLight(directionalLights[i], input.worldNormal, calcAlbedo.xyz, calcSpecular, CalcBlinnPhongSpecular(normalize(-directionalLights[i].direction.xyz), input.worldNormal, normalize(viewPos - input.worldPos), shininess));

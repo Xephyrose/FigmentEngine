@@ -18,13 +18,11 @@ void MaterialPhong::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer
     struct TransformData {
         glm::mat4 mvp;
         glm::mat4 model;
-        // glm::mat4 normalMatrix;
     };
 
     TransformData data{};
     data.mvp = mvp;
     data.model = model;
-    // data.normalMatrix = normalMatrix;
 
     SDL_PushGPUVertexUniformData(commandBuffer, 0, &data, sizeof(data));
 
@@ -36,6 +34,19 @@ void MaterialPhong::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer
 
     SDL_BindGPUGraphicsPipeline(appState->renderPass, gotPipeline);
 
+    struct PushData {
+        glm::vec3 viewPos;
+        int       num_point_lights;
+        int       num_dir_lights;
+        // int       num_spot_lights;
+    };
+    PushData push{};
+    push.viewPos = appState->current_camera_3d->GetGlobalTransform().position;
+    push.num_point_lights = appState->pointLights.size();
+    push.num_dir_lights = appState->directionalLights.size();
+
+    SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
+
     SDL_BindGPUFragmentStorageBuffers(
         appState->renderPass,
         0,
@@ -43,11 +54,10 @@ void MaterialPhong::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer
         1
     );
 
-    struct PushData {
-        glm::vec3 viewPos;
-    };
-    PushData push{};
-    push.viewPos = appState->current_camera_3d->GetGlobalTransform().position;
-
-    SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
+    SDL_BindGPUFragmentStorageBuffers(
+        appState->renderPass,
+        1,
+        &appState->directionalLightBuffer,
+        1
+    );
 }
