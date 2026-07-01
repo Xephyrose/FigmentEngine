@@ -1,0 +1,53 @@
+#ifndef LIGHTS
+#define LIGHTS
+
+// for all uses of color, they're vec4s with xyz as rgb, intensity is while
+// positions and rotations are
+
+struct PointLight {
+    float4 color;
+    float4 position; // 3 for pos, 1 for padding
+};
+
+struct DirectionalLight {
+    float4 rgb;
+    float4 direction; // 3 for dir, 1 for padding
+};
+
+struct SpotLight {
+    float4 rgb;
+    float4 position; // 3 for pos, 1 for padding
+    float4 direction; // 3 for dir, 1 for padding
+};
+
+float3 CalcPointLight(PointLight light, float3 normal, float3 fragPos, float3 viewDir, float3 calcAlbedo, float3 calcSpecular, float shininess)
+{
+    float3 lightColor = light.color.xyz * light.color.w;
+
+    // Diffuse
+    float3 lightDir = normalize(light.position.xyz - fragPos);
+    float diff = max(dot(normal, lightDir), 0.0);
+    float3 diffuse = lightColor * diff * calcAlbedo.xyz;
+
+    // Specular
+    float3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess * 4); // *4 because phong uses 4x as much as blinn-phong, so 4x here makes it comparable to phong
+    float3 specular = lightColor * (spec * calcSpecular);
+
+    return diffuse + specular;
+}
+
+float3 CalcDirectionalLight(DirectionalLight light, float3 normal, float3 viewDir, float3 calcAlbedo, float3 calcSpecular, float shininess)
+{
+    float3 lightColor = light.rgb.xyz * light.rgb.w;
+
+    float3 lightDir = normalize(-light.direction.xyz);
+    float diff = max(dot(normal, lightDir), 0.0);
+    float3 reflectDir = reflect(-lightDir, normal);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess * 4);
+
+    float3 diffuse = lightColor * diff * calcAlbedo;
+    float3 specular = lightColor * spec * calcSpecular;
+    return diffuse + specular;
+}
+#endif

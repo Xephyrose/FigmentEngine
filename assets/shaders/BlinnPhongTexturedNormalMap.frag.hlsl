@@ -1,3 +1,5 @@
+#include "assets/shaders/Lights.hlsl"
+
 Texture2D g_albedo : register(t0, space2);
 Texture2D g_ambient : register(t1, space2);
 Texture2D g_specular : register(t2, space2);
@@ -30,56 +32,9 @@ struct PSInput {
     float3 worldBitangent : TEXCOORD4;
 };
 
-struct PointLight {
-    float4 color;
-    float4 position; // 3 for pos, 1 for padding
-};
-
-struct DirectionalLight {
-    float4 rgb;
-    float4 direction; // 3 for dir, 1 for padding
-};
-
-//struct SpotLight {
-//    float4 rgb;
-//    float4 position; // 3 for pos, 1 for padding
-//    float4 direction; // 3 for dir, 1 for padding
-//};
-
 StructuredBuffer<PointLight> pointLights : register(t4, space2);
 StructuredBuffer<DirectionalLight> directionalLights : register(t5, space2);
 //StructuredBuffer<SpotLight> spotLights : register(t6, space2);
-
-float3 CalcPointLight(PointLight light, float3 normal, float3 fragPos, float3 viewDir, float3 calcAlbedo, float3 calcSpecular)
-{
-    float3 lightColor = light.color.xyz * light.color.w;
-
-    // Diffuse
-    float3 lightDir = normalize(light.position - fragPos);
-    float diff = max(dot(normal, lightDir), 0.0);
-    float3 diffuse = lightColor * diff * calcAlbedo.xyz;
-
-    // Specular
-    float3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess * 4); // *4 because phong uses 4x as much as blinn-phong, so 4x here makes it comparable to phong
-    float3 specular = lightColor * (spec * calcSpecular);
-
-    return diffuse + specular;
-}
-
-float3 CalcDirectionalLight(DirectionalLight light, float3 normal, float3 fragPos, float3 viewDir, float3 calcAlbedo, float3 calcSpecular)
-{
-    float3 lightColor = light.rgb.xyz * light.rgb.w;
-
-    float3 lightDir = normalize(-light.direction.xyz);
-    float diff = max(dot(normal, lightDir), 0.0);
-    float3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess * 4);
-
-    float3 diffuse = lightColor * diff * calcAlbedo;
-    float3 specular = lightColor * spec * calcSpecular;
-    return diffuse + specular;
-}
 
 float4 main(PSInput input) : SV_TARGET {
     float3 sampledNormal = g_normal_map.Sample(g_sampler3, input.uv).rgb;
@@ -123,10 +78,10 @@ float4 main(PSInput input) : SV_TARGET {
 
     float3 result = float3(0.0f, 0.0f, 0.0f);
     for(int i = 0; i < num_point_lights; i++) {
-        result += CalcPointLight(pointLights[i], worldNormal, input.worldPos, normalize(viewPos - input.worldPos), calcAlbedo.xyz, calcSpecular);
+        result += CalcPointLight(pointLights[i], worldNormal, input.worldPos, normalize(viewPos - input.worldPos), calcAlbedo.xyz, calcSpecular, shininess);
     }
     for(int i = 0; i < num_dir_lights; i++) {
-        result += CalcDirectionalLight(directionalLights[i], worldNormal, input.worldPos, normalize(viewPos - input.worldPos), calcAlbedo.xyz, calcSpecular);
+        result += CalcDirectionalLight(directionalLights[i], worldNormal, normalize(viewPos - input.worldPos), calcAlbedo.xyz, calcSpecular, shininess);
     }
     return float4(result + calcAmbient, calcAlbedo.w);
 }

@@ -96,7 +96,9 @@ struct AppState {
     void CreateDefaultMeshes();
     void CreateDepthTexture();
     void CreateMSAAColorTarget();
-    void CreateLightBuffers();
+    void CreatePointLightBuffer();
+    void CreateDirectionalLightBuffer();
+    void CreateSpotLightBuffer();
     void CreateDefaultMaterials();
     void CreateDefaultSamplers();
     void CreateDefaultTextures();

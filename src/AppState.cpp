@@ -681,23 +681,18 @@ void AppState::CreateMSAAColorTarget() {
     }
 }
 
-void AppState::CreateLightBuffers() {
-    SDL_Log("Creating light buffers...");
+void AppState::CreatePointLightBuffer() {
+    if (pointLightBuffer != nullptr) {
+        SDL_Log("Freeing point light buffer...");
+        SDL_WaitForGPUIdle(device);
+        SDL_ReleaseGPUBuffer(device, pointLightBuffer);
+    }
     SDL_GPUBufferCreateInfo pointBufferInfo = {};
     pointBufferInfo.usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ;
     pointBufferInfo.size = MAX_POINT_LIGHTS * sizeof(PointLight3DGPU);
 
     pointLightBuffer = SDL_CreateGPUBuffer(device, &pointBufferInfo);
     if (!pointLightBuffer) {
-        SDL_Log("Failed to create pointlight buffer: %s", SDL_GetError());
-    }
-
-    SDL_GPUBufferCreateInfo directionalBufferInfo = {};
-    directionalBufferInfo.usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ;
-    directionalBufferInfo.size = MAX_DIRECTIONAL_LIGHTS * sizeof(DirectionalLight3DGPU);
-
-    directionalLightBuffer = SDL_CreateGPUBuffer(device, &directionalBufferInfo);
-    if (!directionalLightBuffer) {
         SDL_Log("Failed to create pointlight buffer: %s", SDL_GetError());
     }
 
@@ -708,6 +703,24 @@ void AppState::CreateLightBuffers() {
     pointLightTransferBuffer = SDL_CreateGPUTransferBuffer(device, &pointTransferInfo);
     if (!pointLightTransferBuffer) {
         SDL_Log("Failed to create light transfer buffer: %s", SDL_GetError());
+    }
+}
+
+void AppState::CreateDirectionalLightBuffer() {
+    SDL_Log("Creating light buffers...");
+
+    if (directionalLightBuffer != nullptr) {
+        SDL_Log("Freeing Directional light buffer...");
+        SDL_WaitForGPUIdle(device);
+        SDL_ReleaseGPUBuffer(device, directionalLightBuffer);
+    }
+    SDL_GPUBufferCreateInfo directionalBufferInfo = {};
+    directionalBufferInfo.usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ;
+    directionalBufferInfo.size = MAX_DIRECTIONAL_LIGHTS * sizeof(DirectionalLight3DGPU);
+
+    directionalLightBuffer = SDL_CreateGPUBuffer(device, &directionalBufferInfo);
+    if (!directionalLightBuffer) {
+        SDL_Log("Failed to create pointlight buffer: %s", SDL_GetError());
     }
 
     SDL_GPUTransferBufferCreateInfo directionalTransferInfo = {};
