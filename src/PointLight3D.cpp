@@ -6,8 +6,10 @@
 #include "thirdparty/imgui/imgui.h"
 
 void PointLight3D::ImGuiDraw() {
-    Node3D::ImGuiDraw();
     if (ImGui::CollapsingHeader("PointLight3D", ImGuiTreeNodeFlags_DefaultOpen)) {
+        float _position[3] = { localTransform.position.x, localTransform.position.y, localTransform.position.z };
+        ImGui::ColoredDragFloat3("##Position", _position, true);
+        localTransform.position = glm::vec3(_position[0], _position[1], _position[2]);
         float col[3] = { color.x, color.y, color.z };
         ImGui::ColoredDragFloat3("RGB", col, false);
         color = glm::vec3(col[0], col[1], col[2]);

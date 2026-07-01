@@ -40,15 +40,15 @@ struct DirectionalLight {
     float4 direction; // 3 for dir, 1 for padding
 };
 
-struct SpotLight {
-    float4 rgb;
-    float4 position; // 3 for pos, 1 for padding
-    float4 direction; // 3 for dir, 1 for padding
-};
+//struct SpotLight {
+//    float4 rgb;
+//    float4 position; // 3 for pos, 1 for padding
+//    float4 direction; // 3 for dir, 1 for padding
+//};
 
 StructuredBuffer<PointLight> pointLights : register(t4, space2);
 StructuredBuffer<DirectionalLight> directionalLights : register(t5, space2);
-StructuredBuffer<SpotLight> spotLights : register(t6, space2);
+//StructuredBuffer<SpotLight> spotLights : register(t6, space2);
 
 float3 CalcPointLight(PointLight light, float3 normal, float3 fragPos, float3 viewDir, float3 calcAlbedo, float3 calcSpecular)
 {

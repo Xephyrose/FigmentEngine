@@ -15,6 +15,7 @@
 
 #include "AppState.h"
 #include "Camera3D.h"
+#include "DirectionalLight3D.h"
 #include "FreeCam3D.h"
 #include "Input.h"
 #include "Material.h"
@@ -80,22 +81,21 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     auto* pointLight = new PointLight3D(appState);
     pointLight->localTransform.position.x = -43;
     pointLight->localTransform.position.y = 5;
+    pointLight->localTransform.position.z = -14;
+    pointLight->color.x = 0.5f;
     appState->root.addChild(std::unique_ptr<Node>(pointLight));
 
     auto* pointLight1 = new PointLight3D(appState);
     pointLight1->localTransform.position.x = -36;
     pointLight1->localTransform.position.y = 5;
+    pointLight1->color.y  = 0.5f;
     appState->root.addChild(std::unique_ptr<Node>(pointLight1));
 
-    // auto* pointLight2 = new PointLight3D(appState);
-    // pointLight2->localTransform.position.x = 0;
-    // pointLight2->localTransform.position.y = 5;
-    // appState->root.addChild(std::unique_ptr<Node>(pointLight2));
-    //
-    // auto* pointLight3 = new PointLight3D(appState);
-    // pointLight3->localTransform.position.x = 43;
-    // pointLight3->localTransform.position.y = 5;
-    // appState->root.addChild(std::unique_ptr<Node>(pointLight3));
+    auto* directionalLight = new DirectionalLight3D(appState);
+    directionalLight->localTransform.rotation.x = 10;
+    directionalLight->localTransform.rotation.y = -5;
+    directionalLight->localTransform.rotation.z = -17;
+    appState->root.addChild(std::unique_ptr<Node>(directionalLight));
 
     // auto* camera2d = new Camera2D();
     // appState->current_camera_2d = camera2d;
@@ -249,6 +249,76 @@ void DrawNodeTree(AppState* appState, Node* node) {
     ImGui::PopID();
 }
 
+void PreparePointLightBuffer(AppState *appState, SDL_GPUCommandBuffer *commandBuffer) {
+    // gpuLights is a vector of structs that store point light data. Here we clear this list, so we can upload the latest light data to the GPU.
+    appState->pointLightGPUs.clear();
+    appState->pointLightGPUs.reserve(appState->pointLights.size());
+
+    // repopulate gpuLights
+    for (const PointLight3D* light : appState->pointLights) {
+        PointLight3DGPU gpu;
+        gpu.position = glm::vec4(light->GetGlobalTransform().position, 0);
+        gpu.color = glm::vec4(light->color, light->intensity);
+        appState->pointLightGPUs.push_back(gpu);
+    }
+
+    // transfer the light data into the light buffer
+    if (void* mapped = SDL_MapGPUTransferBuffer(appState->device, appState->pointLightTransferBuffer, false)) {
+        memcpy(mapped, appState->pointLightGPUs.data(), appState->pointLightGPUs.size() * sizeof(PointLight3DGPU));
+        SDL_UnmapGPUTransferBuffer(appState->device, appState->pointLightTransferBuffer);
+    }
+
+    SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(commandBuffer);
+
+    SDL_GPUTransferBufferLocation src = {};
+    src.transfer_buffer = appState->pointLightTransferBuffer;
+    src.offset = 0;
+
+    SDL_GPUBufferRegion dst = {};
+    dst.buffer = appState->pointLightBuffer;
+    dst.offset = 0;
+    dst.size = appState->pointLightGPUs.size() * sizeof(PointLight3DGPU);
+
+    SDL_UploadToGPUBuffer(copyPass, &src, &dst, false);
+
+    SDL_EndGPUCopyPass(copyPass);
+}
+
+void PrepareDirectionalLightBuffer(AppState *appState, SDL_GPUCommandBuffer *commandBuffer) {
+    // gpuLights is a vector of structs that store point light data. Here we clear this list, so we can upload the latest light data to the GPU.
+    appState->directionalLightGPUs.clear();
+    appState->directionalLightGPUs.reserve(appState->directionalLights.size());
+
+    // repopulate gpuLights
+    for (const DirectionalLight3D* light : appState->directionalLights) {
+        DirectionalLight3DGPU gpu;
+        gpu.direction = glm::vec4(light->GetGlobalTransform().rotation, 0);
+        gpu.color = glm::vec4(light->color, light->intensity);
+        appState->directionalLightGPUs.push_back(gpu);
+    }
+
+    // transfer the light data into the light buffer
+    if (void* mapped = SDL_MapGPUTransferBuffer(appState->device, appState->directionalLightTransferBuffer, false)) {
+        memcpy(mapped, appState->directionalLightGPUs.data(), appState->directionalLightGPUs.size() * sizeof(DirectionalLight3DGPU));
+        SDL_UnmapGPUTransferBuffer(appState->device, appState->directionalLightTransferBuffer);
+    }
+
+    SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(commandBuffer);
+
+    SDL_GPUTransferBufferLocation src = {};
+    src.transfer_buffer = appState->directionalLightTransferBuffer;
+    src.offset = 0;
+
+    SDL_GPUBufferRegion dst = {};
+    dst.buffer = appState->directionalLightBuffer;
+    dst.offset = 0;
+    dst.size = appState->directionalLightGPUs.size() * sizeof(DirectionalLight3DGPU);
+
+    SDL_UploadToGPUBuffer(copyPass, &src, &dst, false);
+
+    SDL_EndGPUCopyPass(copyPass);
+}
+
 SDL_AppResult RenderFrame(AppState* appState) {
     if (appState->debug) {
         ImGui_ImplSDLGPU3_NewFrame();
@@ -359,38 +429,8 @@ SDL_AppResult RenderFrame(AppState* appState) {
             .cycle = true
         };
 
-        // gpuLights is a vector of structs that store point light data. Here we clear this list, so we can upload the latest light data to the GPU.
-        appState->pointLightGPUs.clear();
-        appState->pointLightGPUs.reserve(appState->pointLights.size());
-
-        // repopulate gpuLights
-        for (const PointLight3D* light : appState->pointLights) {
-            PointLight3DGPU gpu;
-            gpu.position = glm::vec4(light->GetGlobalTransform().position, 0);
-            gpu.color = glm::vec4(light->color, light->intensity);
-            appState->pointLightGPUs.push_back(gpu);
-        }
-
-        // transfer the light data into the light buffer
-        if (void* mapped = SDL_MapGPUTransferBuffer(appState->device, appState->pointLightTransferBuffer, false)) {
-            memcpy(mapped, appState->pointLightGPUs.data(), appState->pointLightGPUs.size() * sizeof(PointLight3DGPU));
-            SDL_UnmapGPUTransferBuffer(appState->device, appState->pointLightTransferBuffer);
-        }
-
-        SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(commandBuffer);
-
-        SDL_GPUTransferBufferLocation src = {};
-        src.transfer_buffer = appState->pointLightTransferBuffer;
-        src.offset = 0;
-
-        SDL_GPUBufferRegion dst = {};
-        dst.buffer = appState->pointLightBuffer;
-        dst.offset = 0;
-        dst.size = appState->pointLightGPUs.size() * sizeof(PointLight3DGPU);
-
-        SDL_UploadToGPUBuffer(copyPass, &src, &dst, false);
-
-        SDL_EndGPUCopyPass(copyPass);
+        PreparePointLightBuffer(appState, commandBuffer);
+        PrepareDirectionalLightBuffer(appState, commandBuffer);
 
         // Now we actually define the render pass, by passing &colorTargetInfo, which modified our swapchainTexture to become cleared
         appState->renderPass = SDL_BeginGPURenderPass(commandBuffer, &colorTargetInfo, 1, &depthTarget);

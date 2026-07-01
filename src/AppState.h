@@ -5,6 +5,7 @@
 #include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL_video.h>
 
+#include "DirectionalLight3D.h"
 #include "Node.h"
 #include "PointLight3D.h"
 #include "Light3DGPU.h"
@@ -48,7 +49,7 @@ struct AppState {
     std::vector<DirectionalLight3DGPU> directionalLightGPUs;
     // std::vector<SpotLight3DGPU> spotLightGPUs;
     std::vector<PointLight3D*> pointLights;
-    std::vector<PointLight3D*> directionalLights;
+    std::vector<DirectionalLight3D*> directionalLights;
     // std::vector<SpotLight3D*> spotLights;
     SDL_GPUBuffer* pointLightBuffer;
     SDL_GPUBuffer* directionalLightBuffer;
