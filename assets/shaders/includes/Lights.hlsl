@@ -34,13 +34,28 @@ float3 CalcPointLight(PointLight light, float3 normal, float3 fragPos, float3 ca
 
     float3 lightDir = normalize(light.position.xyz - fragPos);
     float diff = max(dot(normal, lightDir), 0.0);
+
+    float distance = length(light.position.xyz - fragPos);
+    float attenuation = 1.0 / (light.params.x + light.params.y * distance + light.params.z * (distance * distance));
+
     float3 diffuse = lightColor * diff * calcAlbedo.xyz;
     float3 specular = lightColor * (spec * calcSpecular);
 
-    return diffuse + specular;
+    return (diffuse * attenuation) + (specular * attenuation);
 }
 
 float3 CalcDirectionalLight(DirectionalLight light, float3 normal, float3 calcAlbedo, float3 calcSpecular, float spec) {
+    float3 lightColor = light.color.xyz * light.color.w;
+
+    float3 lightDir = normalize(-light.direction.xyz);
+    float diff = max(dot(normal, lightDir), 0.0);
+
+    float3 diffuse = lightColor * diff * calcAlbedo;
+    float3 specular = lightColor * spec * calcSpecular;
+    return diffuse + specular;
+}
+
+float3 CalcSpotLight(SpotLight light, float3 normal, float3 calcAlbedo, float3 calcSpecular, float spec) {
     float3 lightColor = light.color.xyz * light.color.w;
 
     float3 lightDir = normalize(-light.direction.xyz);
