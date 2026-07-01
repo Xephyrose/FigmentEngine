@@ -16,7 +16,7 @@ void SpotLight3D::ImGuiDraw() {
         float col[3] = { color.x, color.y, color.z };
         ImGui::ColoredDragFloat3("RGB", col, false);
         color = glm::vec3(col[0], col[1], col[2]);
-        ImGui::ColoredDragFloat("Intensity", &constant, false);
+        ImGui::ColoredDragFloat("Brightness", &brightness, false);
     }
 }
 

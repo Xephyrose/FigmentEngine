@@ -4,6 +4,7 @@
 
 struct PointLight3D : Node3D {
     glm::vec3 color = glm::vec3(1.0f);
+    float brightness = 1.0f;
     float constant = 1.0f;
     float linear = 0.09f;
     float quadratic = 0.032f;

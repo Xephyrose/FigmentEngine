@@ -2,7 +2,7 @@
 #define LIGHTS
 
 struct PointLight {
-    float4 color; // xyz is color, w is padding
+    float4 color; // xyz is color, w is intensity
     float4 position; // xyz is position, w is padding
     float4 params; // x is constant, y is linear, z is quadratic, w is padding
 };
@@ -13,7 +13,7 @@ struct DirectionalLight {
 };
 
 struct SpotLight {
-    float4 color; // xyz is color, w is padding
+    float4 color; // xyz is color, w is intensity
     float4 position; // xyz is position, w is cutoff
     float4 direction; // xyz is direction, w is outer cutoff
     float4 params; // x is constant, y is linear, z is quadratic, w is padding
@@ -30,7 +30,7 @@ float CalcBlinnPhongSpecular(float3 lightDir, float3 norm, float3 viewDir, float
 }
 
 float3 CalcPointLight(PointLight light, float3 normal, float3 fragPos, float3 calcAlbedo, float3 calcSpecular, float spec) {
-    float3 lightColor = light.color.xyz;
+    float3 lightColor = light.color.xyz * light.color.w;
 
     float3 lightDir = normalize(light.position.xyz - fragPos);
     float diff = max(dot(normal, lightDir), 0.0);
@@ -56,7 +56,7 @@ float3 CalcDirectionalLight(DirectionalLight light, float3 normal, float3 calcAl
 }
 
 float3 CalcSpotLight(SpotLight light, float3 normal, float3 fragPos, float3 calcAlbedo, float3 calcSpecular, float spec) {
-    float3 lightColor = light.color.xyz;
+    float3 lightColor = light.color.xyz * light.color.w;
 
     float3 lightDir = normalize(light.position.xyz - fragPos);
     float diff = max(dot(normal, lightDir), 0.0);

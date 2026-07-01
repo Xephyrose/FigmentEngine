@@ -4,7 +4,7 @@
 
 struct DirectionalLight3D : Node3D {
     glm::vec3 color = glm::vec3(1.0f);
-    float intensity = 1.0f;
+    float brightness = 1.0f;
 
     void ImGuiDraw() override;
     explicit DirectionalLight3D(AppState* appState);

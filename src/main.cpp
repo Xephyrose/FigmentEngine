@@ -149,7 +149,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     directionalLight->localTransform.rotation.x = -8;
     directionalLight->localTransform.rotation.y = -9;
     directionalLight->localTransform.rotation.z = -11;
-    directionalLight->intensity = 0;
+    directionalLight->brightness = 0;
     appState->root.addChild(std::unique_ptr<Node>(directionalLight));
 
     auto* spotLight = new SpotLight3D(appState);
@@ -269,7 +269,7 @@ void PreparePointLightBuffer(AppState *appState, SDL_GPUCommandBuffer *commandBu
     // repopulate gpuLights
     for (const PointLight3D* light : appState->pointLights) {
         PointLight3DGPU gpu;
-        gpu.color = glm::vec4(light->color, 0);
+        gpu.color = glm::vec4(light->color, light->brightness);
         gpu.position = glm::vec4(light->GetGlobalTransform().position, 0);
         gpu.params = glm::vec4(light->constant, light->linear, light->quadratic, 0);
         appState->pointLightGPUs.push_back(gpu);
@@ -303,7 +303,7 @@ void PrepareDirectionalLightBuffer(AppState *appState, SDL_GPUCommandBuffer *com
 
     for (const DirectionalLight3D* light : appState->directionalLights) {
         DirectionalLight3DGPU gpu;
-        gpu.color = glm::vec4(light->color, light->intensity);
+        gpu.color = glm::vec4(light->color, light->brightness);
         gpu.direction = glm::vec4(light->GetGlobalTransform().rotation, 0);
         appState->directionalLightGPUs.push_back(gpu);
     }
@@ -335,7 +335,7 @@ void PrepareSpotLightBuffer(AppState *appState, SDL_GPUCommandBuffer *commandBuf
 
     for (const SpotLight3D* light : appState->spotLights) {
         SpotLight3DGPU gpu;
-        gpu.color = glm::vec4(light->color, 0);
+        gpu.color = glm::vec4(light->color, light->brightness);
         gpu.position = glm::vec4(light->GetGlobalTransform().position, glm::cos(glm::radians(light->cutoff)));
         gpu.direction = glm::vec4(light->GetGlobalTransform().getForward(), glm::cos(glm::radians(light->outerCutoff)));
         gpu.params = glm::vec4(light->constant, light->linear, light->quadratic, 0);
