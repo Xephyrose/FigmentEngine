@@ -42,9 +42,6 @@ struct AppState {
     float sensitivity = 0.05f;
     float currentAspectRatio = static_cast<float>(windowWidth) / static_cast<float>(windowHeight);
 
-    const int MAX_POINT_LIGHTS = 16;
-    const int MAX_DIRECTIONAL_LIGHTS = 4;
-    // const int MAX_SPOT_LIGHTS = 128;
     std::vector<PointLight3DGPU> pointLightGPUs;
     std::vector<DirectionalLight3DGPU> directionalLightGPUs;
     // std::vector<SpotLight3DGPU> spotLightGPUs;

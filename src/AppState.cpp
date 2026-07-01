@@ -682,6 +682,7 @@ void AppState::CreateMSAAColorTarget() {
 }
 
 void AppState::CreatePointLightBuffer() {
+    SDL_Log("Creating point light buffer...");
     if (pointLightBuffer != nullptr) {
         SDL_Log("Freeing point light buffer...");
         SDL_WaitForGPUIdle(device);
@@ -689,7 +690,7 @@ void AppState::CreatePointLightBuffer() {
     }
     SDL_GPUBufferCreateInfo pointBufferInfo = {};
     pointBufferInfo.usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ;
-    pointBufferInfo.size = MAX_POINT_LIGHTS * sizeof(PointLight3DGPU);
+    pointBufferInfo.size = std::max(pointLights.size() * sizeof(PointLight3DGPU), sizeof(uint32_t)); // slightly hacky but necessary, buffers must be at least 4 bytes
 
     pointLightBuffer = SDL_CreateGPUBuffer(device, &pointBufferInfo);
     if (!pointLightBuffer) {
@@ -698,7 +699,7 @@ void AppState::CreatePointLightBuffer() {
 
     SDL_GPUTransferBufferCreateInfo pointTransferInfo = {};
     pointTransferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
-    pointTransferInfo.size = MAX_POINT_LIGHTS * sizeof(PointLight3DGPU);
+    pointTransferInfo.size = pointLights.size() * sizeof(PointLight3DGPU);
 
     pointLightTransferBuffer = SDL_CreateGPUTransferBuffer(device, &pointTransferInfo);
     if (!pointLightTransferBuffer) {
@@ -707,7 +708,7 @@ void AppState::CreatePointLightBuffer() {
 }
 
 void AppState::CreateDirectionalLightBuffer() {
-    SDL_Log("Creating light buffers...");
+    SDL_Log("Creating directional light buffer...");
 
     if (directionalLightBuffer != nullptr) {
         SDL_Log("Freeing Directional light buffer...");
@@ -716,7 +717,7 @@ void AppState::CreateDirectionalLightBuffer() {
     }
     SDL_GPUBufferCreateInfo directionalBufferInfo = {};
     directionalBufferInfo.usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ;
-    directionalBufferInfo.size = MAX_DIRECTIONAL_LIGHTS * sizeof(DirectionalLight3DGPU);
+    directionalBufferInfo.size = std::max(directionalLights.size() * sizeof(DirectionalLight3DGPU), sizeof(uint32_t));
 
     directionalLightBuffer = SDL_CreateGPUBuffer(device, &directionalBufferInfo);
     if (!directionalLightBuffer) {
@@ -725,7 +726,7 @@ void AppState::CreateDirectionalLightBuffer() {
 
     SDL_GPUTransferBufferCreateInfo directionalTransferInfo = {};
     directionalTransferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
-    directionalTransferInfo.size = MAX_DIRECTIONAL_LIGHTS * sizeof(DirectionalLight3DGPU);
+    directionalTransferInfo.size = directionalLights.size() * sizeof(DirectionalLight3DGPU);
 
     directionalLightTransferBuffer = SDL_CreateGPUTransferBuffer(device, &directionalTransferInfo);
     if (!directionalLightTransferBuffer) {

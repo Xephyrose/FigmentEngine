@@ -24,11 +24,13 @@ PointLight3D::PointLight3D(AppState* appState) {
 
 void PointLight3D::Register(AppState* appState) {
     appState->pointLights.push_back(this);
+    appState->CreatePointLightBuffer();
 }
 
 void PointLight3D::Unregister(AppState* appState) {
     if (const auto it = std::ranges::find(appState->pointLights, this); it != appState->pointLights.end()) {
         appState->pointLights.erase(it);
+        appState->CreatePointLightBuffer();
     }
     else {
         SDL_Log("Attempted to unregister an unregistered PointLight3DGPU");

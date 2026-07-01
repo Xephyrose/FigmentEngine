@@ -72,39 +72,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     worldDef.gravity = (b2Vec2){0.0f, 9.8f};
     appState->worldId = b2CreateWorld(&worldDef);
 
-    auto* freeCam = new FreeCam3D();
-    appState->current_camera_3d = freeCam;
-    freeCam->localTransform.position = glm::vec3(-43, 8, 14);
-    freeCam->localTransform.setRotation(glm::vec3(-34, 0, 0));
-    appState->root.addChild(std::unique_ptr<Node>(freeCam));
-
-    auto* pointLight = new PointLight3D(appState);
-    pointLight->localTransform.position.x = -43;
-    pointLight->localTransform.position.y = 5;
-    pointLight->localTransform.position.z = -14;
-    pointLight->color.x = 0.5f;
-    appState->root.addChild(std::unique_ptr<Node>(pointLight));
-
-    auto* pointLight1 = new PointLight3D(appState);
-    pointLight1->localTransform.position.x = -36;
-    pointLight1->localTransform.position.y = 5;
-    pointLight1->color.y  = 0.5f;
-    appState->root.addChild(std::unique_ptr<Node>(pointLight1));
-
-    auto* directionalLight = new DirectionalLight3D(appState);
-    directionalLight->localTransform.rotation.x = -8;
-    directionalLight->localTransform.rotation.y = -9;
-    directionalLight->localTransform.rotation.z = -11;
-    appState->root.addChild(std::unique_ptr<Node>(directionalLight));
-
-    // auto* camera2d = new Camera2D();
-    // appState->current_camera_2d = camera2d;
-    // appState->root.addChild(std::unique_ptr<Node>(camera2d));
-
-    // auto* freeCam = new FreeCam2D();
-    // appState->current_camera_2d = freeCam;
-    // appState->root.addChild(std::unique_ptr<Node>(freeCam));
-
     float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     if (main_scale < 1.0f) {
         main_scale = 1.0f;
@@ -149,11 +116,45 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->CreateDefaultPipelines();
     appState->CreateMSAAColorTarget();
     appState->CreateDepthTexture();
-    appState->CreateLightBuffers();
+    appState->CreatePointLightBuffer();
+    appState->CreateDirectionalLightBuffer();
 
     appState->quadMesh = new Mesh();
     appState->quadMesh->CreateQuad(1, 1, -1);
     appState->quadMesh->UploadToGPU(*appState);
+
+    auto* freeCam = new FreeCam3D();
+    appState->current_camera_3d = freeCam;
+    freeCam->localTransform.position = glm::vec3(-43, 8, 14);
+    freeCam->localTransform.setRotation(glm::vec3(-34, 0, 0));
+    appState->root.addChild(std::unique_ptr<Node>(freeCam));
+
+    auto* pointLight = new PointLight3D(appState);
+    pointLight->localTransform.position.x = -43;
+    pointLight->localTransform.position.y = 5;
+    pointLight->localTransform.position.z = -14;
+    pointLight->color.x = 0.5f;
+    appState->root.addChild(std::unique_ptr<Node>(pointLight));
+
+    auto* pointLight1 = new PointLight3D(appState);
+    pointLight1->localTransform.position.x = -36;
+    pointLight1->localTransform.position.y = 5;
+    pointLight1->color.y  = 0.5f;
+    appState->root.addChild(std::unique_ptr<Node>(pointLight1));
+
+    auto* directionalLight = new DirectionalLight3D(appState);
+    directionalLight->localTransform.rotation.x = -8;
+    directionalLight->localTransform.rotation.y = -9;
+    directionalLight->localTransform.rotation.z = -11;
+    appState->root.addChild(std::unique_ptr<Node>(directionalLight));
+
+    // auto* camera2d = new Camera2D();
+    // appState->current_camera_2d = camera2d;
+    // appState->root.addChild(std::unique_ptr<Node>(camera2d));
+
+    // auto* freeCam = new FreeCam2D();
+    // appState->current_camera_2d = freeCam;
+    // appState->root.addChild(std::unique_ptr<Node>(freeCam));
 
     auto* meshInstance = new MeshInstance3D();
     meshInstance->mesh = "zulu.glb";

@@ -24,11 +24,13 @@ DirectionalLight3D::DirectionalLight3D(AppState* appState) {
 
 void DirectionalLight3D::Register(AppState* appState) {
     appState->directionalLights.push_back(this);
+    appState->CreateDirectionalLightBuffer();
 }
 
 void DirectionalLight3D::Unregister(AppState* appState) {
     if (const auto it = std::ranges::find(appState->directionalLights, this); it != appState->directionalLights.end()) {
         appState->directionalLights.erase(it);
+        appState->CreateDirectionalLightBuffer();
     }
     else {
         SDL_Log("Attempted to unregister an unregistered DirectionalLight3DGPU");
