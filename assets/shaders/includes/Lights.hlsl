@@ -30,7 +30,7 @@ float CalcBlinnPhongSpecular(float3 lightDir, float3 norm, float3 viewDir, float
 }
 
 float3 CalcPointLight(PointLight light, float3 normal, float3 fragPos, float3 calcAlbedo, float3 calcSpecular, float spec) {
-    float3 lightColor = light.color.xyz * light.color.w;
+    float3 lightColor = light.color.xyz * light.params.x;
 
     float3 lightDir = normalize(light.position.xyz - fragPos);
     float diff = max(dot(normal, lightDir), 0.0);

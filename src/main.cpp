@@ -130,20 +130,20 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     freeCam->localTransform.setRotation(glm::vec3(-34, 0, 0));
     appState->root.addChild(std::unique_ptr<Node>(freeCam));
 
-    // auto* pointLight = new PointLight3D(appState);
-    // pointLight->localTransform.position.x = -43;
-    // pointLight->localTransform.position.y = 5;
-    // pointLight->localTransform.position.z = -14;
-    // pointLight->color.x = 0.5f;
-    // pointLight->intensity = 0;
-    // appState->root.addChild(std::unique_ptr<Node>(pointLight));
-    //
-    // auto* pointLight1 = new PointLight3D(appState);
-    // pointLight1->localTransform.position.x = -36;
-    // pointLight1->localTransform.position.y = 5;
-    // pointLight1->color.y  = 0.5f;
-    // // pointLight1->intensity = 0;
-    // appState->root.addChild(std::unique_ptr<Node>(pointLight1));
+    auto* pointLight = new PointLight3D(appState);
+    pointLight->localTransform.position.x = -43;
+    pointLight->localTransform.position.y = 5;
+    pointLight->localTransform.position.z = -14;
+    pointLight->color.x = 0.5f;
+    pointLight->constant = 0;
+    appState->root.addChild(std::unique_ptr<Node>(pointLight));
+
+    auto* pointLight1 = new PointLight3D(appState);
+    pointLight1->localTransform.position.x = -36;
+    pointLight1->localTransform.position.y = 5;
+    pointLight1->color.y  = 0.5f;
+    // pointLight1->intensity = 0;
+    appState->root.addChild(std::unique_ptr<Node>(pointLight1));
 
     auto* directionalLight = new DirectionalLight3D(appState);
     directionalLight->localTransform.rotation.x = -8;
@@ -405,7 +405,7 @@ SDL_AppResult RenderFrame(AppState* appState) {
                 pointLight->color.r = static_cast<float>(rand()) / RAND_MAX; // NOLINT(*-msc50-cpp)
                 pointLight->color.g = static_cast<float>(rand()) / RAND_MAX; // NOLINT(*-msc50-cpp)
                 pointLight->color.b = static_cast<float>(rand()) / RAND_MAX; // NOLINT(*-msc50-cpp)
-                pointLight->intensity = 0.01f;
+                pointLight->constant = 0.01f;
                 appState->root.addChild(std::unique_ptr<Node>(pointLight));
             }
         }
