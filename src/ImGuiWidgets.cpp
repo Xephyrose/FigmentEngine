@@ -136,15 +136,10 @@ namespace ImGui {
         constexpr float padding = 6.0f;
         const char* letters[3] = {"X", "YE", "ZEX"};
 
-        // 1. Calculate text size first
         const ImVec2 textSize = CalcTextSize(letters[i]);
-
-        // 2. Set box width based on text size
         float boxWidth = drawText ? padding + textSize.x + padding : padding;
-
         const ImVec2 cursorPos = GetCursorScreenPos();
 
-        // 3. Draw the box (with the dynamically calculated width)
         ImVec2 boxMin = cursorPos;
         auto boxMax = ImVec2(cursorPos.x + boxWidth, cursorPos.y + lineHeight);
 
@@ -156,7 +151,6 @@ namespace ImGui {
             ImDrawFlags_RoundCornersLeft
         );
 
-        // 4. Draw the text centered in the box
         if (drawText) {
             auto textPos = ImVec2(
                 cursorPos.x + (boxWidth - textSize.x) * 0.5f,
@@ -165,7 +159,6 @@ namespace ImGui {
             drawList->AddText(textPos, GetColorU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)), letters[i]);
         }
 
-        // 5. Position the DragFloat after the box
         SetCursorScreenPos(ImVec2(cursorPos.x + boxWidth - GetStyle().FrameRounding, cursorPos.y));
         SetNextItemWidth(itemWidth);
 
@@ -173,7 +166,6 @@ namespace ImGui {
         sprintf(id, "##%s_%d", label, i);
         DragFloat(id, &v[i]);
 
-        // 6. Draw the separator line
         auto lineStart = ImVec2(cursorPos.x + boxWidth, cursorPos.y + 2.0f);
         auto lineEnd = ImVec2(cursorPos.x + boxWidth, cursorPos.y + lineHeight - 2.0f);
         drawList->AddLine(lineStart, lineEnd, GetColorU32(ImVec4(0.3f, 0.3f, 0.3f, 0.5f)), 1.0f);
