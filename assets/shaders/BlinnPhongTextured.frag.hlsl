@@ -30,7 +30,7 @@ struct PSInput {
 
 StructuredBuffer<PointLight> pointLights : register(t3, space2);
 StructuredBuffer<DirectionalLight> directionalLights : register(t4, space2);
-//StructuredBuffer<SpotLight> spotLights : register(t5, space2);
+StructuredBuffer<SpotLight> spotLights : register(t5, space2);
 
 
 float4 main(PSInput input) : SV_TARGET {

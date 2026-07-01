@@ -695,12 +695,12 @@ void AppState::CreatePointLightBuffer() {
 
     pointLightBuffer = SDL_CreateGPUBuffer(device, &pointBufferInfo);
     if (!pointLightBuffer) {
-        SDL_Log("Failed to create pointlight buffer: %s", SDL_GetError());
+        SDL_Log("Failed to create point light buffer: %s", SDL_GetError());
     }
 
     SDL_GPUTransferBufferCreateInfo pointTransferInfo = {};
     pointTransferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
-    pointTransferInfo.size = pointLights.size() * sizeof(PointLight3DGPU);
+    pointTransferInfo.size = std::max(pointLights.size() * sizeof(PointLight3DGPU), sizeof(uint32_t));
 
     pointLightTransferBuffer = SDL_CreateGPUTransferBuffer(device, &pointTransferInfo);
     if (!pointLightTransferBuffer) {
@@ -712,7 +712,7 @@ void AppState::CreateDirectionalLightBuffer() {
     SDL_Log("Creating directional light buffer of size %i", pointLights.size());
 
     if (directionalLightBuffer != nullptr) {
-        SDL_Log("Freeing Directional light buffer...");
+        SDL_Log("Freeing directional light buffer...");
         SDL_WaitForGPUIdle(device);
         SDL_ReleaseGPUBuffer(device, directionalLightBuffer);
     }
@@ -722,16 +722,43 @@ void AppState::CreateDirectionalLightBuffer() {
 
     directionalLightBuffer = SDL_CreateGPUBuffer(device, &directionalBufferInfo);
     if (!directionalLightBuffer) {
-        SDL_Log("Failed to create pointlight buffer: %s", SDL_GetError());
+        SDL_Log("Failed to create directional light buffer: %s", SDL_GetError());
     }
 
     SDL_GPUTransferBufferCreateInfo directionalTransferInfo = {};
     directionalTransferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
-    directionalTransferInfo.size = directionalLights.size() * sizeof(DirectionalLight3DGPU);
+    directionalTransferInfo.size = std::max(directionalLights.size() * sizeof(DirectionalLight3DGPU), sizeof(uint32_t));
 
     directionalLightTransferBuffer = SDL_CreateGPUTransferBuffer(device, &directionalTransferInfo);
     if (!directionalLightTransferBuffer) {
-        SDL_Log("Failed to create light transfer buffer: %s", SDL_GetError());
+        SDL_Log("Failed to create directional light transfer buffer: %s", SDL_GetError());
+    }
+}
+
+void AppState::CreateSpotLightBuffer() {
+    SDL_Log("Creating spot light buffer of size %i", pointLights.size());
+
+    if (spotLightBuffer != nullptr) {
+        SDL_Log("Freeing spot light buffer...");
+        SDL_WaitForGPUIdle(device);
+        SDL_ReleaseGPUBuffer(device, spotLightBuffer);
+    }
+    SDL_GPUBufferCreateInfo spotBufferInfo = {};
+    spotBufferInfo.usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ;
+    spotBufferInfo.size = std::max(spotLights.size() * sizeof(SpotLight3DGPU), sizeof(uint32_t));
+
+    spotLightBuffer = SDL_CreateGPUBuffer(device, &spotBufferInfo);
+    if (!spotLightBuffer) {
+        SDL_Log("Failed to create spot light buffer: %s", SDL_GetError());
+    }
+
+    SDL_GPUTransferBufferCreateInfo spotTransferInfo = {};
+    spotTransferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
+    spotTransferInfo.size = std::max(spotLights.size() * sizeof(SpotLight3DGPU), sizeof(uint32_t));
+
+    spotLightTransferBuffer = SDL_CreateGPUTransferBuffer(device, &spotTransferInfo);
+    if (!spotLightTransferBuffer) {
+        SDL_Log("Failed to create spot light transfer buffer: %s", SDL_GetError());
     }
 }
 

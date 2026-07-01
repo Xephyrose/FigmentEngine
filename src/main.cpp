@@ -118,6 +118,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->CreateDepthTexture();
     appState->CreatePointLightBuffer();
     appState->CreateDirectionalLightBuffer();
+    appState->CreateSpotLightBuffer();
 
     appState->quadMesh = new Mesh();
     appState->quadMesh->CreateQuad(1, 1, -1);
@@ -129,20 +130,20 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     freeCam->localTransform.setRotation(glm::vec3(-34, 0, 0));
     appState->root.addChild(std::unique_ptr<Node>(freeCam));
 
-    auto* pointLight = new PointLight3D(appState);
-    pointLight->localTransform.position.x = -43;
-    pointLight->localTransform.position.y = 5;
-    pointLight->localTransform.position.z = -14;
-    pointLight->color.x = 0.5f;
-    pointLight->intensity = 0;
-    appState->root.addChild(std::unique_ptr<Node>(pointLight));
-
-    auto* pointLight1 = new PointLight3D(appState);
-    pointLight1->localTransform.position.x = -36;
-    pointLight1->localTransform.position.y = 5;
-    pointLight1->color.y  = 0.5f;
-    // pointLight1->intensity = 0;
-    appState->root.addChild(std::unique_ptr<Node>(pointLight1));
+    // auto* pointLight = new PointLight3D(appState);
+    // pointLight->localTransform.position.x = -43;
+    // pointLight->localTransform.position.y = 5;
+    // pointLight->localTransform.position.z = -14;
+    // pointLight->color.x = 0.5f;
+    // pointLight->intensity = 0;
+    // appState->root.addChild(std::unique_ptr<Node>(pointLight));
+    //
+    // auto* pointLight1 = new PointLight3D(appState);
+    // pointLight1->localTransform.position.x = -36;
+    // pointLight1->localTransform.position.y = 5;
+    // pointLight1->color.y  = 0.5f;
+    // // pointLight1->intensity = 0;
+    // appState->root.addChild(std::unique_ptr<Node>(pointLight1));
 
     auto* directionalLight = new DirectionalLight3D(appState);
     directionalLight->localTransform.rotation.x = -8;
@@ -150,6 +151,13 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     directionalLight->localTransform.rotation.z = -11;
     // directionalLight->intensity = 0;
     appState->root.addChild(std::unique_ptr<Node>(directionalLight));
+
+    auto* spotLight = new SpotLight3D(appState);
+    spotLight->localTransform.rotation.x = -8;
+    spotLight->localTransform.rotation.y = -9;
+    spotLight->localTransform.rotation.z = -11;
+    // spotLight->intensity = 0;
+    appState->root.addChild(std::unique_ptr<Node>(spotLight));
 
     // auto* camera2d = new Camera2D();
     // appState->current_camera_2d = camera2d;
@@ -261,8 +269,9 @@ void PreparePointLightBuffer(AppState *appState, SDL_GPUCommandBuffer *commandBu
     // repopulate gpuLights
     for (const PointLight3D* light : appState->pointLights) {
         PointLight3DGPU gpu;
+        gpu.color = glm::vec4(light->color, 0);
         gpu.position = glm::vec4(light->GetGlobalTransform().position, 0);
-        gpu.color = glm::vec4(light->color, light->intensity);
+        gpu.params = glm::vec4(light->constant, light->linear, light->quadratic, 0);
         appState->pointLightGPUs.push_back(gpu);
     }
 
@@ -289,19 +298,16 @@ void PreparePointLightBuffer(AppState *appState, SDL_GPUCommandBuffer *commandBu
 }
 
 void PrepareDirectionalLightBuffer(AppState *appState, SDL_GPUCommandBuffer *commandBuffer) {
-    // gpuLights is a vector of structs that store point light data. Here we clear this list, so we can upload the latest light data to the GPU.
     appState->directionalLightGPUs.clear();
     appState->directionalLightGPUs.reserve(appState->directionalLights.size());
 
-    // repopulate gpuLights
     for (const DirectionalLight3D* light : appState->directionalLights) {
         DirectionalLight3DGPU gpu;
-        gpu.direction = glm::vec4(light->GetGlobalTransform().rotation, 0);
         gpu.color = glm::vec4(light->color, light->intensity);
+        gpu.direction = glm::vec4(light->GetGlobalTransform().rotation, 0);
         appState->directionalLightGPUs.push_back(gpu);
     }
 
-    // transfer the light data into the light buffer
     if (void* mapped = SDL_MapGPUTransferBuffer(appState->device, appState->directionalLightTransferBuffer, false)) {
         memcpy(mapped, appState->directionalLightGPUs.data(), appState->directionalLightGPUs.size() * sizeof(DirectionalLight3DGPU));
         SDL_UnmapGPUTransferBuffer(appState->device, appState->directionalLightTransferBuffer);
@@ -317,6 +323,40 @@ void PrepareDirectionalLightBuffer(AppState *appState, SDL_GPUCommandBuffer *com
     dst.buffer = appState->directionalLightBuffer;
     dst.offset = 0;
     dst.size = appState->directionalLightGPUs.size() * sizeof(DirectionalLight3DGPU);
+
+    SDL_UploadToGPUBuffer(copyPass, &src, &dst, false);
+
+    SDL_EndGPUCopyPass(copyPass);
+}
+
+void PrepareSpotLightBuffer(AppState *appState, SDL_GPUCommandBuffer *commandBuffer) {
+    appState->spotLightGPUs.clear();
+    appState->spotLightGPUs.reserve(appState->spotLights.size());
+
+    for (const SpotLight3D* light : appState->spotLights) {
+        SpotLight3DGPU gpu;
+        gpu.color = glm::vec4(light->color, 0);
+        gpu.position = glm::vec4(light->GetGlobalTransform().position, light->cutoff);
+        gpu.direction = glm::vec4(light->GetGlobalTransform().rotation, light->outerCutoff);
+        gpu.params = glm::vec4(light->constant, light->linear, light->quadratic, 0);
+        appState->spotLightGPUs.push_back(gpu);
+    }
+
+    if (void* mapped = SDL_MapGPUTransferBuffer(appState->device, appState->spotLightTransferBuffer, false)) {
+        memcpy(mapped, appState->spotLightGPUs.data(), appState->spotLightGPUs.size() * sizeof(SpotLight3DGPU));
+        SDL_UnmapGPUTransferBuffer(appState->device, appState->spotLightTransferBuffer);
+    }
+
+    SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(commandBuffer);
+
+    SDL_GPUTransferBufferLocation src = {};
+    src.transfer_buffer = appState->spotLightTransferBuffer;
+    src.offset = 0;
+
+    SDL_GPUBufferRegion dst = {};
+    dst.buffer = appState->spotLightBuffer;
+    dst.offset = 0;
+    dst.size = appState->spotLightGPUs.size() * sizeof(SpotLight3DGPU);
 
     SDL_UploadToGPUBuffer(copyPass, &src, &dst, false);
 
@@ -358,13 +398,13 @@ SDL_AppResult RenderFrame(AppState* appState) {
         if (ImGui::Button("Spawn 100 Lights")) {
             for (int i = 0; i < 100; i++) {
                 auto* pointLight = new PointLight3D(appState);
-                pointLight->localTransform.position.x = -(rand() % 81);
-                pointLight->localTransform.position.y = rand() % 5 + 2;
-                pointLight->localTransform.position.z = 70 - (rand() % (50 - -70 + 1));
+                pointLight->localTransform.position.x = static_cast<float>(-(rand() % 81)); // NOLINT(*-msc50-cpp)
+                pointLight->localTransform.position.y = rand() % 5 + 2; // NOLINT(*-narrowing-conversions, *-msc50-cpp)
+                pointLight->localTransform.position.z = 70.0f - static_cast<float>((rand() % (50 - -70 + 1))); // NOLINT(*-msc50-cpp)
 
-                pointLight->color.r = static_cast<float>(rand()) / RAND_MAX;
-                pointLight->color.g = static_cast<float>(rand()) / RAND_MAX;
-                pointLight->color.b = static_cast<float>(rand()) / RAND_MAX;
+                pointLight->color.r = static_cast<float>(rand()) / RAND_MAX; // NOLINT(*-msc50-cpp)
+                pointLight->color.g = static_cast<float>(rand()) / RAND_MAX; // NOLINT(*-msc50-cpp)
+                pointLight->color.b = static_cast<float>(rand()) / RAND_MAX; // NOLINT(*-msc50-cpp)
                 pointLight->intensity = 0.01f;
                 appState->root.addChild(std::unique_ptr<Node>(pointLight));
             }
@@ -450,6 +490,7 @@ SDL_AppResult RenderFrame(AppState* appState) {
 
         PreparePointLightBuffer(appState, commandBuffer);
         PrepareDirectionalLightBuffer(appState, commandBuffer);
+        PrepareSpotLightBuffer(appState, commandBuffer);
 
         // Now we actually define the render pass, by passing &colorTargetInfo, which modified our swapchainTexture to become cleared
         appState->renderPass = SDL_BeginGPURenderPass(commandBuffer, &colorTargetInfo, 1, &depthTarget);

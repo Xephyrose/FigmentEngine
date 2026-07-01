@@ -58,7 +58,7 @@ void MaterialPhongTexturedNormalMap::Bind(AppState *appState, SDL_GPUCommandBuff
         uint32_t  useSpecularTexture;
         int       num_point_lights;
         int       num_dir_lights;
-        // int       num_spot_lights;
+        int       num_spot_lights;
     };
     PushData push{};
     push.viewPos = appState->current_camera_3d->GetGlobalTransform().position;
@@ -71,6 +71,7 @@ void MaterialPhongTexturedNormalMap::Bind(AppState *appState, SDL_GPUCommandBuff
     push.useSpecularTexture = (textureSpecular == "none" ? 0 : 1);
     push.num_point_lights = appState->pointLights.size();
     push.num_dir_lights = appState->directionalLights.size();
+    push.num_spot_lights = appState->spotLights.size();
 
     SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
 
@@ -79,12 +80,19 @@ void MaterialPhongTexturedNormalMap::Bind(AppState *appState, SDL_GPUCommandBuff
         0,
         &appState->pointLightBuffer,
         1
-    );
+        );
 
     SDL_BindGPUFragmentStorageBuffers(
         appState->renderPass,
         1,
         &appState->directionalLightBuffer,
+        1
+        );
+
+    SDL_BindGPUFragmentStorageBuffers(
+        appState->renderPass,
+        2,
+        &appState->spotLightBuffer,
         1
     );
 }

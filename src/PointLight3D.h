@@ -4,7 +4,9 @@
 
 struct PointLight3D : Node3D {
     glm::vec3 color = glm::vec3(1.0f);
-    float intensity = 1.0f;
+    float constant;
+    float linear;
+    float quadratic;
 
     void ImGuiDraw() override;
     explicit PointLight3D(AppState* appState);

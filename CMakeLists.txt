@@ -111,6 +111,8 @@ add_executable(FigmentEngine
         src/DirectionalLight3D.h
         src/MaterialColor.cpp
         src/MaterialColor.h
+        src/SpotLight3D.cpp
+        src/SpotLight3D.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

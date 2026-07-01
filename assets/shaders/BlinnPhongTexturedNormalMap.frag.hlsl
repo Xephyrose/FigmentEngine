@@ -34,7 +34,7 @@ struct PSInput {
 
 StructuredBuffer<PointLight> pointLights : register(t4, space2);
 StructuredBuffer<DirectionalLight> directionalLights : register(t5, space2);
-//StructuredBuffer<SpotLight> spotLights : register(t6, space2);
+StructuredBuffer<SpotLight> spotLights : register(t6, space2);
 
 float4 main(PSInput input) : SV_TARGET {
     float3 sampledNormal = g_normal_map.Sample(g_sampler3, input.uv).rgb;

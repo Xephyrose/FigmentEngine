@@ -38,12 +38,13 @@ void MaterialPhong::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer
         glm::vec3 viewPos;
         int       num_point_lights;
         int       num_dir_lights;
-        // int       num_spot_lights;
+        int       num_spot_lights;
     };
     PushData push{};
     push.viewPos = appState->current_camera_3d->GetGlobalTransform().position;
     push.num_point_lights = appState->pointLights.size();
     push.num_dir_lights = appState->directionalLights.size();
+    push.num_spot_lights = appState->spotLights.size();
 
     SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
 
@@ -58,6 +59,13 @@ void MaterialPhong::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer
         appState->renderPass,
         1,
         &appState->directionalLightBuffer,
+        1
+        );
+
+    SDL_BindGPUFragmentStorageBuffers(
+        appState->renderPass,
+        2,
+        &appState->spotLightBuffer,
         1
     );
 }

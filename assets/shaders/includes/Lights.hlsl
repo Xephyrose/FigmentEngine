@@ -1,23 +1,22 @@
 #ifndef LIGHTS
 #define LIGHTS
 
-// for all uses of color, they're vec4s with xyz as rgb, intensity is while
-// positions and rotations are
-
 struct PointLight {
-    float4 color;
-    float4 position; // 3 for pos, 1 for padding
+    float4 color; // xyz is color, w is padding
+    float4 position; // xyz is position, w is padding
+    float4 params; // x is constant, y is linear, z is quadratic, w is padding
 };
 
 struct DirectionalLight {
-    float4 rgb;
+    float4 color; // xyz is color, w is intensity
     float4 direction; // 3 for dir, 1 for padding
 };
 
 struct SpotLight {
-    float4 rgb;
-    float4 position; // 3 for pos, 1 for padding
-    float4 direction; // 3 for dir, 1 for padding
+    float4 color; // xyz is color, w is padding
+    float4 position; // xyz is position, w is cutoff
+    float4 direction; // xyz is direction, w is outer cutoff
+    float4 params; // x is constant, y is linear, z is quadratic, w is padding
 };
 
 float CalcPhongSpecular(float3 lightDir, float3 norm, float3 viewDir, float shininess) {
@@ -42,7 +41,7 @@ float3 CalcPointLight(PointLight light, float3 normal, float3 fragPos, float3 ca
 }
 
 float3 CalcDirectionalLight(DirectionalLight light, float3 normal, float3 calcAlbedo, float3 calcSpecular, float spec) {
-    float3 lightColor = light.rgb.xyz * light.rgb.w;
+    float3 lightColor = light.color.xyz * light.color.w;
 
     float3 lightDir = normalize(-light.direction.xyz);
     float diff = max(dot(normal, lightDir), 0.0);
