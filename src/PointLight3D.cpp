@@ -8,10 +8,10 @@
 void PointLight3D::ImGuiDraw() {
     if (ImGui::CollapsingHeader("PointLight3D", ImGuiTreeNodeFlags_DefaultOpen)) {
         float _position[3] = { localTransform.position.x, localTransform.position.y, localTransform.position.z };
-        ImGui::ColoredDragFloat3("##Position", _position, true);
+        ImGui::ColoredDragFloat3XYZ("##Position", _position);
         localTransform.position = glm::vec3(_position[0], _position[1], _position[2]);
         float col[3] = { color.x, color.y, color.z };
-        ImGui::ColoredDragFloat3("RGB", col, false);
+        ImGui::ColoredDragFloat3XYZ("RGB", col);
         color = glm::vec3(col[0], col[1], col[2]);
         ImGui::ColoredDragFloat("Brightness", &brightness, false);
     }

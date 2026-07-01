@@ -6,15 +6,15 @@
 
 void Transform3D::ImGuiDraw() {
     float _position[3] = { position.x, position.y, position.z };
-    ImGui::ColoredDragFloat3("##Position", _position, true);
+    ImGui::ColoredDragFloat3XYZ("##Position", _position);
     position = glm::vec3(_position[0], _position[1], _position[2]);
 
     float _rotation[3] = { rotation.x, rotation.y, rotation.z };
-    ImGui::ColoredDragFloat3("##Rotation", _rotation, true);
+    ImGui::ColoredDragFloat3XYZ("##Rotation", _rotation);
     setRotation(glm::vec3(_rotation[0], _rotation[1], _rotation[2]));
 
     float _scale[3] = { scale.x, scale.y, scale.z };
-    ImGui::ColoredDragFloat3("##Scale", _scale, true);
+    ImGui::ColoredDragFloat3XYZ("##Scale", _scale);
     scale = glm::vec3(_scale[0], _scale[1], _scale[2]);
 }
 

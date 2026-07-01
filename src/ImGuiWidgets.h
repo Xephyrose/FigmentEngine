@@ -3,9 +3,11 @@
 #include "thirdparty/imgui/imgui.h"
 
 namespace ImGui {
-    void ColoredDragFloat(const char* label, float *v, bool drawText);
-    void ColoredDragFloat2(const char* label, float v[2], bool drawText);
-    void ColoredDragFloat3(const char* label, float v[3], bool drawText);
+    void ColoredDragFloat(const char* label, float *v, const char* letters);
+    void ColoredDragFloat2(const char* label, float v[2], const char* letters[2] = nullptr);
+    void ColoredDragFloat3(const char* label, float v[3], const char* letters[3] = nullptr);
+    void ColoredDragFloat3XYZ(const char* label, float v[3]);
+    void ColoredDragFloat3RGB(const char* label, float v[3]);
 
     constexpr ImVec4 colors[4] = {
         ImVec4(0.6f, 0.1f, 0.0f, 1.0f),

@@ -8,10 +8,10 @@
 void DirectionalLight3D::ImGuiDraw() {
     if (ImGui::CollapsingHeader("DirectionalLight3D", ImGuiTreeNodeFlags_DefaultOpen)) {
         float _rotation[3] = { localTransform.rotation.x, localTransform.rotation.y, localTransform.rotation.z };
-        ImGui::ColoredDragFloat3("##Position", _rotation, true);
+        ImGui::ColoredDragFloat3XYZ("##Position", _rotation);
         localTransform.rotation = glm::vec3(_rotation[0], _rotation[1], _rotation[2]);
         float col[3] = { color.x, color.y, color.z };
-        ImGui::ColoredDragFloat3("RGB", col, false);
+        ImGui::ColoredDragFloat3XYZ("RGB", col);
         color = glm::vec3(col[0], col[1], col[2]);
         ImGui::ColoredDragFloat("Brightness", &brightness, false);
     }
