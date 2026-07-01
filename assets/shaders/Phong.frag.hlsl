@@ -1,5 +1,3 @@
-StructuredBuffer<float4> pointLights : register(t0, space2);
-
 cbuffer PushConstants : register(b0, space3)
 {
     float3 viewPos;
@@ -11,9 +9,17 @@ struct PSInput {
     float3 worldNormal : TEXCOORD2;
 };
 
+struct PointLight {
+    float3 rgb;
+    float intensity;
+    float3 position;
+};
+
+StructuredBuffer<PointLight> pointLights : register(t0, space2);
+
 float4 main(PSInput input) : SV_TARGET {
-    float3 lightColor = pointLights[0].rgb * pointLights[0].w;
-    float3 lightPos = pointLights[1].xyz;
+    float3 lightColor = pointLights[0].rgb * pointLights[0].intensity;
+    float3 lightPos = pointLights[0].position;
 
     // Ambient
     float ambientStrength = 0.1;

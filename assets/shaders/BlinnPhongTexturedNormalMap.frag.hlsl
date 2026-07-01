@@ -17,6 +17,7 @@ cbuffer PushConstants : register(b0, space3)
     bool    useAmbientTexture;
     float3  colorSpecular;
     bool    useSpecularTexture;
+    int     num_lights;
 }
 
 struct PSInput {
@@ -27,7 +28,42 @@ struct PSInput {
     float3 worldBitangent : TEXCOORD4;
 };
 
-StructuredBuffer<float4> pointLights : register(t4, space2);
+struct PointLight {
+    float4 color;
+    float4 position; // 3 for pos, 1 for padding
+};
+
+//struct DirectionalLight {
+//    float4 rgb;
+//    float4 direction; // 3 for dir, 1 for padding
+//};
+//
+//struct SpotLight {
+//    float4 rgb;
+//    float4 position; // 3 for pos, 1 for padding
+//    float4 direction; // 3 for dir, 1 for padding
+//};
+
+StructuredBuffer<PointLight> pointLights : register(t4, space2);
+//StructuredBuffer<DirectionalLight> directionalLights : register(t5, space2);
+//StructuredBuffer<SpotLight> spotLights : register(t6, space2);
+
+float3 CalcPointLight(PointLight light, float3 normal, float3 fragPos, float3 viewDir, float3 calcAlbedo, float3 calcSpecular)
+{
+    float3 lightColor = light.color.xyz * light.color.w;
+
+    // Diffuse
+    float3 lightDir = normalize(light.position - fragPos);
+    float diff = max(dot(normal, lightDir), 0.0);
+    float3 diffuse = lightColor * diff * calcAlbedo.xyz;
+
+    // Specular
+    float3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess * 4); // * 4 because phong uses 4x as much as blinn-phong, so 4x here makes it comparable to phong
+    float3 specular = lightColor * (spec * calcSpecular);
+
+    return diffuse + specular;
+}
 
 float4 main(PSInput input) : SV_TARGET {
     float3 sampledNormal = g_normal_map.Sample(g_sampler3, input.uv).rgb;
@@ -35,7 +71,7 @@ float4 main(PSInput input) : SV_TARGET {
 
     float3 N = normalize(input.worldNormal);
     float3 T = normalize(input.worldTangent);
-    float3 B = normalize(input.worldBitangent);
+    float3 B = normalize(input.worldTangent);
 
     T = normalize(T - dot(T, N) * N);
     B = cross(N, T);
@@ -69,23 +105,9 @@ float4 main(PSInput input) : SV_TARGET {
         calcSpecular = colorSpecular;
     }
 
-    float3 lightColor = pointLights[0].rgb * pointLights[0].w;
-    float3 lightPos = pointLights[1].xyz;
-
-    // Ambient
-    float3 ambient = lightColor * calcAmbient;
-
-    // Diffuse
-    float3 lightDir = normalize(lightPos - input.worldPos);
-    float diff = max(dot(worldNormal, lightDir), 0.0);
-    float3 diffuse = lightColor * diff * calcAlbedo.xyz;
-
-    // Specular
-    float3 viewDir = normalize(viewPos - input.worldPos);
-    float3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(worldNormal, halfwayDir), 0.0), shininess * 4);
-    float3 specular = lightColor * (spec * calcSpecular);
-
-    float3 result = ambient + diffuse + specular;
-    return float4(result, calcAlbedo.w);
+    float3 result = float3(0.0f, 0.0f, 0.0f);
+    for(int i = 0; i < num_lights; i++) {
+        result += CalcPointLight(pointLights[i], worldNormal, input.worldPos, normalize(viewPos - input.worldPos), calcAlbedo.xyz, calcSpecular);
+    }
+    return float4(result + calcAmbient, calcAlbedo.w);
 }

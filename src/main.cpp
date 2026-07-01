@@ -82,6 +82,21 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     pointLight->localTransform.position.y = 5;
     appState->root.addChild(std::unique_ptr<Node>(pointLight));
 
+    auto* pointLight1 = new PointLight3D(appState);
+    pointLight1->localTransform.position.x = -36;
+    pointLight1->localTransform.position.y = 5;
+    appState->root.addChild(std::unique_ptr<Node>(pointLight1));
+
+    // auto* pointLight2 = new PointLight3D(appState);
+    // pointLight2->localTransform.position.x = 0;
+    // pointLight2->localTransform.position.y = 5;
+    // appState->root.addChild(std::unique_ptr<Node>(pointLight2));
+    //
+    // auto* pointLight3 = new PointLight3D(appState);
+    // pointLight3->localTransform.position.x = 43;
+    // pointLight3->localTransform.position.y = 5;
+    // appState->root.addChild(std::unique_ptr<Node>(pointLight3));
+
     // auto* camera2d = new Camera2D();
     // appState->current_camera_2d = camera2d;
     // appState->root.addChild(std::unique_ptr<Node>(camera2d));
@@ -351,7 +366,7 @@ SDL_AppResult RenderFrame(AppState* appState) {
         // repopulate gpuLights
         for (const PointLight3D* light : appState->pointLights) {
             PointLight3DGPU gpu;
-            gpu.position = glm::vec4(light->GetGlobalTransform().position, 0.0f);
+            gpu.position = glm::vec4(light->GetGlobalTransform().position, 0);
             gpu.color = glm::vec4(light->color, light->intensity);
             appState->gpuLights.push_back(gpu);
         }

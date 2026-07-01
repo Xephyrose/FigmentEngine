@@ -56,6 +56,7 @@ void MaterialPhongTexturedNormalMap::Bind(AppState *appState, SDL_GPUCommandBuff
         uint32_t  useAmbientTexture;
         glm::vec3 colorSpecular;
         uint32_t  useSpecularTexture;
+        int       num_lights;
     };
     PushData push{};
     push.viewPos = appState->current_camera_3d->GetGlobalTransform().position;
@@ -66,6 +67,7 @@ void MaterialPhongTexturedNormalMap::Bind(AppState *appState, SDL_GPUCommandBuff
     push.useAmbientTexture = (textureAmbient == "none" ? 0 : 1);
     push.colorSpecular = glm::vec4(colorSpecular, 1.0f);
     push.useSpecularTexture = (textureSpecular == "none" ? 0 : 1);
+    push.num_lights = appState->pointLights.size();
 
     SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
 

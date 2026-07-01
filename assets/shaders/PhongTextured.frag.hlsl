@@ -25,7 +25,13 @@ struct PSInput {
     float3 worldNormal : TEXCOORD2;
 };
 
-StructuredBuffer<float4> pointLights : register(t3, space2);
+struct PointLight {
+    float3 rgb;
+    float intensity;
+    float3 position;
+};
+
+StructuredBuffer<PointLight> pointLights : register(t3, space2);
 
 float4 main(PSInput input) : SV_TARGET {
 
@@ -58,8 +64,8 @@ float4 main(PSInput input) : SV_TARGET {
         calcSpecular = colorSpecular;
     }
 
-    float3 lightColor = pointLights[0].rgb * pointLights[0].w;
-    float3 lightPos = pointLights[1].xyz;
+    float3 lightColor = pointLights[0].rgb * pointLights[0].intensity;
+    float3 lightPos = pointLights[0].position;
 
     // Ambient
     float3 ambient = lightColor * calcAmbient;
