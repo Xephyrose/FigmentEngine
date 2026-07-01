@@ -79,7 +79,7 @@ void MaterialPhongTexturedNormalMap::Bind(AppState *appState, SDL_GPUCommandBuff
         0,
         &appState->pointLightBuffer,
         1
-        );
+    );
 
     SDL_BindGPUFragmentStorageBuffers(
         appState->renderPass,

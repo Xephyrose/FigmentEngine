@@ -92,9 +92,9 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->root.addChild(std::unique_ptr<Node>(pointLight1));
 
     auto* directionalLight = new DirectionalLight3D(appState);
-    directionalLight->localTransform.rotation.x = 10;
-    directionalLight->localTransform.rotation.y = -5;
-    directionalLight->localTransform.rotation.z = -17;
+    directionalLight->localTransform.rotation.x = -8;
+    directionalLight->localTransform.rotation.y = -9;
+    directionalLight->localTransform.rotation.z = -11;
     appState->root.addChild(std::unique_ptr<Node>(directionalLight));
 
     // auto* camera2d = new Camera2D();
