@@ -81,7 +81,7 @@ float4 main(PSInput input) : SV_TARGET {
         result += CalcPointLight(pointLights[i], worldNormal, input.worldPos, normalize(viewPos - input.worldPos), calcAlbedo.xyz, calcSpecular, shininess);
     }
     for(int i = 0; i < num_dir_lights; i++) {
-        result += CalcDirectionalLight(directionalLights[i], worldNormal, normalize(viewPos - input.worldPos), calcAlbedo.xyz, calcSpecular, shininess);
+        result += CalcDirectionalLight(directionalLights[i], worldNormal, calcAlbedo.xyz, calcSpecular, CalcPhongSpecular(normalize(-directionalLights[i].direction.xyz), worldNormal, normalize(viewPos - input.worldPos)));
     }
     return float4(result + calcAmbient, calcAlbedo.w);
 }

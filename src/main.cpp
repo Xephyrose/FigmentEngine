@@ -134,18 +134,21 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     pointLight->localTransform.position.y = 5;
     pointLight->localTransform.position.z = -14;
     pointLight->color.x = 0.5f;
+    pointLight->intensity = 0;
     appState->root.addChild(std::unique_ptr<Node>(pointLight));
 
     auto* pointLight1 = new PointLight3D(appState);
     pointLight1->localTransform.position.x = -36;
     pointLight1->localTransform.position.y = 5;
     pointLight1->color.y  = 0.5f;
+    pointLight1->intensity = 0;
     appState->root.addChild(std::unique_ptr<Node>(pointLight1));
 
     auto* directionalLight = new DirectionalLight3D(appState);
     directionalLight->localTransform.rotation.x = -8;
     directionalLight->localTransform.rotation.y = -9;
     directionalLight->localTransform.rotation.z = -11;
+    directionalLight->intensity = 0;
     appState->root.addChild(std::unique_ptr<Node>(directionalLight));
 
     // auto* camera2d = new Camera2D();
@@ -355,10 +358,14 @@ SDL_AppResult RenderFrame(AppState* appState) {
         if (ImGui::Button("Spawn 100 Lights")) {
             for (int i = 0; i < 100; i++) {
                 auto* pointLight = new PointLight3D(appState);
-                pointLight->localTransform.position.x = rand() % 10;
-                pointLight->localTransform.position.y = rand() % 10;
-                pointLight->localTransform.position.z = rand() % 10;
-                pointLight->color.x = 0.5f;
+                pointLight->localTransform.position.x = -(rand() % 81);
+                pointLight->localTransform.position.y = rand() % 5 + 2;
+                pointLight->localTransform.position.z = 70 - (rand() % (50 - -70 + 1));
+
+                pointLight->color.r = static_cast<float>(rand()) / RAND_MAX;
+                pointLight->color.g = static_cast<float>(rand()) / RAND_MAX;
+                pointLight->color.b = static_cast<float>(rand()) / RAND_MAX;
+                pointLight->intensity = 0.01f;
                 appState->root.addChild(std::unique_ptr<Node>(pointLight));
             }
         }
