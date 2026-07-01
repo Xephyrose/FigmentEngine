@@ -109,6 +109,8 @@ add_executable(FigmentEngine
     src/MaterialPhongTexturedNormalMap.h
         src/DirectionalLight3D.cpp
         src/DirectionalLight3D.h
+        src/MaterialColor.cpp
+        src/MaterialColor.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

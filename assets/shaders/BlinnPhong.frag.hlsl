@@ -1,3 +1,5 @@
+#include "assets/shaders/includes/Lights.hlsl"
+
 cbuffer PushConstants : register(b0, space3)
 {
     float3 viewPos;
@@ -9,35 +11,8 @@ struct PSInput {
     float3 worldNormal : TEXCOORD2;
 };
 
-struct PointLight {
-    float3 rgb;
-    float intensity;
-    float3 position;
-};
-
 StructuredBuffer<PointLight> pointLights : register(t0, space2);
 
 float4 main(PSInput input) : SV_TARGET {
-    float3 lightColor = pointLights[0].rgb * pointLights[0].intensity;
-    float3 lightPos = pointLights[0].position;
-
-    // Ambient
-    float ambientStrength = 0.1;
-    float3 ambient = ambientStrength * lightColor;
-
-    // Diffuse
-    float3 norm = normalize(input.worldNormal);
-    float3 lightDir = normalize(lightPos - input.worldPos);
-    float diff = max(dot(norm, lightDir), 0.0);
-    float3 diffuse = diff * lightColor;
-
-    // Specular
-    float specularStrength = 0.5;
-    float3 viewDir = normalize(viewPos - input.worldPos);
-    float3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(norm, halfwayDir), 0.0), 128);
-    float3 specular = specularStrength * spec;
-
-    float3 result = ambient + diffuse + specular;
-    return float4(result, 1.0);
+    return float4(CalcPointLight(pointLights[0], input.worldNormal, input.worldPos, float3(1.0, 1.0, 1.0), float3(1.0, 1.0, 1.0), CalcBlinnPhongSpecular(normalize(pointLights[0].position.xyz - input.worldPos), input.worldNormal, normalize(viewPos - input.worldPos), 64)) + 0.1f, 1.0);
 }

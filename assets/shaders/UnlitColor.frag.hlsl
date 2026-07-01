@@ -1,16 +1,9 @@
-struct Input
+cbuffer PushConstants : register(b0, space3)
 {
-};
+    float4 color;
+}
 
-struct Output
+float4 main() : SV_TARGET
 {
-	float4 Color : SV_Target0;
-};
-
-Output main()
-{
-	Output output;
-	output.Color = float4(1.0f, 0.5f, 0.0f, 1.0f);
-
-	return output;
+	return color;
 }

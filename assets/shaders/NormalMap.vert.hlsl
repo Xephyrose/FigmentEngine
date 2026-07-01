@@ -31,7 +31,7 @@ VSOutput main(VSInput input)
     output.worldPos = mul(Model, float4(input.pos, 1.0)).xyz;
 
     output.worldNormal = normalize(mul((float3x3)NormalMatrix, input.normal));
-    output.worldTangent = normalize(mul((float3x3)NormalMatrix, input.tangent));
+    output.worldTangent = normalize(mul((float3x3)NormalMatrix, input.tangent.xyz));
     output.worldBitangent = normalize(cross(output.worldNormal, output.worldTangent) * input.tangent.w); // handedness stored in tangent.w
 
     return output;

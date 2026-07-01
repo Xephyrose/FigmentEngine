@@ -10,7 +10,6 @@ struct VSInput
     float3 pos : POSITION0;
     float2 uv : TEXCOORD0;
     float3 normal : TEXCOORD1;
-    float4 tangent : TANGENT0;
 };
 
 struct VSOutput

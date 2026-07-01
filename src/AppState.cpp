@@ -10,6 +10,7 @@
 #include "MaterialUnlitTextured.h"
 #include "Mesh.h"
 #include "Light3DGPU.h"
+#include "MaterialColor.h"
 #include "Vertex.h"
 #include "SDL3/SDL_log.h"
 #include "thirdparty/json.hpp"
@@ -736,8 +737,6 @@ void AppState::CreateDirectionalLightBuffer() {
 
 void AppState::CreateDefaultMaterials() {
     SDL_Log("Creating default materials...");
-    new MaterialUnlitTextured(this, "uvs", "UnlitUVs");
-
     auto* missing_2d = new MaterialUnlitTextured(this, "missing_2d", "2D");
     missing_2d->setTextureAlbedo(this, "missing.png");
     missing_2d->setSampler(this, "nearest_repeat");
@@ -755,9 +754,8 @@ void AppState::CreateDefaultMaterials() {
     blinn_phong_tex->setTextureAlbedo(this, "missing.png");
     blinn_phong_tex->setSampler(this, "nearest_repeat");
 
-    auto* line = new MaterialPhongTextured(this, "line", "Line");
-    line->setTextureAlbedo(this, "missing.png");
-    line->setSampler(this, "anisotropic_repeat");
+    auto* line = new MaterialColor(this, "line", "Line");
+    line->setColor(glm::vec4(1, 0, 1, 1));
 
     auto* concrete_bricks = new MaterialPhongTexturedNormalMap(this, "concrete_bricks", "BlinnPhongTexturedNormalMapped");
     concrete_bricks->setTextureAlbedo(this, "brick_concrete_albedo.png");
@@ -965,8 +963,7 @@ void AppState::CreateDefaultTextures() {
 void AppState::CreateDefaultPipelines() {
     SDL_Log("Creating default pipelines...");
 
-    CreatePipeline("Line", "Default", "UnlitTextured", "Line", "Default", true, true);
-    CreatePipeline("UnlitUVs", "Default", "UnlitUVs", "Fill", "Default", true, true);
+    CreatePipeline("Line", "Default", "UnlitColor", "Line", "Default", true, true);
     CreatePipeline("2D", "Default", "UnlitTextured", "FillNoBack", "Alpha", false, false);
 
     CreatePipeline("UnlitTextured", "Default", "UnlitTextured", "Fill", "Default", true, true);
