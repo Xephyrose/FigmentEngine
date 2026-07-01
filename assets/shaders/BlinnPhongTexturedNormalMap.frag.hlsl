@@ -17,7 +17,9 @@ cbuffer PushConstants : register(b0, space3)
     bool    useAmbientTexture;
     float3  colorSpecular;
     bool    useSpecularTexture;
-    int     num_lights;
+    int     num_point_lights;
+    int     num_dir_lights;
+    int     num_spot_lights;
 }
 
 struct PSInput {
@@ -33,20 +35,20 @@ struct PointLight {
     float4 position; // 3 for pos, 1 for padding
 };
 
-//struct DirectionalLight {
-//    float4 rgb;
-//    float4 direction; // 3 for dir, 1 for padding
-//};
-//
-//struct SpotLight {
-//    float4 rgb;
-//    float4 position; // 3 for pos, 1 for padding
-//    float4 direction; // 3 for dir, 1 for padding
-//};
+struct DirectionalLight {
+    float4 rgb;
+    float4 direction; // 3 for dir, 1 for padding
+};
+
+struct SpotLight {
+    float4 rgb;
+    float4 position; // 3 for pos, 1 for padding
+    float4 direction; // 3 for dir, 1 for padding
+};
 
 StructuredBuffer<PointLight> pointLights : register(t4, space2);
-//StructuredBuffer<DirectionalLight> directionalLights : register(t5, space2);
-//StructuredBuffer<SpotLight> spotLights : register(t6, space2);
+StructuredBuffer<DirectionalLight> directionalLights : register(t5, space2);
+StructuredBuffer<SpotLight> spotLights : register(t6, space2);
 
 float3 CalcPointLight(PointLight light, float3 normal, float3 fragPos, float3 viewDir, float3 calcAlbedo, float3 calcSpecular)
 {
@@ -59,9 +61,21 @@ float3 CalcPointLight(PointLight light, float3 normal, float3 fragPos, float3 vi
 
     // Specular
     float3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess * 4); // * 4 because phong uses 4x as much as blinn-phong, so 4x here makes it comparable to phong
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess * 4); // *4 because phong uses 4x as much as blinn-phong, so 4x here makes it comparable to phong
     float3 specular = lightColor * (spec * calcSpecular);
 
+    return diffuse + specular;
+}
+
+float3 CalcDirectionalLight(DirectionalLight light, float3 normal, float3 fragPos, float3 viewDir, float3 calcAlbedo, float3 calcSpecular)
+{
+    float3 lightDir = normalize(-light.direction.xyz);
+    float diff = max(dot(normal, lightDir), 0.0);
+    float3 reflectDir = reflect(-lightDir, normal);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess * 4);
+
+    float3 diffuse = diff * calcAlbedo;
+    float3 specular = spec * calcSpecular;
     return diffuse + specular;
 }
 
@@ -106,8 +120,11 @@ float4 main(PSInput input) : SV_TARGET {
     }
 
     float3 result = float3(0.0f, 0.0f, 0.0f);
-    for(int i = 0; i < num_lights; i++) {
+    for(int i = 0; i < num_point_lights; i++) {
         result += CalcPointLight(pointLights[i], worldNormal, input.worldPos, normalize(viewPos - input.worldPos), calcAlbedo.xyz, calcSpecular);
+    }
+    for(int i = 0; i < num_dir_lights; i++) {
+        result += CalcDirectionalLight(directionalLights[i], worldNormal, input.worldPos, normalize(viewPos - input.worldPos), calcAlbedo.xyz, calcSpecular);
     }
     return float4(result + calcAmbient, calcAlbedo.w);
 }

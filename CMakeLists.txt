@@ -95,8 +95,7 @@ add_executable(FigmentEngine
     src/Player2D.cpp
     src/Player2D.h
     src/PointLight3D.h
-    src/PointLight3DGPU.cpp
-    src/PointLight3DGPU.h
+        src/Light3DGPU.h
     src/PointLight3D.cpp
     src/MaterialPhong.cpp
     src/MaterialPhong.h

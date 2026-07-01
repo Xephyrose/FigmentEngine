@@ -7,7 +7,7 @@
 
 #include "Node.h"
 #include "PointLight3D.h"
-#include "PointLight3DGPU.h"
+#include "Light3DGPU.h"
 #include "Transform3D.h"
 #include "box2d/box2d.h"
 
@@ -41,11 +41,21 @@ struct AppState {
     float sensitivity = 0.05f;
     float currentAspectRatio = static_cast<float>(windowWidth) / static_cast<float>(windowHeight);
 
-    const int MAX_LIGHTS = 128;
-    std::vector<PointLight3DGPU> gpuLights;
+    const int MAX_POINT_LIGHTS = 16;
+    const int MAX_DIRECTIONAL_LIGHTS = 4;
+    // const int MAX_SPOT_LIGHTS = 128;
+    std::vector<PointLight3DGPU> pointLightGPUs;
+    std::vector<DirectionalLight3DGPU> directionalLightGPUs;
+    // std::vector<SpotLight3DGPU> spotLightGPUs;
     std::vector<PointLight3D*> pointLights;
-    SDL_GPUBuffer* lightBuffer;
-    SDL_GPUTransferBuffer* lightTransferBuffer;
+    std::vector<PointLight3D*> directionalLights;
+    // std::vector<SpotLight3D*> spotLights;
+    SDL_GPUBuffer* pointLightBuffer;
+    SDL_GPUBuffer* directionalLightBuffer;
+    // SDL_GPUBuffer* spotLightBuffer;
+    SDL_GPUTransferBuffer* pointLightTransferBuffer;
+    SDL_GPUTransferBuffer* directionalLightTransferBuffer;
+    SDL_GPUTransferBuffer* spotLightTransferBuffer;
 
     std::unordered_map<std::string, Mesh> meshes;
     std::unordered_map<std::string, Material*> materials;

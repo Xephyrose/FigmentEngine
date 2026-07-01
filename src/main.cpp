@@ -360,33 +360,33 @@ SDL_AppResult RenderFrame(AppState* appState) {
         };
 
         // gpuLights is a vector of structs that store point light data. Here we clear this list, so we can upload the latest light data to the GPU.
-        appState->gpuLights.clear();
-        appState->gpuLights.reserve(appState->pointLights.size());
+        appState->pointLightGPUs.clear();
+        appState->pointLightGPUs.reserve(appState->pointLights.size());
 
         // repopulate gpuLights
         for (const PointLight3D* light : appState->pointLights) {
             PointLight3DGPU gpu;
             gpu.position = glm::vec4(light->GetGlobalTransform().position, 0);
             gpu.color = glm::vec4(light->color, light->intensity);
-            appState->gpuLights.push_back(gpu);
+            appState->pointLightGPUs.push_back(gpu);
         }
 
         // transfer the light data into the light buffer
-        if (void* mapped = SDL_MapGPUTransferBuffer(appState->device, appState->lightTransferBuffer, false)) {
-            memcpy(mapped, appState->gpuLights.data(), appState->gpuLights.size() * sizeof(PointLight3DGPU));
-            SDL_UnmapGPUTransferBuffer(appState->device, appState->lightTransferBuffer);
+        if (void* mapped = SDL_MapGPUTransferBuffer(appState->device, appState->pointLightTransferBuffer, false)) {
+            memcpy(mapped, appState->pointLightGPUs.data(), appState->pointLightGPUs.size() * sizeof(PointLight3DGPU));
+            SDL_UnmapGPUTransferBuffer(appState->device, appState->pointLightTransferBuffer);
         }
 
         SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(commandBuffer);
 
         SDL_GPUTransferBufferLocation src = {};
-        src.transfer_buffer = appState->lightTransferBuffer;
+        src.transfer_buffer = appState->pointLightTransferBuffer;
         src.offset = 0;
 
         SDL_GPUBufferRegion dst = {};
-        dst.buffer = appState->lightBuffer;
+        dst.buffer = appState->pointLightBuffer;
         dst.offset = 0;
-        dst.size = appState->gpuLights.size() * sizeof(PointLight3DGPU);
+        dst.size = appState->pointLightGPUs.size() * sizeof(PointLight3DGPU);
 
         SDL_UploadToGPUBuffer(copyPass, &src, &dst, false);
 

@@ -39,7 +39,7 @@ void MaterialPhong::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer
     SDL_BindGPUFragmentStorageBuffers(
         appState->renderPass,
         0,
-        &appState->lightBuffer,
+        &appState->pointLightBuffer,
         1
     );
 

@@ -69,7 +69,7 @@ void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *comma
     SDL_BindGPUFragmentStorageBuffers(
         appState->renderPass,
         0,
-        &appState->lightBuffer,
+        &appState->pointLightBuffer,
         1
     );
 }
