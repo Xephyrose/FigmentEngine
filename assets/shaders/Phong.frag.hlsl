@@ -26,5 +26,8 @@ float4 main(PSInput input) : SV_TARGET {
     for(int i = 0; i < num_dir_lights; i++) {
         result += CalcDirectionalLight(directionalLights[i], input.worldNormal, float3(1.0, 1.0, 1.0), float3(1.0, 1.0, 1.0), CalcPhongSpecular(normalize(-directionalLights[i].direction.xyz), input.worldNormal, normalize(viewPos - input.worldPos), 64));
     }
+    for(int i = 0; i < num_spot_lights; i++) {
+        result += CalcSpotLight(spotLights[i], input.worldNormal, input.worldPos, float3(1.0, 1.0, 1.0), float3(1.0, 1.0, 1.0), CalcPhongSpecular(normalize(spotLights[i].position.xyz - input.worldPos), input.worldNormal, normalize(viewPos - input.worldPos), 64));
+    }
     return float4(result + 0.1, 1.0f);
 }

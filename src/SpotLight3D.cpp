@@ -11,7 +11,7 @@ void SpotLight3D::ImGuiDraw() {
         ImGui::ColoredDragFloat3("##Position", _position, true);
         localTransform.position = glm::vec3(_position[0], _position[1], _position[2]);
         float _rotation[3] = { localTransform.rotation.x, localTransform.rotation.y, localTransform.rotation.z };
-        ImGui::ColoredDragFloat3("##Position", _rotation, true);
+        ImGui::ColoredDragFloat3("##Rotation", _rotation, true);
         localTransform.rotation = glm::vec3(_rotation[0], _rotation[1], _rotation[2]);
         float col[3] = { color.x, color.y, color.z };
         ImGui::ColoredDragFloat3("RGB", col, false);

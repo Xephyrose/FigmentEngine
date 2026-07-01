@@ -142,20 +142,20 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     pointLight1->localTransform.position.x = -36;
     pointLight1->localTransform.position.y = 5;
     pointLight1->color.y  = 0.5f;
-    // pointLight1->intensity = 0;
+    pointLight1->constant = 0;
     appState->root.addChild(std::unique_ptr<Node>(pointLight1));
 
     auto* directionalLight = new DirectionalLight3D(appState);
     directionalLight->localTransform.rotation.x = -8;
     directionalLight->localTransform.rotation.y = -9;
     directionalLight->localTransform.rotation.z = -11;
-    // directionalLight->intensity = 0;
+    directionalLight->intensity = 0;
     appState->root.addChild(std::unique_ptr<Node>(directionalLight));
 
     auto* spotLight = new SpotLight3D(appState);
-    spotLight->localTransform.rotation.x = -8;
-    spotLight->localTransform.rotation.y = -9;
-    spotLight->localTransform.rotation.z = -11;
+    pointLight->localTransform.position.x = -53;
+    pointLight->localTransform.position.y = 6;
+    pointLight->localTransform.position.z = -26;
     // spotLight->intensity = 0;
     appState->root.addChild(std::unique_ptr<Node>(spotLight));
 
