@@ -76,6 +76,7 @@ namespace ImGui {
         PopStyleColor(5);
         PopID();
     }
+    void ColoredDragFloat1(const char *label, float &v, const char* letters);
     void ColoredDragFloat3XYZ(const char *label, float (&v)[3]);
     void ColoredDragFloat3RGB(const char *label, float (&v)[3]);
 }

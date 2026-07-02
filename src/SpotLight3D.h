@@ -8,7 +8,7 @@ struct SpotLight3D : Node3D {
     float constant = 1.0f;
     float linear = 0.09f;
     float quadratic = 0.032f;
-    float cutoff = 12.5f;
+    float cutoff = 0.0f;
     float outerCutoff = 15.0f;
 
     void ImGuiDraw() override;

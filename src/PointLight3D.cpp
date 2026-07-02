@@ -13,7 +13,10 @@ void PointLight3D::ImGuiDraw() {
         float col[3] = { color.x, color.y, color.z };
         ImGui::ColoredDragFloat3XYZ("RGB", col);
         color = glm::vec3(col[0], col[1], col[2]);
-        // ImGui::ColoredDragFloat("Brightness", &brightness, false);
+        ImGui::ColoredDragFloat1("Brightness", brightness, "Brightness");
+        ImGui::ColoredDragFloat1("Constant", constant, "Constant");
+        ImGui::ColoredDragFloat1("Linear", linear, "Linear");
+        ImGui::ColoredDragFloat1("Quadratic", quadratic, "Quadratic");
     }
 }
 
