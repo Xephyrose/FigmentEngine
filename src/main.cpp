@@ -130,34 +130,34 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     freeCam->localTransform.setRotation(glm::vec3(-34, 0, 0));
     appState->root.addChild(std::unique_ptr<Node>(freeCam));
 
-    auto* pointLight = new PointLight3D(appState);
-    pointLight->localTransform.position.x = -43;
-    pointLight->localTransform.position.y = 5;
-    pointLight->localTransform.position.z = -14;
-    pointLight->color.x = 0.5f;
-    pointLight->constant = 0;
-    appState->root.addChild(std::unique_ptr<Node>(pointLight));
-
-    auto* pointLight1 = new PointLight3D(appState);
-    pointLight1->localTransform.position.x = -36;
-    pointLight1->localTransform.position.y = 5;
-    pointLight1->color.y  = 0.5f;
-    pointLight1->constant = 0;
-    appState->root.addChild(std::unique_ptr<Node>(pointLight1));
+    // auto* pointLight = new PointLight3D(appState);
+    // pointLight->localTransform.position.x = -43;
+    // pointLight->localTransform.position.y = 5;
+    // pointLight->localTransform.position.z = -14;
+    // pointLight->color.x = 0.5f;
+    // pointLight->constant = 0;
+    // appState->root.addChild(std::unique_ptr<Node>(pointLight));
+    //
+    // auto* pointLight1 = new PointLight3D(appState);
+    // pointLight1->localTransform.position.x = -36;
+    // pointLight1->localTransform.position.y = 5;
+    // pointLight1->color.y  = 0.5f;
+    // pointLight1->constant = 0;
+    // appState->root.addChild(std::unique_ptr<Node>(pointLight1));
 
     auto* directionalLight = new DirectionalLight3D(appState);
     directionalLight->localTransform.rotation.x = -8;
     directionalLight->localTransform.rotation.y = -9;
     directionalLight->localTransform.rotation.z = -11;
-    directionalLight->brightness = 0;
     appState->root.addChild(std::unique_ptr<Node>(directionalLight));
 
-    auto* spotLight = new SpotLight3D(appState);
-    spotLight->localTransform.position.x = -53;
-    spotLight->localTransform.position.y = 6;
-    spotLight->localTransform.position.z = -26;
-    // spotLight->intensity = 0;
-    appState->root.addChild(std::unique_ptr<Node>(spotLight));
+    // auto* spotLight = new SpotLight3D(appState);
+    // spotLight->localTransform.position.x = -46;
+    // spotLight->localTransform.position.y = 1;
+    // spotLight->localTransform.position.z = 14;
+    // spotLight->brightness = 27;
+    // // spotLight->intensity = 0;
+    // appState->root.addChild(std::unique_ptr<Node>(spotLight));
 
     // auto* camera2d = new Camera2D();
     // appState->current_camera_2d = camera2d;
