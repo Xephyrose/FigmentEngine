@@ -27,6 +27,9 @@ struct AppState {
     SDL_GPURenderPass *renderPass;
     SDL_GPUTexture* depthTexture = nullptr;
     SDL_GPUTexture* msaaColorTarget = nullptr;
+    std::array<SDL_GPUVertexBufferDescription, 1> m_vertexBufferDescriptions;
+    std::array<SDL_GPUVertexAttribute, 4> m_vertexAttributes;
+    SDL_GPUVertexInputState vertexInputState;
     int msaaSamples = 3;
     bool isMouseRelative = false;
 
@@ -37,6 +40,9 @@ struct AppState {
     Camera2D* current_camera_2d;
     Camera3D* current_camera_3d;
     Transform3D modelTransform;
+
+    SDL_GPUTexture* shadowMap = nullptr;
+    SDL_GPUGraphicsPipeline* shadowPipeline = nullptr;
 
     int windowWidth = 1600;
     int windowHeight = 900;
@@ -91,6 +97,7 @@ struct AppState {
     SDL_GPURasterizerState GetRasterizerState(const std::string &key) const;
     SDL_GPUMultisampleState GetMultisampleState(const std::string &key) const;
 
+    void CreateVertexinputState();
     void CreateDefaultMeshes();
     void CreateDepthTexture();
     void CreateMSAAColorTarget();
@@ -104,6 +111,10 @@ struct AppState {
     void CreateDefaultBlendStates();
     void CreateDefaultRasterizerStates();
     void CreateDefaultMultisampleStates();
+    void CreateShadowMap();
+    void CreateShadowPipeline();
+    void RenderShadowMap(SDL_GPUCommandBuffer* cmdBuf, const glm::mat4& lightViewProj);
+    glm::mat4 GetLightViewProjection() const;
 
     void RecreateAllMultisampleStates();
     void RecreateAllPipelines();

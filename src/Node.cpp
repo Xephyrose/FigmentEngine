@@ -26,6 +26,12 @@ void Node::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) {
     }
 }
 
+void Node::DrawShadow(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) {
+    for (const auto & i : children) {
+        i->DrawShadow(appState, commandBuffer);
+    }
+}
+
 void Node::Input(AppState& appState) {
     for (const auto & i : children) {
         i->Input(appState);

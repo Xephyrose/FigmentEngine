@@ -106,6 +106,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     SDL_SetGPUSwapchainParameters(appState->device, appState->window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_IMMEDIATE);
 
+    appState->CreateVertexinputState();
     appState->CreateDefaultBlendStates();
     appState->CreateDefaultMultisampleStates();
     appState->CreateDefaultMeshes();
@@ -119,6 +120,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     appState->CreatePointLightBuffer();
     appState->CreateDirectionalLightBuffer();
     appState->CreateSpotLightBuffer();
+    appState->CreateShadowPipeline();
+    appState->CreateShadowMap();
 
     appState->quadMesh = new Mesh();
     appState->quadMesh->CreateQuad(1, 1, -1);
@@ -426,7 +429,7 @@ SDL_AppResult RenderFrame(AppState* appState) {
         ImGui::End();
 
         ImGui::Begin("Rendering Overrides");
-        static const char* items[] = { "", "phong", "phong_textured", "blinn_phong", "blinn_phong_textured", "missing", "line" };
+        static const char* items[] = { "", "shadows", "phong", "phong_textured", "blinn_phong", "blinn_phong_textured", "missing", "line" };
         static int selected_idx = 0;
         ImGui::Combo("Override", &selected_idx, items, IM_ARRAYSIZE(items));
         appState->material_override = items[selected_idx];
@@ -443,6 +446,8 @@ SDL_AppResult RenderFrame(AppState* appState) {
         SDL_Log("Couldn't acquire GPU command buffer: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
+
+    appState->RenderShadowMap(commandBuffer, appState->GetLightViewProjection());
 
     if (appState->debug) {
         ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, commandBuffer);

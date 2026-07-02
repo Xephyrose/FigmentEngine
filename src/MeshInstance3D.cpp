@@ -45,3 +45,28 @@ void MeshInstance3D::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffe
         i->Draw(appState, commandBuffer);
     }
 }
+
+void MeshInstance3D::DrawShadow(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) {
+    const Mesh* _mesh = appState.GetMesh(this->mesh);
+    if (!_mesh || !_mesh->isOnGPU) return;
+
+    // Bind this editorMesh's vertex/index buffers (same buffers for all instances)
+    const SDL_GPUBufferBinding vertexBinding = { .buffer = _mesh->vertexBuffer, .offset = 0 };
+    SDL_BindGPUVertexBuffers(appState.renderPass, 0, &vertexBinding, 1);
+    if (!_mesh->indices.empty()) {
+        const SDL_GPUBufferBinding indexBinding = { .buffer = _mesh->indexBuffer, .offset = 0 };
+        SDL_BindGPUIndexBuffer(appState.renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+    }
+
+    for (const auto& submesh : _mesh->submeshes) {
+        appState.GetMaterial("shadows")->Bind(&appState, commandBuffer, GetGlobalTransform().getMatrix());
+        if (!_mesh->indices.empty()) {
+            SDL_DrawGPUIndexedPrimitives(appState.renderPass, submesh.indexCount, 1, submesh.startIndex, 0, 0);
+        } else {
+            SDL_DrawGPUPrimitives(appState.renderPass, submesh.vertexCount, 1, submesh.startVertex, 0);
+        }
+    }
+    for (const auto & i : children) {
+        i->Draw(appState, commandBuffer);
+    }
+}

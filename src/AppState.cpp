@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <SDL3_image/SDL_image.h>
 
+#include "Camera3D.h"
 #include "MaterialPhong.h"
 #include "MaterialPhongTextured.h"
 #include "MaterialPhongTexturedNormalMap.h"
@@ -11,6 +12,7 @@
 #include "Mesh.h"
 #include "Light3DGPU.h"
 #include "MaterialColor.h"
+#include "MaterialShadows.h"
 #include "Vertex.h"
 #include "SDL3/SDL_log.h"
 #include "thirdparty/json.hpp"
@@ -29,42 +31,6 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
         return false;
     }
 
-    constexpr std::array vertexBufferDescriptions{
-        SDL_GPUVertexBufferDescription{
-            .slot = 0,
-            .pitch = sizeof(Vertex),
-            .input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX,
-            .instance_step_rate = 0,
-        },
-    };
-
-    constexpr std::array vertexAttributes{
-        SDL_GPUVertexAttribute{
-            .location = 0,
-            .buffer_slot = 0,
-            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
-            .offset = offsetof(Vertex, position),
-        },
-        SDL_GPUVertexAttribute{
-            .location = 1,
-            .buffer_slot = 0,
-            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2,
-            .offset = offsetof(Vertex, uv),
-        },
-        SDL_GPUVertexAttribute{
-            .location = 2,
-            .buffer_slot = 0,
-            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
-            .offset = offsetof(Vertex, normal),
-        },
-        SDL_GPUVertexAttribute{
-            .location = 3,
-            .buffer_slot = 0,
-            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT4,
-            .offset = offsetof(Vertex, tangent),
-        }
-    };
-
     const std::array colorTargetDescriptions{
         SDL_GPUColorTargetDescription{
             .format = SDL_GetGPUSwapchainTextureFormat(device, window),
@@ -75,12 +41,7 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
     const auto pipelineCreateInfo = SDL_GPUGraphicsPipelineCreateInfo{
         .vertex_shader = vertexShader,
         .fragment_shader = fragmentShader,
-        .vertex_input_state = SDL_GPUVertexInputState{
-            .vertex_buffer_descriptions = vertexBufferDescriptions.data(),
-            .num_vertex_buffers = vertexBufferDescriptions.size(),
-            .vertex_attributes = vertexAttributes.data(),
-            .num_vertex_attributes = vertexAttributes.size(),
-        },
+        .vertex_input_state = vertexInputState,
         .primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
         .rasterizer_state = GetRasterizerState(rasterizerState),
         .multisample_state = GetMultisampleState("Multisample"),
@@ -625,6 +586,47 @@ SDL_GPUMultisampleState AppState::GetMultisampleState(const std::string& key) co
     return multisampleStates.at(key);
 }
 
+void AppState::CreateVertexinputState() {
+    m_vertexBufferDescriptions[0] = {
+        SDL_GPUVertexBufferDescription{
+            .slot = 0,
+            .pitch = sizeof(Vertex),
+            .input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX,
+            .instance_step_rate = 0,
+        },
+    };
+
+    m_vertexAttributes[0] = SDL_GPUVertexAttribute{
+        .location = 0,
+        .buffer_slot = 0,
+        .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
+        .offset = offsetof(Vertex, position),
+    },
+    m_vertexAttributes[1] = SDL_GPUVertexAttribute{
+        .location = 1,
+        .buffer_slot = 0,
+        .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2,
+        .offset = offsetof(Vertex, uv),
+    },
+    m_vertexAttributes[2] = SDL_GPUVertexAttribute{
+        .location = 2,
+        .buffer_slot = 0,
+        .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
+        .offset = offsetof(Vertex, normal),
+    },
+    m_vertexAttributes[3] = SDL_GPUVertexAttribute{
+        .location = 3,
+        .buffer_slot = 0,
+        .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT4,
+        .offset = offsetof(Vertex, tangent),
+    };
+
+    vertexInputState.vertex_buffer_descriptions = m_vertexBufferDescriptions.data();
+    vertexInputState.num_vertex_buffers = m_vertexBufferDescriptions.size();
+    vertexInputState.vertex_attributes = m_vertexAttributes.data();
+    vertexInputState.num_vertex_attributes = m_vertexAttributes.size();
+}
+
 SDL_GPUColorTargetBlendState AppState::GetBlendState(const std::string &key) const {
     return blendStates.at(key);
 }
@@ -771,6 +773,8 @@ void AppState::CreateDefaultMaterials() {
     auto* missing = new MaterialUnlitTextured(this, "missing", "UnlitTextured");
     missing->setTextureAlbedo(this, "missing.png");
     missing->setSampler(this, "anisotropic_repeat");
+
+    new MaterialShadows(this, "shadows", "Shadows");
 
     new MaterialPhong(this, "phong", "Phong");
     const auto phong_tex = new MaterialPhongTextured(this, "phong_textured", "PhongTextured");
@@ -980,6 +984,22 @@ void AppState::CreateDefaultSamplers() {
     } else {
         SDL_Log("Couldn't create anisotropic sampler: %s", SDL_GetError());
     }
+
+    SDL_GPUSamplerCreateInfo shadowSamplernfo = {};
+    shadowSamplernfo.min_filter = SDL_GPU_FILTER_LINEAR;
+    shadowSamplernfo.mag_filter = SDL_GPU_FILTER_LINEAR;
+    shadowSamplernfo.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_LINEAR;
+    shadowSamplernfo.address_mode_u = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+    shadowSamplernfo.address_mode_v = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+    shadowSamplernfo.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+    shadowSamplernfo.compare_op = SDL_GPU_COMPAREOP_LESS;
+
+
+    if (SDL_GPUSampler* shadowSampler = SDL_CreateGPUSampler(device, &anisotropicInfo)) {
+        samplers["shadow_map"] = shadowSampler;
+    } else {
+        SDL_Log("Couldn't create shadow map sampler: %s", SDL_GetError());
+    }
 }
 
 void AppState::CreateDefaultTextures() {
@@ -1015,6 +1035,8 @@ void AppState::CreateDefaultPipelines() {
 
     CreatePipeline("BlinnPhongTexturedNormalMapped", "NormalMap", "BlinnPhongTexturedNormalMap", "Fill", "Default", true, true);
     CreatePipeline("BlinnPhongTexturedNormalMappedAlpha", "NormalMap", "BlinnPhongTexturedNormalMap", "Fill", "Alpha", true, false);
+
+    CreatePipeline("Shadows", "Shadows", "Shadows", "Fill", "Default", true, true);
 }
 
 void AppState::CreateDefaultRasterizerStates() {
@@ -1064,6 +1086,84 @@ void AppState::CreateDefaultMultisampleStates()
     multisampleStates.insert_or_assign("Multisample", defaultMultisampleState);
 }
 
+void AppState::CreateShadowMap() {
+    if (shadowMap) {
+        SDL_ReleaseGPUTexture(device, shadowMap);
+        shadowMap = nullptr;
+    }
+
+    constexpr int shadowMapSize = 2048;  // You can make this configurable
+
+    SDL_GPUTextureCreateInfo info = {};
+    info.type = SDL_GPU_TEXTURETYPE_2D;
+    info.format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
+    info.width = shadowMapSize;
+    info.height = shadowMapSize;
+    info.layer_count_or_depth = 1;
+    info.num_levels = 1;
+    info.usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER;
+    info.sample_count = SDL_GPU_SAMPLECOUNT_1;
+
+    shadowMap = SDL_CreateGPUTexture(device, &info);
+    if (!shadowMap) {
+        SDL_Log("Failed to create shadow map: %s", SDL_GetError());
+    }
+}
+
+void AppState::CreateShadowPipeline() {
+    SDL_GPUShader* vertexShader = GetShader("ShadowMap.vert");
+    SDL_GPUShader* fragmentShader = GetShader("ShadowMap.frag");
+
+    if (!vertexShader || !fragmentShader) {
+        SDL_Log("Failed to load shadow shaders");
+        return;
+    }
+
+    // No color targets — just depth
+    SDL_GPUGraphicsPipelineCreateInfo pipelineInfo = {};
+    pipelineInfo.vertex_shader = vertexShader;
+    pipelineInfo.fragment_shader = fragmentShader;
+    pipelineInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
+    pipelineInfo.rasterizer_state = GetRasterizerState("Fill");  // Or whatever you use
+
+    // Depth state (writes depth, no color)
+    pipelineInfo.depth_stencil_state.enable_depth_test = true;
+    pipelineInfo.depth_stencil_state.enable_depth_write = true;
+    pipelineInfo.depth_stencil_state.compare_op = SDL_GPU_COMPAREOP_LESS;
+
+    pipelineInfo.target_info.has_depth_stencil_target = true;
+    pipelineInfo.target_info.depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
+    pipelineInfo.target_info.num_color_targets = 0;  // No color targets!
+
+    // Vertex input (same as your regular meshes)
+    pipelineInfo.vertex_input_state = vertexInputState;
+
+    shadowPipeline = SDL_CreateGPUGraphicsPipeline(device, &pipelineInfo);
+}
+
+glm::mat4 AppState::GetLightViewProjection() const {
+    // Find the directional light
+    const DirectionalLight3D* light = directionalLights[0];
+    if (!light) return {1.0f};
+
+    // Light direction (opposite of the light's forward vector)
+    const glm::vec3 lightDir = -light->GetGlobalTransform().getForward();
+
+    // For a directional light, we need an orthographic projection
+    // centered around the camera's view frustum
+    const glm::vec3 center = current_camera_3d->GetGlobalTransform().position;
+
+    // Light's view matrix (looking from a position along the light direction)
+    const glm::vec3 lightPos = center - lightDir * 50.0f;  // Distance from center
+    const glm::mat4 lightView = glm::lookAt(lightPos, center, glm::vec3(0.0f, 1.0f, 0.0f));
+
+    // Orthographic projection (adjust size to cover your scene)
+    constexpr float orthoSize = 30.0f;
+    const glm::mat4 lightProj = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, 0.1f, 100.0f);
+
+    return lightProj * lightView;
+}
+
 void AppState::RecreateAllMultisampleStates() {
     SDL_Log("Recreating all multisample states...");
     multisampleStates.clear();
@@ -1079,4 +1179,34 @@ void AppState::RecreateAllPipelines() {
     pipelines.clear();
 
     CreateDefaultPipelines();
+}
+
+void AppState::RenderShadowMap(SDL_GPUCommandBuffer* cmdBuf, const glm::mat4& lightViewProj) {
+    SDL_Log("Trying RenderShadowMap...");
+    if (!shadowMap || !shadowPipeline) return;
+    SDL_Log("Starting RenderShadowMap...");
+
+    SDL_GPUDepthStencilTargetInfo depthTarget = {};
+    depthTarget.texture = shadowMap;
+    depthTarget.clear_depth = 1.0f; // Far plane
+    depthTarget.load_op = SDL_GPU_LOADOP_CLEAR;
+    depthTarget.store_op = SDL_GPU_STOREOP_STORE;
+    depthTarget.stencil_load_op = SDL_GPU_LOADOP_DONT_CARE;
+    depthTarget.stencil_store_op = SDL_GPU_STOREOP_DONT_CARE;
+    depthTarget.cycle = true;
+
+    SDL_GPURenderPass* pass = SDL_BeginGPURenderPass(cmdBuf, nullptr, 0, &depthTarget);
+    if (!pass) {
+        SDL_Log("Failed to begin shadow render pass");
+        return;
+    }
+
+    SDL_BindGPUGraphicsPipeline(pass, shadowPipeline);
+
+    SDL_PushGPUVertexUniformData(cmdBuf, 0, &lightViewProj, sizeof(lightViewProj));
+
+    root.DrawShadow(*this, cmdBuf);
+
+    SDL_EndGPURenderPass(pass);
+    SDL_Log("Finishing RenderShadowMap...");
 }
