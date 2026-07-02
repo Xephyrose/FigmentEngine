@@ -149,9 +149,9 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     // appState->root.addChild(std::unique_ptr<Node>(pointLight1));
 
     auto* directionalLight = new DirectionalLight3D(appState);
-    directionalLight->localTransform.rotation.x = -8;
-    directionalLight->localTransform.rotation.y = -9;
-    directionalLight->localTransform.rotation.z = -11;
+    directionalLight->localTransform.rotation.x = -9;
+    directionalLight->localTransform.rotation.y = 45;
+    directionalLight->localTransform.rotation.z = 45;
     appState->root.addChild(std::unique_ptr<Node>(directionalLight));
 
     // auto* spotLight = new SpotLight3D(appState);
@@ -307,7 +307,7 @@ void PrepareDirectionalLightBuffer(AppState *appState, SDL_GPUCommandBuffer *com
     for (const DirectionalLight3D* light : appState->directionalLights) {
         DirectionalLight3DGPU gpu;
         gpu.color = glm::vec4(light->color, light->brightness);
-        gpu.direction = glm::vec4(light->GetGlobalTransform().rotation, 0);
+        gpu.direction = glm::vec4(light->GetGlobalTransform().getForward(), 0);
         appState->directionalLightGPUs.push_back(gpu);
     }
 

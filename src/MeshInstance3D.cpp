@@ -2,6 +2,7 @@
 #include "Mesh.h"
 #include "Camera3D.h"
 #include "Material.h"
+#include "SDL3/SDL_log.h"
 
 MeshInstance3D::MeshInstance3D() {
     name = "MeshInstance3D";
@@ -47,10 +48,10 @@ void MeshInstance3D::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffe
 }
 
 void MeshInstance3D::DrawShadow(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) {
+    SDL_Log("Starting DrawShadow()...");
     const Mesh* _mesh = appState.GetMesh(this->mesh);
     if (!_mesh || !_mesh->isOnGPU) return;
 
-    // Bind this editorMesh's vertex/index buffers (same buffers for all instances)
     const SDL_GPUBufferBinding vertexBinding = { .buffer = _mesh->vertexBuffer, .offset = 0 };
     SDL_BindGPUVertexBuffers(appState.renderPass, 0, &vertexBinding, 1);
     if (!_mesh->indices.empty()) {
@@ -59,14 +60,33 @@ void MeshInstance3D::DrawShadow(AppState &appState, SDL_GPUCommandBuffer *comman
     }
 
     for (const auto& submesh : _mesh->submeshes) {
-        appState.GetMaterial("shadows")->Bind(&appState, commandBuffer, GetGlobalTransform().getMatrix());
+
+        // We could make a class and call its bind() here, but instead I decided to just write the bind code right here. I'm gonna regret this.
+        SDL_GPUGraphicsPipeline* shadowPipeline = appState.shadowPipeline;
+        if (!shadowPipeline) {
+            SDL_Log("ERROR: ShadowPipeline not found!");
+            return;
+        }
+
+        // 2. Bind the shadow pipeline
+        SDL_BindGPUGraphicsPipeline(appState.renderPass, shadowPipeline);
+
+        // 3. Compute LightVP × Model
+        glm::mat4 lightVP = appState.GetLightViewProjection();
+        glm::mat4 model = GetGlobalTransform().getMatrix();
+        glm::mat4 mvp = lightVP * model;
+
+        // 4. Push to vertex shader
+        SDL_PushGPUVertexUniformData(commandBuffer, 0, &mvp, sizeof(mvp));
+
         if (!_mesh->indices.empty()) {
             SDL_DrawGPUIndexedPrimitives(appState.renderPass, submesh.indexCount, 1, submesh.startIndex, 0, 0);
         } else {
             SDL_DrawGPUPrimitives(appState.renderPass, submesh.vertexCount, 1, submesh.startVertex, 0);
         }
     }
+    SDL_Log("Finishing DrawShadow()...");
     for (const auto & i : children) {
-        i->Draw(appState, commandBuffer);
+        i->DrawShadow(appState, commandBuffer);
     }
 }

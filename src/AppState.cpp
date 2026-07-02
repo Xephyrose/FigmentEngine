@@ -985,18 +985,18 @@ void AppState::CreateDefaultSamplers() {
         SDL_Log("Couldn't create anisotropic sampler: %s", SDL_GetError());
     }
 
-    SDL_GPUSamplerCreateInfo shadowSamplernfo = {};
-    shadowSamplernfo.min_filter = SDL_GPU_FILTER_LINEAR;
-    shadowSamplernfo.mag_filter = SDL_GPU_FILTER_LINEAR;
-    shadowSamplernfo.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_LINEAR;
-    shadowSamplernfo.address_mode_u = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
-    shadowSamplernfo.address_mode_v = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
-    shadowSamplernfo.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
-    shadowSamplernfo.compare_op = SDL_GPU_COMPAREOP_LESS;
+    SDL_GPUSamplerCreateInfo shadowSamplerinfo = {};
+    shadowSamplerinfo.min_filter = SDL_GPU_FILTER_LINEAR;
+    shadowSamplerinfo.mag_filter = SDL_GPU_FILTER_LINEAR;
+    shadowSamplerinfo.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_LINEAR;
+    shadowSamplerinfo.address_mode_u = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+    shadowSamplerinfo.address_mode_v = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+    shadowSamplerinfo.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+    shadowSamplerinfo.compare_op = SDL_GPU_COMPAREOP_LESS;
 
 
-    if (SDL_GPUSampler* shadowSampler = SDL_CreateGPUSampler(device, &anisotropicInfo)) {
-        samplers["shadow_map"] = shadowSampler;
+    if (SDL_GPUSampler* shadowSampler = SDL_CreateGPUSampler(device, &shadowSamplerinfo)) {
+        samplers["shadow_sampler"] = shadowSampler;
     } else {
         SDL_Log("Couldn't create shadow map sampler: %s", SDL_GetError());
     }
@@ -1124,7 +1124,7 @@ void AppState::CreateShadowPipeline() {
     pipelineInfo.vertex_shader = vertexShader;
     pipelineInfo.fragment_shader = fragmentShader;
     pipelineInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
-    pipelineInfo.rasterizer_state = GetRasterizerState("Fill");  // Or whatever you use
+    pipelineInfo.rasterizer_state = GetRasterizerState("FillNoBack");  // Or whatever you use
 
     // Depth state (writes depth, no color)
     pipelineInfo.depth_stencil_state.enable_depth_test = true;
@@ -1158,8 +1158,8 @@ glm::mat4 AppState::GetLightViewProjection() const {
     const glm::mat4 lightView = glm::lookAt(lightPos, center, glm::vec3(0.0f, 1.0f, 0.0f));
 
     // Orthographic projection (adjust size to cover your scene)
-    constexpr float orthoSize = 30.0f;
-    const glm::mat4 lightProj = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, 0.1f, 100.0f);
+    constexpr float orthoSize = 200.0f;
+    const glm::mat4 lightProj = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, 0.1f, 500.0f);
 
     return lightProj * lightView;
 }
@@ -1188,7 +1188,7 @@ void AppState::RenderShadowMap(SDL_GPUCommandBuffer* cmdBuf, const glm::mat4& li
 
     SDL_GPUDepthStencilTargetInfo depthTarget = {};
     depthTarget.texture = shadowMap;
-    depthTarget.clear_depth = 1.0f; // Far plane
+    depthTarget.clear_depth = 0.0f; // Far plane
     depthTarget.load_op = SDL_GPU_LOADOP_CLEAR;
     depthTarget.store_op = SDL_GPU_STOREOP_STORE;
     depthTarget.stencil_load_op = SDL_GPU_LOADOP_DONT_CARE;
@@ -1203,6 +1203,7 @@ void AppState::RenderShadowMap(SDL_GPUCommandBuffer* cmdBuf, const glm::mat4& li
 
     SDL_BindGPUGraphicsPipeline(pass, shadowPipeline);
 
+    SDL_Log("LightVP: [%f %f %f %f]", lightViewProj[0][0], lightViewProj[0][1], lightViewProj[0][2], lightViewProj[0][3]);
     SDL_PushGPUVertexUniformData(cmdBuf, 0, &lightViewProj, sizeof(lightViewProj));
 
     root.DrawShadow(*this, cmdBuf);

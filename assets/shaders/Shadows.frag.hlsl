@@ -11,6 +11,5 @@ float4 main(PSInput input) : SV_TARGET {
     projCoords = saturate(projCoords);
 
     float shadow = shadowMap.SampleCmp(shadowSampler, projCoords.xy, projCoords.z);
-
     return float4(shadow, shadow, shadow, 1.0);
 }
