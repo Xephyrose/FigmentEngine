@@ -1124,7 +1124,7 @@ void AppState::CreateShadowPipeline() {
     pipelineInfo.vertex_shader = vertexShader;
     pipelineInfo.fragment_shader = fragmentShader;
     pipelineInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
-    pipelineInfo.rasterizer_state = GetRasterizerState("FillNoBack");  // Or whatever you use
+    pipelineInfo.rasterizer_state = GetRasterizerState("FillNoBack");
 
     // Depth state (writes depth, no color)
     pipelineInfo.depth_stencil_state.enable_depth_test = true;
