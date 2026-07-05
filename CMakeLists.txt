@@ -115,6 +115,8 @@ add_executable(FigmentEngine
         src/SpotLight3D.h
         src/MaterialShadows.cpp
         src/MaterialShadows.h
+        game/Game.cpp
+        game/Game.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
