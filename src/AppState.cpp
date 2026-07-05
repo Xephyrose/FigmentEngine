@@ -1126,16 +1126,14 @@ void AppState::CreateShadowPipeline() {
     pipelineInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
     pipelineInfo.rasterizer_state = GetRasterizerState("FillNoBack");
 
-    // Depth state (writes depth, no color)
     pipelineInfo.depth_stencil_state.enable_depth_test = true;
     pipelineInfo.depth_stencil_state.enable_depth_write = true;
     pipelineInfo.depth_stencil_state.compare_op = SDL_GPU_COMPAREOP_LESS;
 
     pipelineInfo.target_info.has_depth_stencil_target = true;
     pipelineInfo.target_info.depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
-    pipelineInfo.target_info.num_color_targets = 0;  // No color targets!
+    pipelineInfo.target_info.num_color_targets = 0;
 
-    // Vertex input (same as your regular meshes)
     pipelineInfo.vertex_input_state = vertexInputState;
 
     shadowPipeline = SDL_CreateGPUGraphicsPipeline(device, &pipelineInfo);
@@ -1188,7 +1186,7 @@ void AppState::RenderShadowMap(SDL_GPUCommandBuffer* cmdBuf, const glm::mat4& li
 
     SDL_GPUDepthStencilTargetInfo depthTarget = {};
     depthTarget.texture = shadowMap;
-    depthTarget.clear_depth = 0.0f; // Far plane
+    depthTarget.clear_depth = 1.0f; // Far plane
     depthTarget.load_op = SDL_GPU_LOADOP_CLEAR;
     depthTarget.store_op = SDL_GPU_STOREOP_STORE;
     depthTarget.stencil_load_op = SDL_GPU_LOADOP_DONT_CARE;
@@ -1203,10 +1201,10 @@ void AppState::RenderShadowMap(SDL_GPUCommandBuffer* cmdBuf, const glm::mat4& li
 
     SDL_BindGPUGraphicsPipeline(pass, shadowPipeline);
 
-    SDL_Log("LightVP: [%f %f %f %f]", lightViewProj[0][0], lightViewProj[0][1], lightViewProj[0][2], lightViewProj[0][3]);
+    // SDL_Log("LightVP: [%f %f %f %f]", lightViewProj[0][0], lightViewProj[0][1], lightViewProj[0][2], lightViewProj[0][3]);
     SDL_PushGPUVertexUniformData(cmdBuf, 0, &lightViewProj, sizeof(lightViewProj));
 
-    root.DrawShadow(*this, cmdBuf);
+    root.DrawShadow(*this, cmdBuf, pass);
 
     SDL_EndGPURenderPass(pass);
     SDL_Log("Finishing RenderShadowMap...");

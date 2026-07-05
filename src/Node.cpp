@@ -26,9 +26,9 @@ void Node::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) {
     }
 }
 
-void Node::DrawShadow(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) {
+void Node::DrawShadow(AppState &appState, SDL_GPUCommandBuffer *commandBuffer, SDL_GPURenderPass* renderPass) {
     for (const auto & i : children) {
-        i->DrawShadow(appState, commandBuffer);
+        i->DrawShadow(appState, commandBuffer, renderPass);
     }
 }
 
