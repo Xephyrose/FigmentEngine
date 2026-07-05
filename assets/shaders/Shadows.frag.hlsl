@@ -7,7 +7,7 @@ struct PSInput {
 
 float4 main(PSInput input) : SV_TARGET {
     float3 projCoords = input.shadowCoord.xyz / input.shadowCoord.w;
-    projCoords = projCoords * 0.5 + 0.5;
+    projCoords.xy = projCoords.xy * 0.5 + 0.5;
     projCoords = saturate(projCoords);
 
     float depth = shadowMap.Sample(shadowSampler, projCoords.xy).r;

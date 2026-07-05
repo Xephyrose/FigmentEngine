@@ -2,7 +2,7 @@
 #define FIGMENTENGINE_FREECAM_H
 #include "Camera3D.h"
 
-struct FreeCam3D : public Camera3D {
+struct FreeCam3D : Camera3D {
     FreeCam3D();
     void ImGuiDraw() override;
     void Input(AppState& appState) override;

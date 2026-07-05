@@ -1036,7 +1036,7 @@ void AppState::CreateDefaultPipelines() {
     CreatePipeline("BlinnPhongTexturedNormalMapped", "NormalMap", "BlinnPhongTexturedNormalMap", "Fill", "Default", true, true);
     CreatePipeline("BlinnPhongTexturedNormalMappedAlpha", "NormalMap", "BlinnPhongTexturedNormalMap", "Fill", "Alpha", true, false);
 
-    CreatePipeline("Shadows", "Shadows", "Shadows", "Fill", "Default", true, true);
+    CreatePipeline("Shadows", "Shadows", "Shadows", "FillNoBack", "Default", true, true);
 }
 
 void AppState::CreateDefaultRasterizerStates() {
@@ -1143,23 +1143,15 @@ glm::mat4 AppState::GetLightViewProjection() const {
     const DirectionalLight3D* light = directionalLights[0];
     if (!light) return glm::mat4(1.0f);
 
-    // Light direction (opposite of the light's forward vector)
+    const glm::vec3 lightPos = light->GetGlobalTransform().position;
     const glm::vec3 lightDir = -light->GetGlobalTransform().getForward();
 
-    // For a directional light, the light's view matrix is based on the direction
-    // The position of the light doesn't matter for directional lights
-    // Use the center of the scene (0, 0, 0) or a fixed point
-    const glm::vec3 center = glm::vec3(0.0f, 0.0f, 0.0f);
+    // Target is along the light's direction from its position
+    const glm::vec3 target = lightPos + lightDir * 100.0f;  // Look ahead along the light direction
 
-    // Light position along the direction from the center
-    constexpr float lightDistance = 100.0f;
-    const glm::vec3 lightPos = center - lightDir * lightDistance;
+    glm::mat4 lightView = glm::lookAt(lightPos, target, glm::vec3(0.0f, 1.0f, 0.0f));
 
-    // Create the light's view matrix
-    glm::mat4 lightView = glm::lookAt(lightPos, center, glm::vec3(0.0f, 1.0f, 0.0f));
-
-    // Orthographic projection (should cover the entire scene)
-    constexpr float orthoSize = 500.0f;
+    constexpr float orthoSize = 50.0f;
     glm::mat4 lightProj = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, 0.1f, 500.0f);
 
     return lightProj * lightView;

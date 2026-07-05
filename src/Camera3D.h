@@ -2,7 +2,7 @@
 #define FIGMENTENGINE_CAMERA3D_H
 #include "Node3D.h"
 
-struct Camera3D : public Node3D {
+struct Camera3D : Node3D {
     Camera3D();
     void ImGuiDraw() override;
     float fov = 90.0f;

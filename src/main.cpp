@@ -151,7 +151,9 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     auto* directionalLight = new DirectionalLight3D(appState);
     directionalLight->localTransform.rotation.x = -9;
     directionalLight->localTransform.rotation.y = 45;
-    directionalLight->localTransform.rotation.z = 45;
+    // directionalLight->localTransform.position.x = -0.01f;
+    // directionalLight->localTransform.position.y = 45;
+    // directionalLight->localTransform.position.z = -0.01f;
     appState->root.addChild(std::unique_ptr<Node>(directionalLight));
 
     // auto* spotLight = new SpotLight3D(appState);
@@ -515,8 +517,8 @@ SDL_AppResult RenderFrame(AppState* appState) {
             uiTargetInfo.texture = swapchainTexture;
             uiTargetInfo.mip_level = 0;
             uiTargetInfo.layer_or_depth_plane = 0;
-            uiTargetInfo.clear_color = SDL_FColor{0.0f, 0.0f, 0.0f, 0.0f}; // Don't clear
-            uiTargetInfo.load_op = SDL_GPU_LOADOP_LOAD;   // Preserve the 3D scene
+            uiTargetInfo.clear_color = SDL_FColor{0.0f, 0.0f, 0.0f, 0.0f};
+            uiTargetInfo.load_op = SDL_GPU_LOADOP_LOAD;
             uiTargetInfo.store_op = SDL_GPU_STOREOP_STORE;
             uiTargetInfo.resolve_texture = nullptr;
             uiTargetInfo.cycle = false;
