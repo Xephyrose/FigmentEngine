@@ -1140,24 +1140,27 @@ void AppState::CreateShadowPipeline() {
 }
 
 glm::mat4 AppState::GetLightViewProjection() const {
-    // Find the directional light
     const DirectionalLight3D* light = directionalLights[0];
-    if (!light) return {1.0f};
+    if (!light) return glm::mat4(1.0f);
 
     // Light direction (opposite of the light's forward vector)
     const glm::vec3 lightDir = -light->GetGlobalTransform().getForward();
 
-    // For a directional light, we need an orthographic projection
-    // centered around the camera's view frustum
-    const glm::vec3 center = current_camera_3d->GetGlobalTransform().position;
+    // For a directional light, the light's view matrix is based on the direction
+    // The position of the light doesn't matter for directional lights
+    // Use the center of the scene (0, 0, 0) or a fixed point
+    const glm::vec3 center = glm::vec3(0.0f, 0.0f, 0.0f);
 
-    // Light's view matrix (looking from a position along the light direction)
-    const glm::vec3 lightPos = center - lightDir * 50.0f;  // Distance from center
-    const glm::mat4 lightView = glm::lookAt(lightPos, center, glm::vec3(0.0f, 1.0f, 0.0f));
+    // Light position along the direction from the center
+    constexpr float lightDistance = 100.0f;
+    const glm::vec3 lightPos = center - lightDir * lightDistance;
 
-    // Orthographic projection (adjust size to cover your scene)
-    constexpr float orthoSize = 200.0f;
-    const glm::mat4 lightProj = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, 0.1f, 500.0f);
+    // Create the light's view matrix
+    glm::mat4 lightView = glm::lookAt(lightPos, center, glm::vec3(0.0f, 1.0f, 0.0f));
+
+    // Orthographic projection (should cover the entire scene)
+    constexpr float orthoSize = 500.0f;
+    glm::mat4 lightProj = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, 0.1f, 500.0f);
 
     return lightProj * lightView;
 }

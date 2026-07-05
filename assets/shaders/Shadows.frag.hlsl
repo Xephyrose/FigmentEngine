@@ -1,5 +1,5 @@
 Texture2D shadowMap : register(t0, space2);
-SamplerComparisonState shadowSampler : register(s0, space2);
+SamplerState shadowSampler : register(s0, space2);
 
 struct PSInput {
     float4 shadowCoord : TEXCOORD0;
@@ -10,6 +10,6 @@ float4 main(PSInput input) : SV_TARGET {
     projCoords = projCoords * 0.5 + 0.5;
     projCoords = saturate(projCoords);
 
-    float shadow = shadowMap.SampleCmp(shadowSampler, projCoords.xy, projCoords.z);
-    return float4(shadow, shadow, shadow, 1.0);
+    float depth = shadowMap.Sample(shadowSampler, projCoords.xy).r;
+    return float4(depth, depth, depth, 1.0);
 }
