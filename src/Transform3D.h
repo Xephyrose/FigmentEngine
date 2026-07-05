@@ -1,6 +1,7 @@
 #ifndef FIGMENTENGINE_TRANSFORM_H
 #define FIGMENTENGINE_TRANSFORM_H
 
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <thirdparty/glm/glm.hpp>
 #include <thirdparty/glm/gtc/matrix_transform.hpp>
 #include <thirdparty/glm/gtc/quaternion.hpp>

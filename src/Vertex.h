@@ -1,5 +1,6 @@
 #ifndef FIGMENTENGINE_VERTEX_H
 #define FIGMENTENGINE_VERTEX_H
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <thirdparty/glm/glm.hpp>
 
 struct Vertex {

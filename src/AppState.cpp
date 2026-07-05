@@ -1152,7 +1152,7 @@ glm::mat4 AppState::GetLightViewProjection() const {
     glm::mat4 lightView = glm::lookAt(lightPos, target, glm::vec3(0.0f, 1.0f, 0.0f));
 
     constexpr float orthoSize = 50.0f;
-    glm::mat4 lightProj = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, 0.1f, 500.0f);
+    glm::mat4 lightProj = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, -500.0f, 500.0f);
 
     return lightProj * lightView;
 }
