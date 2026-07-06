@@ -33,11 +33,11 @@ void Game::Init(AppState& appState) {
     // addChild(std::unique_ptr<Node>(pointLight1));
 
     auto* directionalLight = new DirectionalLight3D(&appState);
-    directionalLight->localTransform.rotation.x = -9;
-    directionalLight->localTransform.rotation.y = 45;
-    // directionalLight->localTransform.position.x = -0.01f;
-    // directionalLight->localTransform.position.y = 45;
-    // directionalLight->localTransform.position.z = -0.01f;
+    // directionalLight->localTransform.rotation.x = -9;
+    // directionalLight->localTransform.rotation.y = 45;
+    directionalLight->localTransform.position.x = -2.0f;
+    directionalLight->localTransform.position.y = 4;
+    directionalLight->localTransform.position.z = -1.0f;
     addChild(std::unique_ptr<Node>(directionalLight));
 
     // auto* spotLight = new SpotLight3D(appState);

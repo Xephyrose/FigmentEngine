@@ -1141,18 +1141,14 @@ void AppState::CreateShadowPipeline() {
 
 glm::mat4 AppState::GetLightViewProjection() const {
     const DirectionalLight3D* light = directionalLights[0];
-    if (!light) return glm::mat4(1.0f);
+    if (!light) return {1.0f};
 
     const glm::vec3 lightPos = light->GetGlobalTransform().position;
-    const glm::vec3 lightDir = -light->GetGlobalTransform().getForward();
 
-    // Target is along the light's direction from its position
-    const glm::vec3 target = lightPos + lightDir * 100.0f;  // Look ahead along the light direction
+    glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-    glm::mat4 lightView = glm::lookAt(lightPos, target, glm::vec3(0.0f, 1.0f, 0.0f));
-
-    constexpr float orthoSize = 50.0f;
-    glm::mat4 lightProj = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, -500.0f, 500.0f);
+    constexpr float orthoSize = 10.0f;
+    glm::mat4 lightProj = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, 1.0f, 50.0f);
 
     return lightProj * lightView;
 }
