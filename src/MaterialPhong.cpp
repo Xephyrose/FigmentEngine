@@ -10,6 +10,7 @@ MaterialPhong::MaterialPhong(AppState *appState, const std::string &name, const 
 }
 
 void MaterialPhong::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, const glm::mat4 model) {
+    if (!appState->current_camera_3d) return;
     const glm::mat4 view = appState->current_camera_3d->GetViewMatrix();
     const glm::mat4 proj = appState->current_camera_3d->GetProjectionMatrix(appState->currentAspectRatio);
     const glm::mat4 mvp = proj * view * model;

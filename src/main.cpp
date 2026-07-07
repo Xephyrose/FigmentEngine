@@ -68,7 +68,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     *appstate = appState;
 
     b2WorldDef worldDef = b2DefaultWorldDef();
-    worldDef.gravity = (b2Vec2){0.0f, 9.8f};
+    worldDef.gravity = (b2Vec2){0.0f, 98.0f};
     appState->worldId = b2CreateWorld(&worldDef);
 
     float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
@@ -384,8 +384,9 @@ SDL_AppResult RenderFrame(AppState* appState) {
         SDL_Log("Couldn't acquire GPU command buffer: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
-
-    appState->RenderShadowMap(commandBuffer, appState->GetLightViewProjection());
+    if (!appState->directionalLights.empty()) {
+        appState->RenderShadowMap(commandBuffer, appState->GetLightViewProjection());
+    }
 
     if (appState->debug) {
         ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, commandBuffer);

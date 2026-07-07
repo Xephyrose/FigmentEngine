@@ -12,7 +12,7 @@
 #include "Light3DGPU.h"
 #include "Transform3D.h"
 #include "box2d/box2d.h"
-#include "game/Game.h"
+#include "game/FightingGame/FightingGame.h"
 
 struct Mesh;
 struct Camera2D;
@@ -34,7 +34,7 @@ struct AppState {
     int msaaSamples = 3;
     bool isMouseRelative = false;
 
-    Game root;
+    FightingGame root;
     b2WorldId worldId;
 
     Mesh* quadMesh = nullptr;

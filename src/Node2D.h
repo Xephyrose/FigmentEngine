@@ -4,7 +4,7 @@
 #include "Transform2D.h"
 
 
-struct Node2D : public Node{
+struct Node2D : Node{
     Node2D();
     void ImGuiDraw() override;
     Transform2D localTransform;

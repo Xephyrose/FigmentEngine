@@ -11,6 +11,7 @@
 #include "MaterialUnlitTextured.h"
 #include "Mesh.h"
 #include "Light3DGPU.h"
+#include "Material2D.h"
 #include "MaterialColor.h"
 #include "MaterialShadows.h"
 #include "Vertex.h"
@@ -24,7 +25,6 @@ bool AppState::CreatePipeline(const std::string& name, const std::string& vertSh
         SDL_Log("Couldn't create vertex shader: %s", vertShader.c_str());
         return false;
     }
-
     SDL_GPUShader* fragmentShader = GetShader(fragShader + ".frag");
     if (!fragmentShader) {
         SDL_Log("Couldn't create fragment shader: %s", fragShader.c_str());
@@ -766,7 +766,7 @@ void AppState::CreateSpotLightBuffer() {
 
 void AppState::CreateDefaultMaterials() {
     SDL_Log("Creating default materials...");
-    auto* missing_2d = new MaterialUnlitTextured(this, "missing_2d", "2D");
+    auto* missing_2d = new Material2D(this, "missing_2d", "2D");
     missing_2d->setTextureAlbedo(this, "missing.png");
     missing_2d->setSampler(this, "nearest_repeat");
 

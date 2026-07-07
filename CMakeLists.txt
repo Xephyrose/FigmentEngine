@@ -117,6 +117,12 @@ add_executable(FigmentEngine
         src/MaterialShadows.h
         game/Game.cpp
         game/Game.h
+        game/FightingGame/FightingGame.cpp
+        game/FightingGame/FightingGame.h
+        game/ShooterGame/ShooterGame.cpp
+        game/ShooterGame/ShooterGame.h
+        src/Material2D.cpp
+        src/Material2D.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

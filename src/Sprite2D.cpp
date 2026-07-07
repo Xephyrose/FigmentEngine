@@ -6,6 +6,7 @@
 #include "../thirdparty/imgui/imgui_stdlib.h"
 #include "Material.h"
 #include "Mesh.h"
+#include "SDL3/SDL_log.h"
 
 Sprite2D::Sprite2D() : size(glm::vec2(100.0f, 100.0f)) {
     name = "Sprite2D";
@@ -39,16 +40,6 @@ void Sprite2D::Draw(AppState& appState, SDL_GPUCommandBuffer* commandBuffer) {
 
     Transform2D transform = GetGlobalTransform();
     transform.scale *= size;
-
-    const glm::mat4 model = transform.getMatrix();
-    const glm::mat4 view = appState.current_camera_2d->GetViewMatrix();
-    const glm::mat4 proj = appState.current_camera_2d->GetProjectionMatrix(
-        appState.windowWidth,
-        appState.windowHeight
-    );
-    const glm::mat4 mvp = proj * view * model;
-
-    SDL_PushGPUVertexUniformData(commandBuffer, 0, &mvp, sizeof(mvp));
 
     Material* material = appState.GetMaterial(sprite);
     if (material == nullptr) material = appState.GetMaterial("missing_2d");

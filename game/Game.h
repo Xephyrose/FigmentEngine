@@ -4,7 +4,7 @@
 
 struct Game : Node {
     Game();
-    void Init(AppState& appState);
+    virtual void Init(AppState& appState);
     void ImGuiDraw() override;
     void Update(AppState& appState) override;
     void Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) override;
