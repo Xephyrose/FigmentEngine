@@ -14,11 +14,11 @@ Player2D::Player2D(AppState &appState, const float size_x, const float size_y, c
 
 void Player2D::Input(AppState &appState) {
     // Keep in mind this is the velocity at the START of the method
-    b2Vec2 curVel = b2Body_GetLinearVelocity(bodyId);
+    auto [velX, velY] = b2Body_GetLinearVelocity(bodyId);
     auto moveDirection = glm::vec2(0.0f);
     if (Input::IsPressed(SDL_SCANCODE_S)) {
         b2Body_SetGravityScale(bodyId, 2);
-        if (curVel.y < 0) b2Body_SetLinearVelocity(bodyId, b2Vec2(curVel.x, 0));
+        if (velY < 0) b2Body_SetLinearVelocity(bodyId, b2Vec2(velX, 0));
     }
     else {
         b2Body_SetGravityScale(bodyId, 1);
