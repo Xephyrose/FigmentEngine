@@ -68,7 +68,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     *appstate = appState;
 
     b2WorldDef worldDef = b2DefaultWorldDef();
-    worldDef.gravity = (b2Vec2){0.0f, 98.0f};
+    worldDef.gravity = (b2Vec2){0.0f, 19.6f};
     appState->worldId = b2CreateWorld(&worldDef);
 
     float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());

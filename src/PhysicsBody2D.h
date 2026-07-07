@@ -5,7 +5,9 @@
 
 struct PhysicsBody2D : Node2D {
     PhysicsBody2D(AppState &appState, b2BodyType bodyType, float size_x, float size_y, float pos_x, float pos_y);
+
     b2BodyId bodyId{};
+
     [[nodiscard]] Transform2D GetGlobalTransform() const override;
     void Update(AppState& appState) override;
 };

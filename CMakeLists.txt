@@ -92,8 +92,8 @@ add_executable(FigmentEngine
     src/FreeCam2D.h
     src/PhysicsBody2D.cpp
     src/PhysicsBody2D.h
-    src/Player2D.cpp
-    src/Player2D.h
+        game/FightingGame/Player2D.cpp
+        game/FightingGame/Player2D.h
     src/PointLight3D.h
         src/Light3DGPU.h
     src/PointLight3D.cpp

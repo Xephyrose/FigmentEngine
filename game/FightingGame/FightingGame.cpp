@@ -3,7 +3,7 @@
 #include "src/AppState.h"
 #include "src/FreeCam2D.h"
 #include "src/PhysicsBody2D.h"
-#include "src/Player2D.h"
+#include "Player2D.h"
 #include "src/Sprite2D.h"
 
 void FightingGame::Init(AppState &appState) {
