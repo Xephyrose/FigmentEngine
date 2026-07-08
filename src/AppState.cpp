@@ -1149,12 +1149,29 @@ glm::mat4 AppState::GetLightViewProjection() const {
     const DirectionalLight3D* light = directionalLights[0];
     if (!light) return {1.0f};
 
-    const glm::vec3 lightPos = light->GetGlobalTransform().position;
+    const auto& transform = light->GetGlobalTransform();
 
-    glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    const glm::vec3 lightDir = glm::normalize(transform.getForward());
+    const glm::vec3 lightPos = transform.position;
+
+    const glm::vec3 target = lightPos + lightDir;
+
+    const glm::mat4 lightView = glm::lookAt(
+        lightPos,
+        target,
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
 
     constexpr float orthoSize = 100.0f;
-    glm::mat4 lightProj = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, 1.0f, 1000.0f);
+
+    const glm::mat4 lightProj = glm::ortho(
+        -orthoSize,
+        orthoSize,
+        -orthoSize,
+        orthoSize,
+        1.0f,
+        1000.0f
+    );
 
     return lightProj * lightView;
 }
