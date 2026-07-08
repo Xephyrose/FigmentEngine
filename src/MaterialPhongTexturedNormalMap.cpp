@@ -14,12 +14,14 @@ void MaterialPhongTexturedNormalMap::Bind(AppState *appState, SDL_GPUCommandBuff
         glm::mat4 mvp;
         glm::mat4 model;
         glm::mat4 normalMatrix;
+        glm::mat4 lightVP;
     };
 
     TransformData data{};
     data.mvp = mvp;
     data.model = model;
     data.normalMatrix = normalMatrix;
+    data.lightVP = appState->GetLightViewProjection();
 
     SDL_PushGPUVertexUniformData(commandBuffer, 0, &data, sizeof(data));
 
@@ -41,10 +43,11 @@ void MaterialPhongTexturedNormalMap::Bind(AppState *appState, SDL_GPUCommandBuff
     SDL_GPUSampler* getSampler3 = appState->GetSampler(sampler);
 
     const SDL_GPUTextureSamplerBinding bindings[] = {
-        {getAlbedo, getSampler0},      // t0
-        {getAmbient, getSampler1},    // t1
-        {getSpecular, getSampler2},  // t2
-        {getNormalMap, getSampler3} // t3
+        {getAlbedo, getSampler0},              // t0
+        {getAmbient, getSampler1},            // t1
+        {getSpecular, getSampler2},          // t2
+        {getNormalMap, getSampler3},         // t3
+        {appState->shadowMap, getSampler3} // t4
     };
     SDL_BindGPUFragmentSamplers(appState->renderPass, 0, bindings, std::size(bindings));
 

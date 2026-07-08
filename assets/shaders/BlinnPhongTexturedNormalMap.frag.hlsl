@@ -4,10 +4,12 @@ Texture2D g_albedo : register(t0, space2);
 Texture2D g_ambient : register(t1, space2);
 Texture2D g_specular : register(t2, space2);
 Texture2D g_normal_map : register(t3, space2);
+Texture2D g_shadow_map : register(t4, space2);
 SamplerState g_sampler0 : register(s0, space2);
 SamplerState g_sampler1 : register(s1, space2);
 SamplerState g_sampler2 : register(s2, space2);
 SamplerState g_sampler3 : register(s3, space2);
+SamplerComparisonState g_shadow_sampler : register(s4, space2);
 
 cbuffer PushConstants : register(b0, space3)
 {
@@ -30,11 +32,12 @@ struct PSInput {
     float3 worldNormal : TEXCOORD2;
     float3 worldTangent : TEXCOORD3;
     float3 worldBitangent : TEXCOORD4;
+    float4 shadowCoord : TEXCOORD5;
 };
 
-StructuredBuffer<PointLight> pointLights : register(t4, space2);
-StructuredBuffer<DirectionalLight> directionalLights : register(t5, space2);
-StructuredBuffer<SpotLight> spotLights : register(t6, space2);
+StructuredBuffer<PointLight> pointLights : register(t5, space2);
+StructuredBuffer<DirectionalLight> directionalLights : register(t6, space2);
+StructuredBuffer<SpotLight> spotLights : register(t7, space2);
 
 float4 main(PSInput input) : SV_TARGET {
     float3 sampledNormal = g_normal_map.Sample(g_sampler3, input.uv).rgb;
@@ -86,5 +89,27 @@ float4 main(PSInput input) : SV_TARGET {
     for(int i = 0; i < num_spot_lights; i++) {
         result += CalcSpotLight(spotLights[i], worldNormal, input.worldPos, float3(1.0, 1.0, 1.0), float3(1.0, 1.0, 1.0), CalcPhongSpecular(normalize(spotLights[i].position.xyz - input.worldPos), worldNormal, normalize(viewPos - input.worldPos), 64));
     }
-    return float4(result + calcAmbient, calcAlbedo.w);
+
+    float3 projCoords = input.shadowCoord.xyz / input.shadowCoord.w;
+    projCoords.xy = projCoords.xy * 0.5 + 0.5;
+
+    if (projCoords.x < 0.0 || projCoords.x > 1.0 ||
+            projCoords.y < 0.0 || projCoords.y > 1.0 ||
+            projCoords.z < 0.0 || projCoords.z > 1.0)
+        {
+            return float4(result + calcAmbient, calcAlbedo.w);
+        } else {
+            float closestDepth = g_shadow_map.SampleCmp(g_shadow_sampler, projCoords.xy, projCoords.z).r;
+
+            float currentDepth = projCoords.z;
+
+            float3 lightDir = normalize(-directionalLights[0].direction.xyz);
+
+            float bias = max(0.0001 * (1.0 - saturate(dot(normalize(input.worldNormal), lightDir))), 0.00001);
+
+            float shadow = currentDepth - bias > closestDepth  ? 0.3 : 1.0;
+
+            float3 lighting = (calcAmbient + shadow * result);
+            return float4(lighting, calcAlbedo.w);
+        }
 }

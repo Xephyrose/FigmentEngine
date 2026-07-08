@@ -3,7 +3,8 @@ cbuffer TransformUBO : register(b0, space1)
     float4x4 ModelViewProjection;
     float4x4 Model;
     float4x4 NormalMatrix;
-};
+    float4x4 LightViewProjection;
+}
 
 struct VSInput
 {
@@ -21,6 +22,7 @@ struct VSOutput
     float3 worldNormal : TEXCOORD2;
     float3 worldTangent : TEXCOORD3;
     float3 worldBitangent : TEXCOORD4;
+    float4 shadowCoord : TEXCOORD5;
 };
 
 VSOutput main(VSInput input)
@@ -33,6 +35,10 @@ VSOutput main(VSInput input)
     output.worldNormal = normalize(mul((float3x3)NormalMatrix, input.normal));
     output.worldTangent = normalize(mul((float3x3)NormalMatrix, input.tangent.xyz));
     output.worldBitangent = normalize(cross(output.worldNormal, output.worldTangent) * input.tangent.w); // handedness stored in tangent.w
+
+    float4 shadowPos = mul(LightViewProjection, mul(Model, float4(input.pos, 1.0)));
+    shadowPos.y = -shadowPos.y;
+    output.shadowCoord = shadowPos;
 
     return output;
 }

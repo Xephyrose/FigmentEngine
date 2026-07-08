@@ -7,7 +7,7 @@ Texture2D g_shadow_map : register(t3, space2);
 SamplerState g_sampler0 : register(s0, space2);
 SamplerState g_sampler1 : register(s1, space2);
 SamplerState g_sampler2 : register(s2, space2);
-SamplerComparisonState g_sampler3 : register(s3, space2);
+SamplerComparisonState g_shadow_sampler : register(s3, space2);
 
 cbuffer PushConstants : register(b0, space3)
 {
@@ -85,12 +85,15 @@ float4 main(PSInput input) : SV_TARGET {
     {
         return float4(result + calcAmbient, calcAlbedo.w);
     } else {
-        float closestDepth = g_shadow_map.SampleCmp(g_sampler3, projCoords.xy, projCoords.z).r;
+        float closestDepth = g_shadow_map.SampleCmp(g_shadow_sampler, projCoords.xy, projCoords.z).r;
 
         float currentDepth = projCoords.z;
-        float bias = 0.00001;
-//        float bias = max(0.001 * (1.0 - dot(input.worldNormal, directionalLights[0].direction.xyz)), 0.0005);
-        float shadow = currentDepth - bias > closestDepth  ? 0.0 : 1.0;
+
+        float3 lightDir = normalize(-directionalLights[0].direction.xyz);
+
+        float bias = max(0.0001 * (1.0 - saturate(dot(normalize(input.worldNormal), lightDir))), 0.00001);
+
+        float shadow = currentDepth - bias > closestDepth  ? 0.3 : 1.0;
 
         float3 lighting = (calcAmbient + shadow * result);
         return float4(lighting, calcAlbedo.w);

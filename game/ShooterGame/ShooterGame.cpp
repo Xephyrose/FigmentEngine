@@ -9,8 +9,6 @@ void ShooterGame::Init(AppState &appState) {
 
     auto* freeCam = new FreeCam3D();
     appState.current_camera_3d = freeCam;
-    freeCam->localTransform.position = glm::vec3(-43, 8, 14);
-    freeCam->localTransform.setRotation(glm::vec3(-34, 0, 0));
     addChild(std::unique_ptr<Node>(freeCam));
 
     // auto* pointLight = new PointLight3D(appState);
@@ -31,6 +29,8 @@ void ShooterGame::Init(AppState &appState) {
     auto* directionalLight = new DirectionalLight3D(&appState);
     directionalLight->localTransform.rotation.x = -135;
     directionalLight->localTransform.rotation.y = -135;
+    directionalLight->localTransform.position.x = 50;
+    directionalLight->localTransform.position.z = 50;
     addChild(std::unique_ptr<Node>(directionalLight));
 
     // auto* spotLight = new SpotLight3D(appState);
