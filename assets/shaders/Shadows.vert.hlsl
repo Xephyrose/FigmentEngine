@@ -16,6 +16,12 @@ struct VSOutput {
 VSOutput main(VSInput input) {
     VSOutput output;
     output.position = mul(ModelViewProjection, float4(input.position, 1.0));
-    output.shadowCoord = mul(LightViewProjection, mul(Model, float4(input.position, 1.0)));
+    float4 shadowPos =
+        mul(LightViewProjection,
+            mul(Model, float4(input.position, 1.0)));
+
+    shadowPos.y = -shadowPos.y;
+
+    output.shadowCoord = shadowPos;
     return output;
 }
