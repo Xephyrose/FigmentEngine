@@ -19,9 +19,7 @@ VSOutput main(VSInput input) {
     float4 shadowPos =
         mul(LightViewProjection,
             mul(Model, float4(input.position, 1.0)));
-
     shadowPos.y = -shadowPos.y;
-
     output.shadowCoord = shadowPos;
     return output;
 }

@@ -31,9 +31,9 @@ void ShooterGame::Init(AppState &appState) {
     auto* directionalLight = new DirectionalLight3D(&appState);
     // directionalLight->localTransform.rotation.x = -9;
     // directionalLight->localTransform.rotation.y = 45;
-    directionalLight->localTransform.position.x = -2.0f;
-    directionalLight->localTransform.position.y = 4;
-    directionalLight->localTransform.position.z = -2.0f;
+    directionalLight->localTransform.position.x = -20;
+    directionalLight->localTransform.position.y = 40;
+    directionalLight->localTransform.position.z = -20;
     addChild(std::unique_ptr<Node>(directionalLight));
 
     // auto* spotLight = new SpotLight3D(appState);

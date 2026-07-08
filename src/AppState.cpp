@@ -1011,47 +1011,53 @@ void AppState::CreateDefaultPipelines() {
     SDL_Log("Creating default pipelines...");
 
     CreatePipeline("Line", "Default", "UnlitColor", "Line", "Default", true, true);
-    CreatePipeline("2D", "Default", "UnlitTextured", "FillNoBack", "Alpha", false, false);
+    CreatePipeline("2D", "Default", "UnlitTextured", "Fill", "Alpha", false, false);
 
-    CreatePipeline("UnlitTextured", "Default", "UnlitTextured", "Fill", "Default", true, true);
-    CreatePipeline("UnlitTexturedAlpha", "Default", "UnlitTextured", "Fill", "Alpha", true, false);
+    CreatePipeline("UnlitTextured", "Default", "UnlitTextured", "FrontFaces", "Default", true, true);
+    CreatePipeline("UnlitTexturedAlpha", "Default", "UnlitTextured", "FrontFaces", "Alpha", true, false);
 
-    CreatePipeline("Phong", "Default", "Phong", "Fill", "Default", true, true);
-    CreatePipeline("PhongTextured", "Default", "PhongTextured", "Fill", "Default", true, true);
-    CreatePipeline("BlinnPhong", "Default", "BlinnPhong", "Fill", "Default", true, true);
-    CreatePipeline("BlinnPhongTextured", "Default", "BlinnPhongTextured", "Fill", "Default", true, true);
-    CreatePipeline("Phong", "Default", "Phong", "Fill", "Default", true, true);
-    CreatePipeline("PhongTextured", "Default", "PhongTextured", "Fill", "Default", true, true);
-    CreatePipeline("BlinnPhong", "Default", "BlinnPhong", "Fill", "Default", true, true);
-    CreatePipeline("BlinnPhongTextured", "Default", "BlinnPhongTextured", "Fill", "Default", true, true);
+    CreatePipeline("Phong", "Default", "Phong", "FrontFaces", "Default", true, true);
+    CreatePipeline("PhongTextured", "Default", "PhongTextured", "FrontFaces", "Default", true, true);
+    CreatePipeline("BlinnPhong", "Default", "BlinnPhong", "FrontFaces", "Default", true, true);
+    CreatePipeline("BlinnPhongTextured", "Default", "BlinnPhongTextured", "FrontFaces", "Default", true, true);
+    CreatePipeline("Phong", "Default", "Phong", "FrontFaces", "Default", true, true);
+    CreatePipeline("PhongTextured", "Default", "PhongTextured", "FrontFaces", "Default", true, true);
+    CreatePipeline("BlinnPhong", "Default", "BlinnPhong", "FrontFaces", "Default", true, true);
+    CreatePipeline("BlinnPhongTextured", "Default", "BlinnPhongTextured", "FrontFaces", "Default", true, true);
 
-    CreatePipeline("PhongAlpha", "Default", "Phong", "Fill", "Alpha", true, false);
-    CreatePipeline("PhongTexturedAlpha", "Default", "PhongTextured", "Fill", "Alpha", true, false);
-    CreatePipeline("BlinnPhongAlpha", "Default", "BlinnPhong", "Fill", "Alpha", true, false);
-    CreatePipeline("BlinnPhongTexturedAlpha", "Default", "BlinnPhongTextured", "Fill", "Alpha", true, false);
-    CreatePipeline("PhongAlpha", "Default", "Phong", "Fill", "Alpha", true, false);
-    CreatePipeline("PhongTexturedAlpha", "Default", "PhongTextured", "Fill", "Alpha", true, false);
-    CreatePipeline("BlinnPhongAlpha", "Default", "BlinnPhong", "Fill", "Alpha", true, false);
+    CreatePipeline("PhongAlpha", "Default", "Phong", "FrontFaces", "Alpha", true, false);
+    CreatePipeline("PhongTexturedAlpha", "Default", "PhongTextured", "FrontFaces", "Alpha", true, false);
+    CreatePipeline("BlinnPhongAlpha", "Default", "BlinnPhong", "FrontFaces", "Alpha", true, false);
+    CreatePipeline("BlinnPhongTexturedAlpha", "Default", "BlinnPhongTextured", "FrontFaces", "Alpha", true, false);
+    CreatePipeline("PhongAlpha", "Default", "Phong", "FrontFaces", "Alpha", true, false);
+    CreatePipeline("PhongTexturedAlpha", "Default", "PhongTextured", "FrontFaces", "Alpha", true, false);
+    CreatePipeline("BlinnPhongAlpha", "Default", "BlinnPhong", "FrontFaces", "Alpha", true, false);
 
-    CreatePipeline("BlinnPhongTexturedNormalMapped", "NormalMap", "BlinnPhongTexturedNormalMap", "Fill", "Default", true, true);
-    CreatePipeline("BlinnPhongTexturedNormalMappedAlpha", "NormalMap", "BlinnPhongTexturedNormalMap", "Fill", "Alpha", true, false);
+    CreatePipeline("BlinnPhongTexturedNormalMapped", "NormalMap", "BlinnPhongTexturedNormalMap", "FrontFaces", "Default", true, true);
+    CreatePipeline("BlinnPhongTexturedNormalMappedAlpha", "NormalMap", "BlinnPhongTexturedNormalMap", "FrontFaces", "Alpha", true, false);
 
-    CreatePipeline("Shadows", "Shadows", "Shadows", "FillNoBack", "Default", true, true);
+    CreatePipeline("Shadows", "Shadows", "Shadows", "FrontFaces", "Default", true, true);
 }
 
 void AppState::CreateDefaultRasterizerStates() {
     SDL_Log("Creating default rasterizer states...");
+    SDL_GPURasterizerState frontFaces{};
+    frontFaces.fill_mode = SDL_GPU_FILLMODE_FILL;
+    frontFaces.cull_mode = SDL_GPU_CULLMODE_BACK;
+    frontFaces.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
+    rasterizerStates.insert_or_assign("FrontFaces", frontFaces);
+
     SDL_GPURasterizerState fill{};
     fill.fill_mode = SDL_GPU_FILLMODE_FILL;
-    fill.cull_mode = SDL_GPU_CULLMODE_BACK;
+    fill.cull_mode = SDL_GPU_CULLMODE_NONE;
     fill.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
     rasterizerStates.insert_or_assign("Fill", fill);
 
-    SDL_GPURasterizerState fillNoBack{};
-    fillNoBack.fill_mode = SDL_GPU_FILLMODE_FILL;
-    fillNoBack.cull_mode = SDL_GPU_CULLMODE_NONE;
-    fillNoBack.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
-    rasterizerStates.insert_or_assign("FillNoBack", fillNoBack);
+    SDL_GPURasterizerState backFaces{};
+    backFaces.fill_mode = SDL_GPU_FILLMODE_FILL;
+    backFaces.cull_mode = SDL_GPU_CULLMODE_NONE;
+    backFaces.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
+    rasterizerStates.insert_or_assign("BackFaces", backFaces);
 
     auto line = SDL_GPURasterizerState {};
     line.fill_mode = SDL_GPU_FILLMODE_LINE;
@@ -1124,7 +1130,7 @@ void AppState::CreateShadowPipeline() {
     pipelineInfo.vertex_shader = vertexShader;
     pipelineInfo.fragment_shader = fragmentShader;
     pipelineInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
-    pipelineInfo.rasterizer_state = GetRasterizerState("FillNoBack");
+    pipelineInfo.rasterizer_state = GetRasterizerState("BackFaces");
 
     pipelineInfo.depth_stencil_state.enable_depth_test = true;
     pipelineInfo.depth_stencil_state.enable_depth_write = true;
@@ -1147,8 +1153,8 @@ glm::mat4 AppState::GetLightViewProjection() const {
 
     glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-    constexpr float orthoSize = 10.0f;
-    glm::mat4 lightProj = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, 1.0f, 50.0f);
+    constexpr float orthoSize = 100.0f;
+    glm::mat4 lightProj = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, 1.0f, 1000.0f);
 
     return lightProj * lightView;
 }

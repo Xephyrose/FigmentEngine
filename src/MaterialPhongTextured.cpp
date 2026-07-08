@@ -8,18 +8,17 @@ void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *comma
     const glm::mat4 view = appState->current_camera_3d->GetViewMatrix();
     const glm::mat4 proj = appState->current_camera_3d->GetProjectionMatrix(appState->currentAspectRatio);
     const glm::mat4 mvp = proj * view * model;
-    // const glm::mat4 normalMatrix = glm::transpose(glm::inverse(model));
 
     struct TransformData {
         glm::mat4 mvp;
         glm::mat4 model;
-        // glm::mat4 normalMatrix;
+        glm::mat4 lightVP;
     };
 
     TransformData data{};
     data.mvp = mvp;
     data.model = model;
-    // data.normalMatrix = normalMatrix;
+    data.lightVP = appState->GetLightViewProjection();
 
     SDL_PushGPUVertexUniformData(commandBuffer, 0, &data, sizeof(data));
 
@@ -37,11 +36,13 @@ void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *comma
     SDL_GPUSampler* getSampler0 = appState->GetSampler(sampler);
     SDL_GPUSampler* getSampler1 = appState->GetSampler(sampler);
     SDL_GPUSampler* getSampler2 = appState->GetSampler(sampler);
+    SDL_GPUSampler* getSampler3 = appState->GetSampler(sampler);
 
     const SDL_GPUTextureSamplerBinding bindings[] = {
-        {getAlbedo, getSampler0},     // t0
-        {getAmbient, getSampler1},   // t1
-        {getSpecular, getSampler2}, // t2
+        {getAlbedo, getSampler0},             // t0
+        {getAmbient, getSampler1},           // t1
+        {getSpecular, getSampler2},         // t2
+        {appState->shadowMap, getSampler3} // t3
     };
     SDL_BindGPUFragmentSamplers(appState->renderPass, 0, bindings, std::size(bindings));
 
