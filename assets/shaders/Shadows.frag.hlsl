@@ -19,7 +19,7 @@ float4 main(PSInput input) : SV_TARGET {
     float closestDepth = shadowMap.SampleCmp(shadowSampler, projCoords.xy, projCoords.z).r;
 
     float currentDepth = projCoords.z;
-    float bias = 0.005;
+    float bias = 0.000001;
     float shadow = currentDepth - bias > closestDepth  ? 0.0 : 1.0;
     return float4(shadow, shadow, shadow, 1.0);
 }

@@ -1092,7 +1092,7 @@ void AppState::CreateShadowMap() {
         shadowMap = nullptr;
     }
 
-    constexpr int shadowMapSize = 2048;  // You can make this configurable
+    constexpr int shadowMapSize = 4096;  // You can make this configurable
 
     SDL_GPUTextureCreateInfo info = {};
     info.type = SDL_GPU_TEXTURETYPE_2D;
