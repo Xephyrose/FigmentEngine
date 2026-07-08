@@ -2,10 +2,12 @@
 #include <SDL3/SDL_keyboard.h>
 #include <cstring>
 
+#include "SDL3/SDL_log.h"
+
 bool Input::prevState[SDL_SCANCODE_COUNT] = {false};
 const bool* Input::currentState = SDL_GetKeyboardState(nullptr);
 
-void Input::Update() {
+void Input::UpdateInputs() {
     memcpy(prevState, currentState, sizeof(prevState));
 }
 

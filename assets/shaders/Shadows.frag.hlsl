@@ -9,11 +9,14 @@ float4 main(PSInput input) : SV_TARGET {
     float3 projCoords = input.shadowCoord.xyz / input.shadowCoord.w;
     projCoords = projCoords * 0.5 + 0.5;
 
-    float depth = shadowMap.Sample(shadowSampler, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+    float closestDepth = shadowMap.Sample(shadowSampler, projCoords.xy).r;
 
-//    float currentDepth = projCoords.z;
-//    float shadow = 1 - (currentDepth > depth  ? 1.0 : 0.0);
-//    return float4(shadow, shadow, shadow, 1.0f);
+    float diff = currentDepth - closestDepth;
 
-    return float4(depth, depth, depth, 1.0);
+    return float4(
+        diff * 100.0 + 0.5,
+        diff * 100.0 + 0.5,
+        diff * 100.0 + 0.5,
+        1.0);
 }

@@ -37,7 +37,8 @@ void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* comma
 
     SDL_BindGPUGraphicsPipeline(appState->renderPass, gotPipeline);
 
-    SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
+    // SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
+    SDL_GPUTexture* getAlbedo = appState->shadowMap;
     SDL_GPUSampler* getSampler = appState->GetSampler(sampler);
 
     const SDL_GPUTextureSamplerBinding binding = {getAlbedo, getSampler};

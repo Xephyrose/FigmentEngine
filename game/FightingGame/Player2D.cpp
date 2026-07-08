@@ -12,7 +12,7 @@ Player2D::Player2D(AppState &appState, const float size_x, const float size_y, c
     b2Body_SetMotionLocks(bodyId, locks);
 }
 
-void Player2D::Input(AppState &appState) {
+void Player2D::FixedUpdate(AppState &appState) {
     // Keep in mind this is the velocity at the START of the method
     auto [velX, velY] = b2Body_GetLinearVelocity(bodyId);
     auto moveDirection = glm::vec2(0.0f);
@@ -32,9 +32,4 @@ void Player2D::Input(AppState &appState) {
     }
 
     b2Body_SetLinearVelocity(bodyId, b2Vec2(moveDirection.x * speed, b2Body_GetLinearVelocity(bodyId).y));
-    PhysicsBody2D::Input(appState);
-}
-
-void Player2D::Update(AppState &appState) {
-    PhysicsBody2D::Update(appState);
 }

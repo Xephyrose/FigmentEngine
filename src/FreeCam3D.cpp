@@ -17,11 +17,16 @@ void FreeCam3D::ImGuiDraw() {
     }
 }
 
-void FreeCam3D::Input(AppState& appState) {
+void FreeCam3D::Update(AppState &appState) {
+    localTransform.move(moveDirection * speed * static_cast<float>(appState.delta));
+    Camera3D::Update(appState);
+}
+
+void FreeCam3D::Input(AppState &appState) {
     const glm::vec3 forward = localTransform.getForward();
     const glm::vec3 right = localTransform.getRight();
 
-    auto moveDirection = glm::vec3(0.0f);
+    moveDirection = glm::vec3(0.0f);
     if (Input::IsPressed(SDL_SCANCODE_W)) moveDirection += forward;
     if (Input::IsPressed(SDL_SCANCODE_S)) moveDirection -= forward;
     if (Input::IsPressed(SDL_SCANCODE_D)) moveDirection += right;
@@ -33,13 +38,12 @@ void FreeCam3D::Input(AppState& appState) {
         moveDirection = glm::normalize(moveDirection);
     }
 
-    localTransform.move(moveDirection * speed * static_cast<float>(appState.delta));
     Camera3D::Input(appState);
 }
 
 void FreeCam3D::Event(AppState &appState, SDL_Event &event) {
     if (event.type == SDL_EVENT_MOUSE_MOTION && appState.isMouseRelative) {
-        localTransform.rotate(glm::vec3(-event.motion.yrel * appState.sensitivity, -event.motion.xrel * appState.sensitivity, 0));
+        localTransform.rotate(glm::vec3(-event.motion.yrel * appState.sensitivity,-event.motion.xrel * appState.sensitivity, 0));
     }
 
     if (event.button.button == SDL_BUTTON_RIGHT && appState.debug) {

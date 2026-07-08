@@ -3,7 +3,7 @@
 #include <SDL3/SDL_scancode.h>
 
 struct Input {
-    static void Update();
+    static void UpdateInputs();
     static bool IsPressed(SDL_Scancode key);
     static bool IsJustPressed(SDL_Scancode key);
     static bool IsJustReleased(SDL_Scancode key);

@@ -20,6 +20,7 @@ struct Node {
     std::string name;
     virtual void ImGuiDraw();
     virtual void Update(AppState& appState);
+    virtual void FixedUpdate(AppState& appState);
     virtual void Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer);
     virtual void DrawShadow(AppState& appState, SDL_GPUCommandBuffer* commandBuffer, SDL_GPURenderPass* renderPass);
     virtual void Input(AppState& appState);

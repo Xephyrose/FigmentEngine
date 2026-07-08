@@ -20,6 +20,12 @@ void Node::Update(AppState& appState) {
     }
 }
 
+void Node::FixedUpdate(AppState& appState) {
+    for (const auto & i : children) {
+        i->FixedUpdate(appState);
+    }
+}
+
 void Node::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) {
     for (const auto & i : children) {
         i->Draw(appState, commandBuffer);

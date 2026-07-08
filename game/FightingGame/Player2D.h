@@ -4,8 +4,7 @@
 
 struct Player2D : PhysicsBody2D {
     Player2D(AppState &appState, float size_x, float size_y, float pos_x, float pos_y);
-    void Input(AppState& appState) override;
-    void Update(AppState& appState) override;
+    void FixedUpdate(AppState& appState) override;
     const float speed = 10.0f;
 };
 

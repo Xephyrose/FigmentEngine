@@ -12,14 +12,13 @@
 #include "Light3DGPU.h"
 #include "Transform3D.h"
 #include "box2d/box2d.h"
-#include "game/FightingGame/FightingGame.h"
+#include "game/ShooterGame/ShooterGame.h"
 
 struct Mesh;
 struct Camera2D;
 struct Node;
 struct Camera3D;
 struct Transform3D;
-
 struct Material;
 
 struct AppState {
@@ -34,7 +33,7 @@ struct AppState {
     int msaaSamples = 3;
     bool isMouseRelative = false;
 
-    FightingGame root;
+    ShooterGame root;
     b2WorldId worldId;
 
     Mesh* quadMesh = nullptr;
@@ -77,7 +76,7 @@ struct AppState {
     Uint64 lastTime = 0;
     Uint64 delta = 0;
     double fixedTimeStepAccumulator = 0;
-    double fixedTimeStep = 1.0 / 60.0;
+    double fixedTimeStep = 1.0 / 120.0;
 
     std::string material_override;
 

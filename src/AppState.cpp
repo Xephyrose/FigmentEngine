@@ -1171,9 +1171,7 @@ void AppState::RecreateAllPipelines() {
 }
 
 void AppState::RenderShadowMap(SDL_GPUCommandBuffer* cmdBuf, const glm::mat4& lightViewProj) {
-    SDL_Log("Trying RenderShadowMap...");
     if (!shadowMap || !shadowPipeline) return;
-    SDL_Log("Starting RenderShadowMap...");
 
     SDL_GPUDepthStencilTargetInfo depthTarget = {};
     depthTarget.texture = shadowMap;
@@ -1198,5 +1196,4 @@ void AppState::RenderShadowMap(SDL_GPUCommandBuffer* cmdBuf, const glm::mat4& li
     root.DrawShadow(*this, cmdBuf, pass);
 
     SDL_EndGPURenderPass(pass);
-    SDL_Log("Finishing RenderShadowMap...");
 }

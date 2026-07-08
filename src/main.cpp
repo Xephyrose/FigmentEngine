@@ -28,6 +28,13 @@
 #include <dlfcn.h>
 #endif
 
+void HandleInput(AppState* appState) {
+    appState->root.Input(*appState);
+    if (Input::IsJustPressed(SDL_SCANCODE_X)) {
+        appState->debug = !appState->debug;
+    }
+}
+
 void FixedDelta(AppState* appState) {
     appState->lastTime = appState->currentTime;
     appState->currentTime = SDL_GetTicks();
@@ -40,15 +47,11 @@ void FixedDelta(AppState* appState) {
     appState->fixedTimeStepAccumulator += frameTimeSeconds;
 
     while (appState->fixedTimeStepAccumulator >= appState->fixedTimeStep) {
+        HandleInput(appState);
+        appState->root.FixedUpdate(*appState);
         b2World_Step(appState->worldId, static_cast<float>(appState->fixedTimeStep), 4);
         appState->fixedTimeStepAccumulator -= appState->fixedTimeStep;
-    }
-}
-
-void HandleInput(AppState* appState) {
-    appState->root.Input(*appState);
-    if (Input::IsJustPressed(SDL_SCANCODE_X)) {
-        appState->debug = !appState->debug;
+        Input::UpdateInputs();
     }
 }
 
@@ -469,7 +472,6 @@ SDL_AppResult RenderFrame(AppState* appState) {
     }
     // Send the command buffer to the GPU for drawing
     SDL_SubmitGPUCommandBuffer(commandBuffer);
-    Input::Update();
 
     return SDL_APP_CONTINUE;
 }
@@ -479,7 +481,6 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     auto* appState = static_cast<AppState*>(appstate);
 
     FixedDelta(appState);
-    HandleInput(appState);
     HandleUpdate(appState);
     return RenderFrame(appState);
 }

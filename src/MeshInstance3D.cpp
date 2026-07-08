@@ -48,7 +48,6 @@ void MeshInstance3D::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffe
 }
 
 void MeshInstance3D::DrawShadow(AppState &appState, SDL_GPUCommandBuffer *commandBuffer, SDL_GPURenderPass* renderPass) {
-    SDL_Log("Starting DrawShadow()...");
     const Mesh* _mesh = appState.GetMesh(this->mesh);
     if (!_mesh || !_mesh->isOnGPU) return;
 
@@ -85,7 +84,6 @@ void MeshInstance3D::DrawShadow(AppState &appState, SDL_GPUCommandBuffer *comman
             SDL_DrawGPUPrimitives(renderPass, submesh.vertexCount, 1, submesh.startVertex, 0);
         }
     }
-    SDL_Log("Finishing DrawShadow()...");
     for (const auto & i : children) {
         i->DrawShadow(appState, commandBuffer, renderPass);
     }
