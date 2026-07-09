@@ -113,8 +113,6 @@ add_executable(FigmentEngine
         src/MaterialColor.h
         src/SpotLight3D.cpp
         src/SpotLight3D.h
-        src/MaterialShadows.cpp
-        src/MaterialShadows.h
         game/Game.cpp
         game/Game.h
         game/FightingGame/FightingGame.cpp

@@ -13,7 +13,6 @@
 #include "Light3DGPU.h"
 #include "Material2D.h"
 #include "MaterialColor.h"
-#include "MaterialShadows.h"
 #include "Vertex.h"
 #include "SDL3/SDL_log.h"
 #include "thirdparty/json.hpp"
@@ -774,8 +773,6 @@ void AppState::CreateDefaultMaterials() {
     missing->setTextureAlbedo(this, "missing.png");
     missing->setSampler(this, "anisotropic_repeat");
 
-    new MaterialShadows(this, "shadows", "Shadows");
-
     new MaterialPhong(this, "phong", "Phong");
     const auto phong_tex = new MaterialPhongTextured(this, "phong_textured", "PhongTextured");
     phong_tex->setTextureAlbedo(this, "missing.png");
@@ -1035,8 +1032,6 @@ void AppState::CreateDefaultPipelines() {
 
     CreatePipeline("BlinnPhongTexturedNormalMapped", "NormalMap", "BlinnPhongTexturedNormalMap", "FrontFaces", "Default", true, true);
     CreatePipeline("BlinnPhongTexturedNormalMappedAlpha", "NormalMap", "BlinnPhongTexturedNormalMap", "FrontFaces", "Alpha", true, false);
-
-    CreatePipeline("Shadows", "Shadows", "Shadows", "FrontFaces", "Default", true, true);
 }
 
 void AppState::CreateDefaultRasterizerStates() {
