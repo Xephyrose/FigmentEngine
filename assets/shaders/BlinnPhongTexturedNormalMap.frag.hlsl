@@ -79,6 +79,15 @@ float4 main(PSInput input) : SV_TARGET {
         calcSpecular = colorSpecular;
     }
 
+    float shadow = 1.0;
+
+    for(int i = 0; i < num_dir_lights; i++) {
+        float lightShadow = CalcDirectionalLightShadows(directionalLights[i], g_shadow_map, g_shadow_sampler, input.shadowCoord, worldNormal, 1);
+        shadow = min(shadow, lightShadow);
+    }
+
+    calcSpecular *= shadow;
+
     float3 result = float3(0.0f, 0.0f, 0.0f);
     for(int i = 0; i < num_point_lights; i++) {
         result += CalcPointLight(pointLights[i], worldNormal, input.worldPos, calcAlbedo.xyz, calcSpecular, CalcBlinnPhongSpecular(normalize(pointLights[i].position.xyz - input.worldPos), worldNormal, normalize(viewPos - input.worldPos), shininess));
@@ -90,26 +99,6 @@ float4 main(PSInput input) : SV_TARGET {
         result += CalcSpotLight(spotLights[i], worldNormal, input.worldPos, float3(1.0, 1.0, 1.0), float3(1.0, 1.0, 1.0), CalcPhongSpecular(normalize(spotLights[i].position.xyz - input.worldPos), worldNormal, normalize(viewPos - input.worldPos), 64));
     }
 
-    float3 projCoords = input.shadowCoord.xyz / input.shadowCoord.w;
-    projCoords.xy = projCoords.xy * 0.5 + 0.5;
-
-    if (projCoords.x < 0.0 || projCoords.x > 1.0 ||
-            projCoords.y < 0.0 || projCoords.y > 1.0 ||
-            projCoords.z < 0.0 || projCoords.z > 1.0)
-        {
-            return float4(result + calcAmbient, calcAlbedo.w);
-        } else {
-            float closestDepth = g_shadow_map.SampleCmp(g_shadow_sampler, projCoords.xy, projCoords.z).r;
-
-            float currentDepth = projCoords.z;
-
-            float3 lightDir = normalize(-directionalLights[0].direction.xyz);
-
-            float bias = max(0.0001 * (1.0 - saturate(dot(normalize(input.worldNormal), lightDir))), 0.00001);
-
-            float shadow = currentDepth - bias > closestDepth  ? 0.3 : 1.0;
-
-            float3 lighting = (calcAmbient + shadow * result);
-            return float4(lighting, calcAlbedo.w);
-        }
+    float3 lighting = (calcAmbient + shadow) * result;
+    return float4(lighting, calcAlbedo.w);
 }

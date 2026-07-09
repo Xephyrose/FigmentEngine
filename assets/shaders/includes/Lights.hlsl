@@ -74,4 +74,39 @@ float3 CalcSpotLight(SpotLight light, float3 normal, float3 fragPos, float3 calc
     return (diffuse * attenuation * intensity) + (specular * attenuation * intensity);
 }
 
+float CalcDirectionalLightShadows(DirectionalLight light, Texture2D shadowMap, SamplerComparisonState shadowSampler, float4 shadowCoord, float3 normal, int pcfDist) {
+    float3 projCoords = shadowCoord.xyz / shadowCoord.w;
+    projCoords.xy = projCoords.xy * 0.5 + 0.5;
+
+    if (projCoords.x < 0.0 || projCoords.x > 1.0 ||
+        projCoords.y < 0.0 || projCoords.y > 1.0 ||
+        projCoords.z < 0.0 || projCoords.z > 1.0)
+    {
+        return 0.0;
+    } else {
+        float currentDepth = projCoords.z;
+        float3 lightDir = normalize(-light.direction.xyz);
+        float bias = max(0.0001 * (1.0 - saturate(dot(normalize(normal), lightDir))), 0.00001);
+
+        float shadow = 0.0;
+        uint width, height;
+
+        shadowMap.GetDimensions(width, height);
+        float2 texelSize = 1.0 / float2(width, height);
+
+        int div = 0;
+
+        for(int x = -pcfDist; x <= pcfDist; ++x)
+        {
+            for(int y = -pcfDist; y <= pcfDist; ++y)
+            {
+                div += 1;
+                float pcfDepth = shadowMap.SampleCmp(shadowSampler, projCoords.xy + float2(x, y) * texelSize, projCoords.z).r;
+                shadow += currentDepth - bias > pcfDepth ? 0.0 : 1.0;
+            }
+        }
+        return shadow /= div;
+    }
+}
+
 #endif
