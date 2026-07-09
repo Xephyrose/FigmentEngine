@@ -4,19 +4,19 @@
 struct PointLight {
     float4 color; // xyz is color, w is intensity
     float4 position; // xyz is position, w is padding
-    float4 params; // x is constant, y is linear, z is quadratic, w is padding
+    float4 params; // x is constant, y is linear, z is quadratic, w is specular influence
 };
 
 struct DirectionalLight {
     float4 color; // xyz is color, w is intensity
-    float4 direction; // 3 for dir, 1 for padding
+    float4 direction; // 3 for direction, 1 for specular influence
 };
 
 struct SpotLight {
     float4 color; // xyz is color, w is intensity
     float4 position; // xyz is position, w is cutoff
     float4 direction; // xyz is direction, w is outer cutoff
-    float4 params; // x is constant, y is linear, z is quadratic, w is padding
+    float4 params; // x is constant, y is linear, z is quadratic, w is specular influence
 };
 
 float CalcPhongSpecular(float3 lightDir, float3 norm, float3 viewDir, float shininess) {
@@ -29,7 +29,7 @@ float CalcBlinnPhongSpecular(float3 lightDir, float3 norm, float3 viewDir, float
     return pow(max(dot(norm, halfwayDir), 0.0), shininess * 4);
 }
 
-float3 CalcPointLight(PointLight light, float3 normal, float3 fragPos, float3 calcAlbedo, float3 calcSpecular, float spec) {
+float3 CalcPointLight(PointLight light, float3 normal, float3 fragPos, float3 calcSpecular, float spec) {
     float3 lightColor = light.color.xyz * light.color.w;
 
     float3 lightDir = normalize(light.position.xyz - fragPos);
@@ -38,24 +38,24 @@ float3 CalcPointLight(PointLight light, float3 normal, float3 fragPos, float3 ca
     float distance = length(light.position.xyz - fragPos);
     float attenuation = 1.0 / (light.params.x + light.params.y * distance + light.params.z * (distance * distance));
 
-    float3 diffuse = lightColor * diff * calcAlbedo.xyz;
+    float3 diffuse = lightColor * diff;
     float3 specular = lightColor * (spec * calcSpecular);
 
-    return (diffuse * attenuation) + (specular * attenuation);
+    return (diffuse * attenuation * (light.params.w * 0.5 + 0.5)) + (specular * attenuation * light.params.w);
 }
 
-float3 CalcDirectionalLight(DirectionalLight light, float3 normal, float3 calcAlbedo, float3 calcSpecular, float spec) {
+float3 CalcDirectionalLight(DirectionalLight light, float3 normal, float3 calcSpecular, float spec) {
     float3 lightColor = light.color.xyz * light.color.w;
 
     float3 lightDir = normalize(-light.direction.xyz);
     float diff = max(dot(normal, lightDir), 0.0);
 
-    float3 diffuse = lightColor * diff * calcAlbedo;
+    float3 diffuse = lightColor * diff;
     float3 specular = lightColor * spec * calcSpecular;
-    return diffuse + specular;
+    return (diffuse + specular) * light.direction.w;
 }
 
-float3 CalcSpotLight(SpotLight light, float3 normal, float3 fragPos, float3 calcAlbedo, float3 calcSpecular, float spec) {
+float3 CalcSpotLight(SpotLight light, float3 normal, float3 fragPos, float3 calcSpecular, float spec) {
     float3 lightColor = light.color.xyz * light.color.w;
 
     float3 lightDir = normalize(light.position.xyz - fragPos);
@@ -64,14 +64,13 @@ float3 CalcSpotLight(SpotLight light, float3 normal, float3 fragPos, float3 calc
     float distance = length(light.position.xyz - fragPos);
     float attenuation = 1.0 / (light.params.x + light.params.y * distance + light.params.z * (distance * distance));
 
-    // spotlight intensity
     float theta = dot(lightDir, normalize(-light.direction.xyz));
     float epsilon = light.position.w - light.direction.w;
     float intensity = clamp((theta - light.direction.w) / epsilon, 0.0, 1.0);
 
-    float3 diffuse = lightColor * diff * calcAlbedo;
+    float3 diffuse = lightColor * diff;
     float3 specular = lightColor * spec * calcSpecular;
-    return (diffuse * attenuation * intensity) + (specular * attenuation * intensity);
+    return (diffuse * attenuation * intensity * (light.params.w * 0.5 + 0.5)) + (specular * attenuation * intensity * light.params.w);
 }
 
 float CalcDirectionalLightShadows(DirectionalLight light, Texture2D shadowMap, SamplerComparisonState shadowSampler, float4 shadowCoord, float3 normal, int pcfDist) {
@@ -105,7 +104,8 @@ float CalcDirectionalLightShadows(DirectionalLight light, Texture2D shadowMap, S
                 shadow += currentDepth - bias > pcfDepth ? 0.0 : 1.0;
             }
         }
-        return shadow /= div;
+        shadow /= div;
+        return shadow;
     }
 }
 
