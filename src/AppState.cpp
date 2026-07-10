@@ -631,7 +631,7 @@ SDL_GPUColorTargetBlendState AppState::GetBlendState(const std::string &key) con
 }
 
 void AppState::CreateDefaultMeshes() {
-    LoadMesh("zulu.glb");
+    LoadMesh("zoo.glb");
     LoadMesh("crate_medium.glb");
 }
 

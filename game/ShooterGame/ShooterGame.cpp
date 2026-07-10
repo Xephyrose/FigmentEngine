@@ -42,7 +42,7 @@ void ShooterGame::Init(AppState &appState) {
     // addChild(std::unique_ptr<Node>(spotLight));
 
     auto* meshInstance = new MeshInstance3D();
-    meshInstance->mesh = "zulu.glb";
+    meshInstance->mesh = "zoo.glb";
     addChild(std::unique_ptr<Node>(meshInstance));
 
     auto* meshInstance2 = new MeshInstance3D();

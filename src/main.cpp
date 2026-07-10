@@ -320,10 +320,25 @@ SDL_AppResult RenderFrame(AppState* appState) {
         ImGui::End();
 
         ImGui::Begin("Debug");
+
+        ImGui::Text("Material Override");
+        static const char* mat_items[] = { "", "phong", "phong_textured", "blinn_phong", "blinn_phong_textured", "missing", "line" };
+        static int mat_selected_idx = 0;
+        ImGui::Combo("##Override", &mat_selected_idx, mat_items, IM_ARRAYSIZE(mat_items));
+        appState->material_override = mat_items[mat_selected_idx];
+
         ImGui::Text("Mesh Spawner");
-        ImGui::InputText("Mesh", &appState->editorMesh);
-        ImGui::SameLine();
-        if (ImGui::Button("Spawn Mesh")) {
+        std::vector<const char*> mesh_items;
+        mesh_items.reserve(appState->meshes.size() + 1);
+        mesh_items.push_back("");
+        for (const auto &key: appState->meshes | std::views::keys)
+            mesh_items.push_back(key.c_str());
+        static int mesh_index = 0;
+        if (ImGui::Combo("##Mesh", &mesh_index, mesh_items.data(), static_cast<int>(mesh_items.size()))) {
+            appState->editorMesh = mesh_items[mesh_index];
+        }
+
+        if (ImGui::Button("Spawn Mesh") && appState->meshes.contains(appState->editorMesh)) {
             auto* meshInstance = new MeshInstance3D();
             meshInstance->mesh = appState->editorMesh;
             SDL_Log("Mesh spawned: %s", appState->editorMesh.c_str());
@@ -331,24 +346,35 @@ SDL_AppResult RenderFrame(AppState* appState) {
             meshInstance->localTransform.rotation = appState->current_camera_3d->GetGlobalTransform().rotation * glm::vec3(0.0f, 1.0f, 0.0f);
             appState->root.addChild(std::unique_ptr<Node>(meshInstance));
         }
+
         ImGui::Text("Sprite Spawner");
-        ImGui::InputText("Sprite", &appState->editorSprite);
-        ImGui::SameLine();
-        if (ImGui::Button("Spawn Sprite")) {
+
+        std::vector<const char*> sprite_items;
+        sprite_items.reserve(appState->textures.size() + 1);
+        sprite_items.push_back("");
+        for (const auto &key: appState->textures | std::views::keys)
+            sprite_items.push_back(key.c_str());
+        static int sprite_index = 0;
+        if (ImGui::Combo("##Sprite", &sprite_index, sprite_items.data(), static_cast<int>(sprite_items.size()))) {
+            appState->editorSprite = sprite_items[sprite_index];
+        }
+
+        if (ImGui::Button("Spawn Sprite") && appState->textures.contains(appState->editorSprite)) {
             auto* sprite = new Sprite2D();
-            // SDL_Log("Sprite spawned: %s", appState->editorSprite.c_str());
+            SDL_Log("Sprite spawned: %s", appState->editorSprite.c_str());
             appState->root.addChild(std::unique_ptr<Node>(sprite));
         }
+
         if (ImGui::Button("Spawn 100 Lights")) {
             for (int i = 0; i < 100; i++) {
                 auto* pointLight = new PointLight3D(appState);
-                pointLight->localTransform.position.x = static_cast<float>(-(rand() % 81)); // NOLINT(*-msc50-cpp)
-                pointLight->localTransform.position.y = rand() % 5 + 2; // NOLINT(*-narrowing-conversions, *-msc50-cpp)
-                pointLight->localTransform.position.z = 70.0f - static_cast<float>((rand() % (50 - -70 + 1))); // NOLINT(*-msc50-cpp)
+                pointLight->localTransform.position.x = 50 - static_cast<float>(rand() % 100); // NOLINT(*-msc50-cpp)
+                pointLight->localTransform.position.y = rand() % 10; // NOLINT(*-narrowing-conversions, *-msc50-cpp)
+                pointLight->localTransform.position.z = 50 - static_cast<float>(rand() % 100); // NOLINT(*-msc50-cpp)
 
-                pointLight->color.r = static_cast<float>(rand()) / RAND_MAX; // NOLINT(*-msc50-cpp)
-                pointLight->color.g = static_cast<float>(rand()) / RAND_MAX; // NOLINT(*-msc50-cpp)
-                pointLight->color.b = static_cast<float>(rand()) / RAND_MAX; // NOLINT(*-msc50-cpp)
+                pointLight->color.r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX); // NOLINT(*-msc50-cpp)
+                pointLight->color.g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX); // NOLINT(*-msc50-cpp)
+                pointLight->color.b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX); // NOLINT(*-msc50-cpp)
                 pointLight->constant = 0.01f;
                 appState->root.addChild(std::unique_ptr<Node>(pointLight));
             }
@@ -367,13 +393,6 @@ SDL_AppResult RenderFrame(AppState* appState) {
             appState->CreateDepthTexture();
             appState->RecreateAllPipelines();
         }
-        ImGui::End();
-
-        ImGui::Begin("Rendering Overrides");
-        static const char* items[] = { "", "phong", "phong_textured", "blinn_phong", "blinn_phong_textured", "missing", "line" };
-        static int selected_idx = 0;
-        ImGui::Combo("Override", &selected_idx, items, IM_ARRAYSIZE(items));
-        appState->material_override = items[selected_idx];
         ImGui::End();
 
         ImGui::Render();
@@ -463,8 +482,7 @@ SDL_AppResult RenderFrame(AppState* appState) {
             uiTargetInfo.resolve_texture = nullptr;
             uiTargetInfo.cycle = false;
 
-            SDL_GPURenderPass* uiPass = SDL_BeginGPURenderPass(commandBuffer, &uiTargetInfo, 1, nullptr);
-            if (uiPass) {
+            if (SDL_GPURenderPass* uiPass = SDL_BeginGPURenderPass(commandBuffer, &uiTargetInfo, 1, nullptr)) {
                 ImGui_ImplSDLGPU3_RenderDrawData(draw_data, commandBuffer, uiPass);
                 SDL_EndGPURenderPass(uiPass);
             }
