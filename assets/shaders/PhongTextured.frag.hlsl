@@ -3,35 +3,37 @@
 Texture2D g_albedo : register(t0, space2);
 Texture2D g_ambient : register(t1, space2);
 Texture2D g_specular : register(t2, space2);
+Texture2D g_shadow_map : register(t3, space2);
 SamplerState g_sampler0 : register(s0, space2);
 SamplerState g_sampler1 : register(s1, space2);
 SamplerState g_sampler2 : register(s2, space2);
+SamplerComparisonState g_shadow_sampler : register(s3, space2);
 
 cbuffer PushConstants : register(b0, space3)
 {
-    float3  viewPos;
-    float   shininess;
-    float4  colorAlbedo;
-    bool    useAlbedoTexture;
-    float3  colorAmbient;
-    bool    useAmbientTexture;
-    float3  colorSpecular;
-    bool    useSpecularTexture;
-    int     num_point_lights;
-    int     num_dir_lights;
-    int     num_spot_lights;
+    float3 viewPos;
+    float  shininess;
+    float4 colorAlbedo;
+    bool   useAlbedoTexture;
+    float3 colorAmbient;
+    bool   useAmbientTexture;
+    float3 colorSpecular;
+    bool   useSpecularTexture;
+    int    num_point_lights;
+    int    num_dir_lights;
+    int    num_spot_lights;
 }
 
 struct PSInput {
     float2 uv : TEXCOORD0;
     float3 worldPos : TEXCOORD1;
     float3 worldNormal : TEXCOORD2;
+    float4 shadowCoord : TEXCOORD3;
 };
 
-StructuredBuffer<PointLight> pointLights : register(t3, space2);
-StructuredBuffer<DirectionalLight> directionalLights : register(t4, space2);
-StructuredBuffer<SpotLight> spotLights : register(t5, space2);
-
+StructuredBuffer<PointLight> pointLights : register(t4, space2);
+StructuredBuffer<DirectionalLight> directionalLights : register(t5, space2);
+StructuredBuffer<SpotLight> spotLights : register(t6, space2);
 
 float4 main(PSInput input) : SV_TARGET {
 
@@ -67,10 +69,14 @@ float4 main(PSInput input) : SV_TARGET {
         result += CalcPointLight(pointLights[i], input.worldNormal, input.worldPos, calcSpecular, CalcPhongSpecular(normalize(pointLights[i].position.xyz - input.worldPos), input.worldNormal, normalize(viewPos - input.worldPos), shininess));
     }
     for(int i = 0; i < num_dir_lights; i++) {
-        result += CalcDirectionalLight(directionalLights[i], input.worldNormal, calcSpecular, CalcPhongSpecular(normalize(-directionalLights[i].direction.xyz), input.worldNormal, normalize(viewPos - input.worldPos), shininess));
+       DirectionalLight light = directionalLights[i];
+       light.direction.w = CalcDirectionalLightShadows(light, g_shadow_map, g_shadow_sampler, input.shadowCoord, input.worldNormal, 1);
+       result += CalcDirectionalLight(light, input.worldNormal, calcSpecular, CalcPhongSpecular(normalize(-directionalLights[i].direction.xyz), input.worldNormal, normalize(viewPos - input.worldPos), shininess));
     }
     for(int i = 0; i < num_spot_lights; i++) {
         result += CalcSpotLight(spotLights[i], input.worldNormal, input.worldPos, float3(1.0, 1.0, 1.0), CalcPhongSpecular(normalize(spotLights[i].position.xyz - input.worldPos), input.worldNormal, normalize(viewPos - input.worldPos), 64));
     }
-    return float4(result + calcAmbient, calcAlbedo.w);
+
+    float3 lighting = (calcAmbient + result) * calcAlbedo;
+    return float4(lighting, calcAlbedo.w);
 }

@@ -14,16 +14,17 @@ void MaterialPhong::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer
     const glm::mat4 view = appState->current_camera_3d->GetViewMatrix();
     const glm::mat4 proj = appState->current_camera_3d->GetProjectionMatrix(appState->currentAspectRatio);
     const glm::mat4 mvp = proj * view * model;
-    // const glm::mat4 normalMatrix = glm::transpose(glm::inverse(model));
 
     struct TransformData {
         glm::mat4 mvp;
         glm::mat4 model;
+        glm::mat4 lightVP;
     };
 
     TransformData data{};
     data.mvp = mvp;
     data.model = model;
+    data.lightVP = appState->GetLightViewProjection();
 
     SDL_PushGPUVertexUniformData(commandBuffer, 0, &data, sizeof(data));
 
@@ -34,6 +35,11 @@ void MaterialPhong::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer
     }
 
     SDL_BindGPUGraphicsPipeline(appState->renderPass, gotPipeline);
+
+    const SDL_GPUTextureSamplerBinding bindings[] = {
+        {appState->shadowMap, appState->GetSampler("anisotropic_repeat")}
+    };
+    SDL_BindGPUFragmentSamplers(appState->renderPass, 0, bindings, std::size(bindings));
 
     struct PushData {
         glm::vec3 viewPos;

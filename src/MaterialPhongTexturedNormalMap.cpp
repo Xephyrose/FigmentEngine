@@ -46,7 +46,7 @@ void MaterialPhongTexturedNormalMap::Bind(AppState *appState, SDL_GPUCommandBuff
         {getAlbedo, getSampler0},              // t0
         {getAmbient, getSampler1},            // t1
         {getSpecular, getSampler2},          // t2
-        {getNormalMap, getSampler3},         // t3
+        {getNormalMap, getSampler3},        // t3
         {appState->shadowMap, getSampler3} // t4
     };
     SDL_BindGPUFragmentSamplers(appState->renderPass, 0, bindings, std::size(bindings));
