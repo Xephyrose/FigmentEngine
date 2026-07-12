@@ -23,18 +23,28 @@ StructuredBuffer<DirectionalLight> directionalLights : register(t2, space2);
 StructuredBuffer<SpotLight> spotLights : register(t3, space2);
 
 float4 main(PSInput input) : SV_TARGET {
-    float3 result = float3(0.0f, 0.0f, 0.0f);
+    float4 calcAlbedo = 1.0;
+    float3 calcAmbient = 0.3;
+    float3 calcSpecular = 1.0;
+    int shininess = 64;
+
+    float3 diffuse = float3(0.0f, 0.0f, 0.0f);
+    float3 specular = float3(0.0f, 0.0f, 0.0f);
     for(int i = 0; i < num_point_lights; i++) {
-        result += CalcPointLight(pointLights[i], input.worldNormal, input.worldPos, float3(1.0, 1.0, 1.0), CalcPhongSpecular(normalize(pointLights[i].position.xyz - input.worldPos), input.worldNormal, normalize(viewPos - input.worldPos), 64));
+        diffuse += CalcPointLightDiffuse(pointLights[i], input.worldNormal, input.worldPos);
+        specular += CalcPointLightSpecular(pointLights[i], input.worldNormal, calcSpecular, CalcPhongSpecular(normalize(-directionalLights[i].direction.xyz), input.worldNormal, normalize(viewPos - input.worldPos), shininess));
     }
     for(int i = 0; i < num_dir_lights; i++) {
-       DirectionalLight light = directionalLights[i];
-       light.direction.w = CalcDirectionalLightShadows(light, g_shadow_map, g_shadow_sampler, input.shadowCoord, input.worldNormal, 1);
-       result += CalcDirectionalLight(light, input.worldNormal, float3(1.0, 1.0, 1.0), CalcPhongSpecular(normalize(-directionalLights[i].direction.xyz), input.worldNormal, normalize(viewPos - input.worldPos), 64));
+        DirectionalLight light = directionalLights[i];
+        light.direction.w = CalcDirectionalLightShadows(light, g_shadow_map, g_shadow_sampler, input.shadowCoord, input.worldNormal, 1);
+        diffuse += CalcDirectionalLightDiffuse(light, input.worldNormal);
+        specular += CalcDirectionalLightSpecular(light, calcSpecular, CalcPhongSpecular(normalize(-directionalLights[i].direction.xyz), input.worldNormal, normalize(viewPos - input.worldPos), shininess));
     }
     for(int i = 0; i < num_spot_lights; i++) {
-        result += CalcSpotLight(spotLights[i], input.worldNormal, input.worldPos, float3(1.0, 1.0, 1.0), CalcPhongSpecular(normalize(spotLights[i].position.xyz - input.worldPos), input.worldNormal, normalize(viewPos - input.worldPos), 64));
+        diffuse += CalcSpotLightDiffuse(spotLights[i], input.worldNormal, input.worldPos);
+        specular += CalcSpotLightSpecular(spotLights[i], input.worldPos, calcSpecular, CalcPhongSpecular(normalize(-directionalLights[i].direction.xyz), input.worldNormal, normalize(viewPos - input.worldPos), shininess));
     }
 
-    return float4(0.3 + result, 1);
+    float3 lighting = (calcAmbient + diffuse) * calcAlbedo + specular;
+    return float4(lighting, calcAlbedo.w);
 }

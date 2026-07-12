@@ -79,19 +79,23 @@ float4 main(PSInput input) : SV_TARGET {
         calcSpecular = colorSpecular;
     }
 
-    float3 result = float3(0.0f, 0.0f, 0.0f);
+    float3 diffuse = float3(0.0f, 0.0f, 0.0f);
+    float3 specular = float3(0.0f, 0.0f, 0.0f);
     for(int i = 0; i < num_point_lights; i++) {
-        result += CalcPointLight(pointLights[i], worldNormal, input.worldPos, calcSpecular, CalcBlinnPhongSpecular(normalize(pointLights[i].position.xyz - input.worldPos), worldNormal, normalize(viewPos - input.worldPos), shininess));
+        diffuse += CalcPointLightDiffuse(pointLights[i], worldNormal, input.worldPos);
+        specular += CalcPointLightSpecular(pointLights[i], worldNormal, calcSpecular, CalcBlinnPhongSpecular(normalize(-directionalLights[i].direction.xyz), worldNormal, normalize(viewPos - input.worldPos), shininess));
     }
-   for (int i = 0; i < num_dir_lights; i++) {
-       DirectionalLight light = directionalLights[i];
-       light.direction.w = CalcDirectionalLightShadows(light, g_shadow_map, g_shadow_sampler, input.shadowCoord, worldNormal, 1);
-       result += CalcDirectionalLight(light, worldNormal, calcSpecular, CalcBlinnPhongSpecular(normalize(-directionalLights[i].direction.xyz), worldNormal, normalize(viewPos - input.worldPos), shininess));
-   }
+    for(int i = 0; i < num_dir_lights; i++) {
+        DirectionalLight light = directionalLights[i];
+        light.direction.w = CalcDirectionalLightShadows(light, g_shadow_map, g_shadow_sampler, input.shadowCoord, worldNormal, 1);
+        diffuse += CalcDirectionalLightDiffuse(light, worldNormal);
+        specular += CalcDirectionalLightSpecular(light, calcSpecular, CalcBlinnPhongSpecular(normalize(-directionalLights[i].direction.xyz), worldNormal, normalize(viewPos - input.worldPos), shininess));
+    }
     for(int i = 0; i < num_spot_lights; i++) {
-        result += CalcSpotLight(spotLights[i], worldNormal, input.worldPos, float3(1.0, 1.0, 1.0), CalcPhongSpecular(normalize(spotLights[i].position.xyz - input.worldPos), worldNormal, normalize(viewPos - input.worldPos), 64));
+        diffuse += CalcSpotLightDiffuse(spotLights[i], worldNormal, input.worldPos);
+        specular += CalcSpotLightSpecular(spotLights[i], input.worldPos, calcSpecular, CalcBlinnPhongSpecular(normalize(-directionalLights[i].direction.xyz), worldNormal, normalize(viewPos - input.worldPos), shininess));
     }
 
-    float3 lighting = (calcAmbient + result) * calcAlbedo;
+    float3 lighting = (calcAmbient + diffuse) * calcAlbedo + specular;
     return float4(lighting, calcAlbedo.w);
 }

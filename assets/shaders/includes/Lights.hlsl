@@ -29,7 +29,7 @@ float CalcBlinnPhongSpecular(float3 lightDir, float3 norm, float3 viewDir, float
     return pow(max(dot(norm, halfwayDir), 0.0), shininess * 4);
 }
 
-float3 CalcPointLight(PointLight light, float3 normal, float3 fragPos, float3 calcSpecular, float spec) {
+float3 CalcPointLightDiffuse(PointLight light, float3 normal, float3 fragPos) {
     float3 lightColor = light.color.xyz * light.color.w;
 
     float3 lightDir = normalize(light.position.xyz - fragPos);
@@ -39,38 +39,69 @@ float3 CalcPointLight(PointLight light, float3 normal, float3 fragPos, float3 ca
     float attenuation = 1.0 / (light.params.x + light.params.y * distance + light.params.z * (distance * distance));
 
     float3 diffuse = lightColor * diff;
-    float3 specular = lightColor * (spec * calcSpecular);
 
-    return (diffuse * attenuation * (light.params.w * 0.5 + 0.5)) + (specular * attenuation * light.params.w);
+    return diffuse * attenuation * (light.params.w * 0.5 + 0.5);
 }
 
-float3 CalcDirectionalLight(DirectionalLight light, float3 normal, float3 calcSpecular, float spec) {
+float3 CalcPointLightSpecular(PointLight light, float3 fragPos, float3 calcSpecular, float spec) {
+    float3 lightColor = light.color.xyz * light.color.w;
+
+    float distance = length(light.position.xyz - fragPos);
+    float attenuation = 1.0 / (light.params.x + light.params.y * distance + light.params.z * (distance * distance));
+
+    float3 specular = lightColor * spec * calcSpecular;
+
+    return specular * attenuation * light.params.w;
+}
+
+float3 CalcDirectionalLightDiffuse(DirectionalLight light, float3 normal) {
     float3 lightColor = light.color.xyz * light.color.w;
 
     float3 lightDir = normalize(-light.direction.xyz);
     float diff = max(dot(normal, lightDir), 0.0);
 
     float3 diffuse = lightColor * diff;
-    float3 specular = lightColor * spec * calcSpecular;
-    return (diffuse + specular) * light.direction.w;
+    return diffuse * light.direction.w;
 }
 
-float3 CalcSpotLight(SpotLight light, float3 normal, float3 fragPos, float3 calcSpecular, float spec) {
+float3 CalcDirectionalLightSpecular(DirectionalLight light, float3 calcSpecular, float spec) {
     float3 lightColor = light.color.xyz * light.color.w;
 
-    float3 lightDir = normalize(light.position.xyz - fragPos);
-    float diff = max(dot(normal, lightDir), 0.0);
+    float3 specular = lightColor * spec * calcSpecular;
+    return specular * light.direction.w;
+}
+
+float3 CalcSpotLightDiffuse(SpotLight light, float3 normal, float3 fragPos) {
+    float3 lightColor = light.color.xyz * light.color.w;
 
     float distance = length(light.position.xyz - fragPos);
     float attenuation = 1.0 / (light.params.x + light.params.y * distance + light.params.z * (distance * distance));
+
+    float3 lightDir = normalize(light.position.xyz - fragPos);
 
     float theta = dot(lightDir, normalize(-light.direction.xyz));
     float epsilon = light.position.w - light.direction.w;
     float intensity = clamp((theta - light.direction.w) / epsilon, 0.0, 1.0);
 
+    float diff = max(dot(normal, lightDir), 0.0);
     float3 diffuse = lightColor * diff;
+    return diffuse * attenuation * intensity * (light.params.w * 0.5 + 0.5);
+}
+
+float3 CalcSpotLightSpecular(SpotLight light, float3 fragPos, float3 calcSpecular, float spec) {
+    float3 lightColor = light.color.xyz * light.color.w;
     float3 specular = lightColor * spec * calcSpecular;
-    return (diffuse * attenuation * intensity * (light.params.w * 0.5 + 0.5)) + (specular * attenuation * intensity * light.params.w);
+
+    float distance = length(light.position.xyz - fragPos);
+    float attenuation = 1.0 / (light.params.x + light.params.y * distance + light.params.z * (distance * distance));
+
+    float3 lightDir = normalize(light.position.xyz - fragPos);
+
+    float theta = dot(lightDir, normalize(-light.direction.xyz));
+    float epsilon = light.position.w - light.direction.w;
+    float intensity = clamp((theta - light.direction.w) / epsilon, 0.0, 1.0);
+
+    return specular * attenuation * intensity * light.params.w;
 }
 
 float CalcDirectionalLightShadows(DirectionalLight light, Texture2D shadowMap, SamplerComparisonState shadowSampler, float4 shadowCoord, float3 normal, int pcfDist) {
@@ -81,11 +112,11 @@ float CalcDirectionalLightShadows(DirectionalLight light, Texture2D shadowMap, S
         projCoords.y < 0.0 || projCoords.y > 1.0 ||
         projCoords.z < 0.0 || projCoords.z > 1.0)
     {
-        return 0.0;
+        return 1.0;
     } else {
         float currentDepth = projCoords.z;
         float3 lightDir = normalize(-light.direction.xyz);
-        float bias = max(0.0001 * (1.0 - saturate(dot(normalize(normal), lightDir))), 0.00001);
+        float bias = max(0.001 * (1.0 - saturate(dot(normalize(normal), lightDir))), 0.0001);
 
         float shadow = 0.0;
         uint width, height;
