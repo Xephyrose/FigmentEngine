@@ -1165,7 +1165,7 @@ glm::mat4 AppState::GetLightViewProjection() const {
         -orthoSize,
         orthoSize,
         1.0f,
-        1000.0f
+        100.0f
     );
 
     return lightProj * lightView;
