@@ -1171,6 +1171,33 @@ glm::mat4 AppState::GetLightViewProjection() const {
     return lightProj * lightView;
 }
 
+glm::mat4 AppState::GetOffsetLightViewProjection() const {
+    const DirectionalLight3D* light = directionalLights[0];
+    if (!light) return {1.0f};
+
+    const glm::vec3 lightDir = glm::normalize(light->GetGlobalTransform().getForward());
+
+    const glm::vec3 cameraPos = current_camera_3d->GetGlobalTransform().position;
+
+    constexpr float lightDistance = 100.0f;
+    const glm::vec3 lightPos = cameraPos - lightDir * lightDistance;
+
+    const glm::vec3 target = cameraPos;
+
+    const glm::mat4 lightView = glm::lookAt(lightPos, target, glm::vec3(0.0f, 1.0f, 0.0f));
+
+    constexpr float orthoSize = 100.0f;
+
+    const glm::mat4 lightProj = glm::ortho(
+        -orthoSize, orthoSize,
+        -orthoSize, orthoSize,
+        0.1f,
+        200.0f
+    );
+
+    return lightProj * lightView;
+}
+
 void AppState::RecreateAllMultisampleStates() {
     SDL_Log("Recreating all multisample states...");
     multisampleStates.clear();

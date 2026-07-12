@@ -115,6 +115,7 @@ struct AppState {
     void CreateShadowPipeline();
     void RenderShadowMap(SDL_GPUCommandBuffer* cmdBuf, const glm::mat4& lightViewProj);
     glm::mat4 GetLightViewProjection() const;
+    glm::mat4 GetOffsetLightViewProjection() const;
 
     void RecreateAllMultisampleStates();
     void RecreateAllPipelines();
