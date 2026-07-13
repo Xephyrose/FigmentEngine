@@ -129,6 +129,8 @@ add_executable(FigmentEngine
         game/ShooterGame/ShooterGame.h
         src/Material2D.cpp
         src/Material2D.h
+        src/MaterialPBR.cpp
+        src/MaterialPBR.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

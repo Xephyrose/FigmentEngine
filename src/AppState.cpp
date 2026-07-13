@@ -13,6 +13,7 @@
 #include "Light3DGPU.h"
 #include "Material2D.h"
 #include "MaterialColor.h"
+#include "MaterialPBR.h"
 #include "Vertex.h"
 #include "SDL3/SDL_log.h"
 #include "thirdparty/json.hpp"
@@ -891,6 +892,9 @@ void AppState::CreateDefaultMaterials() {
 
     auto* blend_brick_concrete = new MaterialPhongTextured(this, "blend_brick_concrete", "BlinnPhongTextured");
     blend_brick_concrete->setColorAlbedo(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+
+    auto* pbr = new MaterialPBR(this, "pbr", "PBR");
+    pbr->setColorAlbedo(glm::vec4(0, 0, 0, 1.0f));
 }
 
 void AppState::CreateDefaultSamplers() {
@@ -1032,6 +1036,8 @@ void AppState::CreateDefaultPipelines() {
 
     CreatePipeline("BlinnPhongTexturedNormalMapped", "NormalMap", "BlinnPhongTexturedNormalMap", "FrontFaces", "Default", true, true);
     CreatePipeline("BlinnPhongTexturedNormalMappedAlpha", "NormalMap", "BlinnPhongTexturedNormalMap", "FrontFaces", "Alpha", true, false);
+
+    CreatePipeline("PBR", "Default", "PBR", "FrontFaces", "Default", true, true);
 }
 
 void AppState::CreateDefaultRasterizerStates() {
