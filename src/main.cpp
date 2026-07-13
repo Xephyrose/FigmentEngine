@@ -89,10 +89,10 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         SDL_Log("Error: SDL_CreateWindow(): %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
-    SDL_SetWindowAspectRatio(appState->window, 1.777f, 1.777f);
+    SDL_SetWindowAspectRatio(appState->window, 16.0f / 9, 16.0f / 9);
     SDL_MaximizeWindow(appState->window);
 
-    constexpr SDL_GPUShaderFormat formatFlags = SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL;
+    constexpr SDL_GPUShaderFormat formatFlags = SDL_GPU_SHADERFORMAT_SPIRV;
     appState->device = SDL_CreateGPUDevice(formatFlags, true, nullptr);
     if (appState->device == nullptr)
     {
