@@ -3,8 +3,8 @@
 
 cbuffer PushConstants : register(b0, space3)
 {
-    float3  viewPos;
-    float3  albedo;
+    float4  viewPos;
+    float4  albedo;
     float   metallic;
     float   roughness;
     float   ao;

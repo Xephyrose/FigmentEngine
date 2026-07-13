@@ -50,7 +50,7 @@ void MaterialPBR::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, 
     // SDL_BindGPUFragmentSamplers(appState->renderPass, 0, bindings, std::size(bindings));
 
     struct PushData {
-        glm::vec3 viewPos;
+        glm::vec4 viewPos;
         glm::vec4 colorAlbedo;
         // uint32_t  useAlbedoTexture;
         float     colorMetallic;
@@ -64,7 +64,7 @@ void MaterialPBR::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, 
         int       num_spot_lights;
     };
     PushData push{};
-    push.viewPos = appState->current_camera_3d->GetGlobalTransform().position;
+    push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransform().position, 0);
     push.colorAlbedo = colorAlbedo;
     // push.useAlbedoTexture = (textureAlbedo == "none" ? 0 : 1);
     push.colorMetallic = colorMetallic;
