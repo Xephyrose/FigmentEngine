@@ -1037,7 +1037,8 @@ void AppState::CreateDefaultPipelines() {
     CreatePipeline("BlinnPhongTexturedNormalMapped", "NormalMap", "BlinnPhongTexturedNormalMap", "FrontFaces", "Default", true, true);
     CreatePipeline("BlinnPhongTexturedNormalMappedAlpha", "NormalMap", "BlinnPhongTexturedNormalMap", "FrontFaces", "Alpha", true, false);
 
-    CreatePipeline("PBR", "Default", "PBR", "FrontFaces", "Default", true, true);
+    CreatePipeline("PBR", "Default", "PBRColor", "FrontFaces", "Default", true, true);
+    CreatePipeline("PBRORM", "Normals", "PBRORM", "FrontFaces", "Default", true, true);
 }
 
 void AppState::CreateDefaultRasterizerStates() {
