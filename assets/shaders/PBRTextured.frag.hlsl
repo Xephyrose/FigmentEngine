@@ -19,6 +19,7 @@ cbuffer PushConstants : register(b0, space3)
     float   colorRoughness;
     float   colorAO;
     bool    useORMTexture;
+    bool    useNormalMap;
     int     num_point_lights;
     int     num_dir_lights;
     int     num_spot_lights;
@@ -94,24 +95,27 @@ float4 main(PSInput input) : SV_TARGET {
     }
 
 
-    float3 sampledNormal = g_normal_map.Sample(g_sampler_normal_map, input.uv).rgb;
-    float3 tangentNormal = sampledNormal * 2.0 - 1.0;
+    float3 worldNormal = normalize(input.worldNormal);
+    if (useNormalMap) {
+        float3 sampledNormal = g_normal_map.Sample(g_sampler_normal_map, input.uv).rgb;
+        float3 tangentNormal = sampledNormal * 2.0 - 1.0;
 
-    float3 N = normalize(input.worldNormal);
-    float3 T = normalize(input.worldTangent);
-    float3 B = normalize(input.worldBitangent);
+        float3 N = normalize(input.worldNormal);
+        float3 T = normalize(input.worldTangent);
+        float3 B = normalize(input.worldBitangent);
 
-    T = normalize(T - dot(T, N) * N);
-    B = cross(N, T);
+        T = normalize(T - dot(T, N) * N);
+        B = cross(N, T);
 
-    float3 worldNormal = normalize(T * tangentNormal.x + B * tangentNormal.y + N * tangentNormal.z);
+        worldNormal = normalize(T * tangentNormal.x + B * tangentNormal.y + N * tangentNormal.z);
+    }
 
-    float3 V = normalize(viewPos - input.worldPos);
+    float3 V = normalize(viewPos.xyz - input.worldPos);
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0
     // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)
     float3 F0 = float3(0.04, 0.04, 0.04);
-    F0 = lerp(F0, calcAlbedo, calcMetallic);
+    F0 = lerp(F0, calcAlbedo.xyz, calcMetallic);
 
     // reflectance equation
     float3 Lo = float3(0, 0, 0);
@@ -125,12 +129,12 @@ float4 main(PSInput input) : SV_TARGET {
         float3 radiance = pointLights[i].color.xyz * pointLights[i].color.w * attenuation;
 
         // Cook-Torrance BRDF
-        float NDF = DistributionGGX(N, H, calcRoughness);
-        float G   = GeometrySmith(N, V, L, calcRoughness);
+        float NDF = DistributionGGX(worldNormal, H, calcRoughness);
+        float G   = GeometrySmith(worldNormal, V, L, calcRoughness);
         float3 F    = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
 
         float3 numerator    = NDF * G * F;
-        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001; // + 0.0001 to prevent divide by zero
+        float denominator = 4.0 * max(dot(worldNormal, V), 0.0) * max(dot(worldNormal, L), 0.0) + 0.0001; // + 0.0001 to prevent divide by zero
         float3 specular = numerator / denominator;
 
         // kS is equal to Fresnel
@@ -145,14 +149,14 @@ float4 main(PSInput input) : SV_TARGET {
         kD *= 1.0 - calcMetallic;
 
         // scale light by NdotL
-        float NdotL = max(dot(N, L), 0.0);
+        float NdotL = max(dot(worldNormal, L), 0.0);
 
         // add to outgoing radiance Lo
-        Lo += (kD * calcAlbedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+        Lo += (kD * calcAlbedo.xyz / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
     }
 
     // ambient lighting (note that the next IBL tutorial will replace this ambient lighting with environment lighting).
-    float3 ambient = float3(0.03, 0.03, 0.03) * calcAlbedo * calcAO;
+    float3 ambient = float3(0.03, 0.03, 0.03) * calcAlbedo.xyz * calcAO;
 
     float3 color = ambient + Lo;
 

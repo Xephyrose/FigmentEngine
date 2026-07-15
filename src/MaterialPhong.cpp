@@ -42,13 +42,13 @@ void MaterialPhong::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer
     SDL_BindGPUFragmentSamplers(appState->renderPass, 0, bindings, std::size(bindings));
 
     struct PushData {
-        glm::vec3 viewPos;
+        glm::vec4 viewPos;
         int       num_point_lights;
         int       num_dir_lights;
         int       num_spot_lights;
     };
     PushData push{};
-    push.viewPos = appState->current_camera_3d->GetGlobalTransform().position;
+    push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransform().position, 0);
     push.num_point_lights = appState->pointLights.size();
     push.num_dir_lights = appState->directionalLights.size();
     push.num_spot_lights = appState->spotLights.size();

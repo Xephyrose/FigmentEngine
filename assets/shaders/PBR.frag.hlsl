@@ -14,10 +14,12 @@ cbuffer PushConstants : register(b0, space3)
 }
 
 struct PSInput {
-    float2 uv : TEXCOORD0;
-    float3 worldPos : TEXCOORD1;
-    float3 worldNormal : TEXCOORD2;
-    float4 shadowCoord : TEXCOORD3;
+     float2 uv : TEXCOORD0;
+     float3 worldPos : TEXCOORD1;
+     float3 worldNormal : TEXCOORD2;
+     float3 worldTangent : TEXCOORD3;
+     float3 worldBitangent : TEXCOORD4;
+     float4 shadowCoord : TEXCOORD5;
 };
 
 StructuredBuffer<PointLight> pointLights : register(t0, space2);
@@ -66,12 +68,12 @@ float3 fresnelSchlick(float cosTheta, float3 F0)
 
 float4 main(PSInput input) : SV_TARGET {
     float3 N = normalize(input.worldNormal);
-    float3 V = normalize(viewPos - input.worldPos);
+    float3 V = normalize(viewPos.xyz - input.worldPos);
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0
     // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)
     float3 F0 = float3(0.04, 0.04, 0.04);
-    F0 = lerp(F0, albedo, metallic);
+    F0 = lerp(F0, albedo.xyz, metallic);
 
     // reflectance equation
     float3 Lo = float3(0, 0, 0);
@@ -108,12 +110,12 @@ float4 main(PSInput input) : SV_TARGET {
         float NdotL = max(dot(N, L), 0.0);
 
         // add to outgoing radiance Lo
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+        Lo += (kD * albedo.xyz / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
     }
 
     // ambient lighting (note that the next IBL tutorial will replace
     // this ambient lighting with environment lighting).
-    float3 ambient = float3(0.03, 0.03, 0.03) * albedo * ao;
+    float3 ambient = float3(0.03, 0.03, 0.03) * albedo.xyz * ao;
 
     float3 color = ambient + Lo;
 

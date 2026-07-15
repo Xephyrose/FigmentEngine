@@ -8,16 +8,19 @@ void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *comma
     const glm::mat4 view = appState->current_camera_3d->GetViewMatrix();
     const glm::mat4 proj = appState->current_camera_3d->GetProjectionMatrix(appState->currentAspectRatio);
     const glm::mat4 mvp = proj * view * model;
+    const glm::mat4 normalMatrix = glm::transpose(glm::inverse(model));
 
     struct TransformData {
         glm::mat4 mvp;
         glm::mat4 model;
+        glm::mat4 normalMatrix;
         glm::mat4 lightVP;
     };
 
     TransformData data{};
     data.mvp = mvp;
     data.model = model;
+    data.normalMatrix = normalMatrix;
     data.lightVP = appState->GetOffsetLightViewProjection();
 
     SDL_PushGPUVertexUniformData(commandBuffer, 0, &data, sizeof(data));
@@ -33,44 +36,44 @@ void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *comma
     SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
     SDL_GPUTexture* getAmbient = appState->GetTexture(textureAmbient);
     SDL_GPUTexture* getSpecular = appState->GetTexture(textureSpecular);
-    SDL_GPUSampler* getSampler0 = appState->GetSampler(sampler);
-    SDL_GPUSampler* getSampler1 = appState->GetSampler(sampler);
-    SDL_GPUSampler* getSampler2 = appState->GetSampler(sampler);
-    SDL_GPUSampler* getSampler3 = appState->GetSampler(sampler);
+    SDL_GPUTexture* getNormalMap = appState->GetTexture(textureNormalMap);
+    SDL_GPUSampler* getSamplerAlbedo = appState->GetSampler(sampler);
+    SDL_GPUSampler* getSamplerAmbient = appState->GetSampler(sampler);
+    SDL_GPUSampler* getSamplerSpecular = appState->GetSampler(sampler);
+    SDL_GPUSampler* getSamplerNormalMap = appState->GetSampler(sampler);
+    // SDL_GPUSampler* getSamplerShadowMap = appState->GetSampler("shadow_sampler");
 
     const SDL_GPUTextureSamplerBinding bindings[] = {
-        {getAlbedo, getSampler0},             // t0
-        {getAmbient, getSampler1},           // t1
-        {getSpecular, getSampler2},         // t2
-        {appState->shadowMap, getSampler3} // t3
+        {getAlbedo, getSamplerAlbedo},                 // t0
+        {getAmbient, getSamplerAmbient},              // t1
+        {getSpecular, getSamplerSpecular},           // t2
+        {getNormalMap, getSamplerNormalMap},        // t3
+        // {appState->shadowMap, getSamplerShadowMap} // t4
     };
     SDL_BindGPUFragmentSamplers(appState->renderPass, 0, bindings, std::size(bindings));
 
     struct PushData {
-        glm::vec3 viewPos;
-        float     shininess;
+        glm::vec4 viewPos;
         glm::vec4 colorAlbedo;
-        uint32_t  useAlbedoTexture;
-        glm::vec3 colorAmbient;
-        uint32_t  useAmbientTexture;
-        glm::vec3 colorSpecular;
-        uint32_t  useSpecularTexture;
-        int       num_point_lights;
-        int       num_dir_lights;
-        int       num_spot_lights;
+        glm::uvec4 texturesUsed; // albedo, ambient, specular, normal
+        glm::vec4 colorAmbient;
+        glm::vec4 colorSpecular;
+        glm::vec4 lightNums; // num_point_lights, num_dir_lights, num_spot_lights
+        glm::vec4 params; // shininess
     };
     PushData push{};
-    push.viewPos = appState->current_camera_3d->GetGlobalTransform().position;
-    push.shininess = shininess;
+    push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransform().position, 0);
+    push.params.x = shininess;
     push.colorAlbedo = colorAlbedo;
-    push.useAlbedoTexture = (textureAlbedo == "none" ? 0 : 1);
-    push.colorAmbient = glm::vec4(colorAmbient, 1.0f);
-    push.useAmbientTexture = (textureAmbient == "none" ? 0 : 1);
-    push.colorSpecular = glm::vec4(colorSpecular, 1.0f);
-    push.useSpecularTexture = (textureSpecular == "none" ? 0 : 1);
-    push.num_point_lights = appState->pointLights.size();
-    push.num_dir_lights = appState->directionalLights.size();
-    push.num_spot_lights = appState->spotLights.size();
+    push.texturesUsed.x = textureAlbedo == "none" ? 0 : 1;
+    push.colorAmbient = glm::vec4(colorAmbient, 0.0f);
+    push.texturesUsed.y = textureAmbient == "none" ? 0 : 1;
+    push.colorSpecular = glm::vec4(colorSpecular, 0.0f);
+    push.texturesUsed.z = textureSpecular == "none" ? 0 : 1;
+    push.texturesUsed.w = textureNormalMap == "none" ? 0 : 1;
+    push.lightNums.x = appState->pointLights.size();
+    push.lightNums.y = appState->directionalLights.size();
+    push.lightNums.z = appState->spotLights.size();
 
     SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
 
@@ -80,6 +83,8 @@ void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *comma
         &appState->pointLightBuffer,
         1
     );
+
+    SDL_Log("lights: %i", appState->directionalLights.size());
 
     SDL_BindGPUFragmentStorageBuffers(
         appState->renderPass,
@@ -115,5 +120,13 @@ void MaterialPhongTextured::setTextureSpecular(AppState *appState, const std::st
     textureSpecular = texture;
     if (textureSpecular != "none") {
         appState->LoadTexture(textureSpecular);
+    }
+}
+
+void MaterialPhongTextured::setTextureNormalMap(AppState *appState, const std::string &texture) {
+    textureNormalMap = texture;
+    if (textureNormalMap != "none") {
+        appState->LoadTexture(textureNormalMap);
+        SDL_Log("setting a thingy to another thingy");
     }
 }

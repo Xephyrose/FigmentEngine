@@ -113,8 +113,6 @@ add_executable(FigmentEngine
     src/EditorThemeManager.h
     src/ImGuiWidgets.cpp
     src/ImGuiWidgets.h
-    src/MaterialPhongTexturedNormalMap.cpp
-    src/MaterialPhongTexturedNormalMap.h
         src/DirectionalLight3D.cpp
         src/DirectionalLight3D.h
         src/MaterialColor.cpp
@@ -131,6 +129,8 @@ add_executable(FigmentEngine
         src/Material2D.h
         src/MaterialPBR.cpp
         src/MaterialPBR.h
+        src/MaterialPBRORM.cpp
+        src/MaterialPBRORM.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
