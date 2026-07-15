@@ -407,7 +407,7 @@ SDL_AppResult RenderFrame(AppState* appState) {
         return SDL_APP_FAILURE;
     }
     if (!appState->directionalLights.empty()) {
-        appState->RenderShadowMap(commandBuffer, appState->GetLightViewProjection());
+        appState->RenderShadowMap(commandBuffer, appState->GetOffsetLightViewProjection());
     }
 
     if (appState->debug) {

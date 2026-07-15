@@ -71,7 +71,7 @@ void MeshInstance3D::DrawShadow(AppState &appState, SDL_GPUCommandBuffer *comman
         SDL_BindGPUGraphicsPipeline(renderPass, shadowPipeline);
 
         // 3. Compute LightVP × Model
-        glm::mat4 lightVP = appState.GetLightViewProjection();
+        glm::mat4 lightVP = appState.GetOffsetLightViewProjection();
         glm::mat4 model = GetGlobalTransform().getMatrix();
         glm::mat4 mvp = lightVP * model;
 

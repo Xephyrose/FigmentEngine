@@ -24,7 +24,7 @@ void MaterialPhong::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer
     TransformData data{};
     data.mvp = mvp;
     data.model = model;
-    data.lightVP = appState->GetLightViewProjection();
+    data.lightVP = appState->GetOffsetLightViewProjection();
 
     SDL_PushGPUVertexUniformData(commandBuffer, 0, &data, sizeof(data));
 
