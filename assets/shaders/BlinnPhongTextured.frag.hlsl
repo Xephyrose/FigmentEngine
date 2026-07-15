@@ -87,5 +87,5 @@ float4 main(PSInput input) : SV_TARGET {
     }
 
     float3 lighting = (calcAmbient + diffuse) * calcAlbedo.xyz + specular;
-    return float4(lighting, 1.0);
+    return float4(lighting, calcAlbedo.w);
 }

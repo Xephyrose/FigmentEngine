@@ -781,7 +781,6 @@ void AppState::CreateDefaultMaterials() {
     const auto blinn_phong_tex = new MaterialPhongTextured(this, "blinn_phong_textured", "BlinnPhongTextured");
     blinn_phong_tex->setTextureAlbedo(this, "missing.png");
     blinn_phong_tex->setSampler(this, "nearest_repeat");
-    blinn_phong_tex->setTextureNormalMap(this, "brick_concrete_normal.png");
 
     auto* line = new MaterialColor(this, "line", "Line");
     line->setColor(glm::vec4(1, 0, 1, 1));
