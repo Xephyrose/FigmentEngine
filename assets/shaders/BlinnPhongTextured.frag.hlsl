@@ -4,12 +4,12 @@ Texture2D g_albedo : register(t0, space2);
 Texture2D g_ambient : register(t1, space2);
 Texture2D g_specular : register(t2, space2);
 Texture2D g_normal_map : register(t3, space2);
-//Texture2D g_shadow_map : register(t4, space2);
+Texture2D g_shadow_map : register(t4, space2);
 SamplerState g_sampler_albedo : register(s0, space2);
 SamplerState g_sampler_ambient : register(s1, space2);
 SamplerState g_sampler_specular : register(s2, space2);
 SamplerState g_sampler_normal_map : register(s3, space2);
-//SamplerComparisonState g_shadow_sampler : register(s4, space2);
+SamplerComparisonState g_shadow_sampler : register(s4, space2);
 
 cbuffer PushConstants : register(b0, space3)
 {
@@ -71,37 +71,21 @@ float4 main(PSInput input) : SV_TARGET {
 
     float3 diffuse = float3(0.0f, 0.0f, 0.0f);
     float3 specular = float3(0.0f, 0.0f, 0.0f);
-//    for(int i = 0; i < lightNums.x; i++) {
-//        diffuse += CalcPointLightDiffuse(pointLights[i], worldNormal, input.worldPos);
-//        specular += CalcPointLightSpecular(pointLights[i], worldNormal, calcSpecular, CalcBlinnPhongSpecular(normalize(pointLights[i].position.xyz - input.worldPos), worldNormal, normalize(viewPos.xyz - input.worldPos), params.x));
-//    }
+    for(int i = 0; i < lightNums.x; i++) {
+        diffuse += CalcPointLightDiffuse(pointLights[i], worldNormal, input.worldPos);
+        specular += CalcPointLightSpecular(pointLights[i], worldNormal, calcSpecular, CalcBlinnPhongSpecular(normalize(pointLights[i].position.xyz - input.worldPos), worldNormal, normalize(viewPos.xyz - input.worldPos), params.x));
+    }
     for(int i = 0; i < lightNums.y; i++) {
         DirectionalLight light = directionalLights[i];
-//        light.direction.w = CalcDirectionalLightShadows(light, g_shadow_map, g_shadow_sampler, input.shadowCoord, worldNormal, 1);
+        light.direction.w = CalcDirectionalLightShadows(light, g_shadow_map, g_shadow_sampler, input.shadowCoord, worldNormal, 1);
         diffuse += CalcDirectionalLightDiffuse(light, worldNormal);
         specular += CalcDirectionalLightSpecular(light, calcSpecular, CalcBlinnPhongSpecular(normalize(-directionalLights[i].direction.xyz), worldNormal, normalize(viewPos.xyz - input.worldPos), params.x));
     }
-//    for(int i = 0; i < lightNums.z; i++) {
-//        diffuse += CalcSpotLightDiffuse(spotLights[i], worldNormal, input.worldPos);
-//        specular += CalcSpotLightSpecular(spotLights[i], input.worldPos, calcSpecular, CalcBlinnPhongSpecular(normalize(spotLights[i].position.xyz - input.worldPos), worldNormal, normalize(viewPos.xyz - input.worldPos), params.x));
-//    }
+    for(int i = 0; i < lightNums.z; i++) {
+        diffuse += CalcSpotLightDiffuse(spotLights[i], worldNormal, input.worldPos);
+        specular += CalcSpotLightSpecular(spotLights[i], input.worldPos, calcSpecular, CalcBlinnPhongSpecular(normalize(spotLights[i].position.xyz - input.worldPos), worldNormal, normalize(viewPos.xyz - input.worldPos), params.x));
+    }
 
     float3 lighting = (calcAmbient + diffuse) * calcAlbedo.xyz + specular;
-//    return float4(worldNormal, 1);
-//    return float4(diffuse, calcAlbedo.w);
-//    return float4(specular, calcAlbedo.w)
-//    return float4(lighting, 1.0);
-//    return float4(directionalLights[0].color.xyz, 1);
-    float3 sampled = g_normal_map.Sample(g_sampler_normal_map, input.uv).rgb;
-    return float4(sampled,1);
-
-//    uint w, h;
-//    g_normal_map.GetDimensions(w, h);
-//
-//    return float4(
-//        w / 4096.0,
-//        h / 4096.0,
-//        0,
-//        1
-//    );
+    return float4(lighting, 1.0);
 }

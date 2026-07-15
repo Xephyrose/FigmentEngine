@@ -41,14 +41,14 @@ void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *comma
     SDL_GPUSampler* getSamplerAmbient = appState->GetSampler(sampler);
     SDL_GPUSampler* getSamplerSpecular = appState->GetSampler(sampler);
     SDL_GPUSampler* getSamplerNormalMap = appState->GetSampler(sampler);
-    // SDL_GPUSampler* getSamplerShadowMap = appState->GetSampler("shadow_sampler");
+    SDL_GPUSampler* getSamplerShadowMap = appState->GetSampler("shadow_sampler");
 
     const SDL_GPUTextureSamplerBinding bindings[] = {
         {getAlbedo, getSamplerAlbedo},                 // t0
         {getAmbient, getSamplerAmbient},              // t1
         {getSpecular, getSamplerSpecular},           // t2
         {getNormalMap, getSamplerNormalMap},        // t3
-        // {appState->shadowMap, getSamplerShadowMap} // t4
+        {appState->shadowMap, getSamplerShadowMap} // t4
     };
     SDL_BindGPUFragmentSamplers(appState->renderPass, 0, bindings, std::size(bindings));
 
