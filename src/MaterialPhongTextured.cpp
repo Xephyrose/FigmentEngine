@@ -84,8 +84,6 @@ void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *comma
         1
     );
 
-    SDL_Log("lights: %i", appState->directionalLights.size());
-
     SDL_BindGPUFragmentStorageBuffers(
         appState->renderPass,
         1,
@@ -127,6 +125,5 @@ void MaterialPhongTextured::setTextureNormalMap(AppState *appState, const std::s
     textureNormalMap = texture;
     if (textureNormalMap != "none") {
         appState->LoadTexture(textureNormalMap);
-        SDL_Log("setting a thingy to another thingy");
     }
 }
