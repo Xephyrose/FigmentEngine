@@ -38,11 +38,11 @@ void ShooterGame::Init(AppState &appState) {
     directionalLight->localTransform.position.z = 50;
     addChild(std::unique_ptr<Node>(directionalLight));
 
-    // auto* spotLight = new SpotLight3D(&appState);
-    // spotLight->localTransform.position.x = 17;
-    // spotLight->localTransform.position.y = 1;
-    // spotLight->localTransform.position.z = 5;
-    // addChild(std::unique_ptr<Node>(spotLight));
+    auto* spotLight = new SpotLight3D(&appState);
+    spotLight->localTransform.position.x = 17;
+    spotLight->localTransform.position.y = 1;
+    spotLight->localTransform.position.z = 5;
+    addChild(std::unique_ptr<Node>(spotLight));
 
     auto* meshInstance = new MeshInstance3D();
     meshInstance->mesh = "zoo.glb";

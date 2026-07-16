@@ -15,52 +15,21 @@ void MaterialPBR::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, 
 
     SDL_BindGPUGraphicsPipeline(appState->renderPass, gotPipeline);
 
-    // SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
-    // SDL_GPUTexture* getMetallic = appState->GetTexture(textureMetallic);
-    // SDL_GPUTexture* getRoughness = appState->GetTexture(textureRoughness);
-    // SDL_GPUTexture* getAO = appState->GetTexture(textureAO);
-    // SDL_GPUSampler* getSampler0 = appState->GetSampler(sampler);
-    // SDL_GPUSampler* getSampler1 = appState->GetSampler(sampler);
-    // SDL_GPUSampler* getSampler2 = appState->GetSampler(sampler);
-    // SDL_GPUSampler* getSampler3 = appState->GetSampler(sampler);
-    // SDL_GPUSampler* getSampler4 = appState->GetSampler(sampler);
-
-    // const SDL_GPUTextureSamplerBinding bindings[] = {
-        // {getAlbedo, getSampler0},       // t0
-        // {getMetallic, getSampler1},    // t1
-        // {getRoughness, getSampler2},  // t2
-        // {getAO, getSampler3},        // t3
-        // {appState->shadowMap, getSampler4} // t4
-    // };
-    // SDL_BindGPUFragmentSamplers(appState->renderPass, 0, bindings, std::size(bindings));
-
     struct PushData {
         glm::vec4 viewPos;
         glm::vec4 colorAlbedo;
-        // uint32_t  useAlbedoTexture;
-        float     colorMetallic;
-        // uint32_t  useMetallicTexture;
-        float     colorRoughness;
-        // uint32_t  useRoughnessTexture;
-        float     colorAO;
-        // uint32_t  useAOTexture;
-        int       num_point_lights;
-        int       num_dir_lights;
-        int       num_spot_lights;
+        glm::vec4 colorORM;
+        glm::vec4 lightNums; // num_point_lights, num_dir_lights, num_spot_lights
     };
     PushData push{};
     push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransform().position, 0);
     push.colorAlbedo = colorAlbedo;
-    // push.useAlbedoTexture = (textureAlbedo == "none" ? 0 : 1);
-    push.colorMetallic = colorMetallic;
-    // push.useMetallicTexture = (textureMetallic == "none" ? 0 : 1);
-    push.colorRoughness = colorRoughness;
-    // push.useRoughnessTexture = (textureRoughness == "none" ? 0 : 1);
-    push.colorAO = colorAO;
-    // push.useAOTexture = (textureAO == "none" ? 0 : 1);
-    push.num_point_lights = appState->pointLights.size();
-    push.num_dir_lights = appState->directionalLights.size();
-    push.num_spot_lights = appState->spotLights.size();
+    push.colorORM.x = colorAO;
+    push.colorORM.y = colorRoughness;
+    push.colorORM.z = colorMetallic;
+    push.lightNums.x = appState->pointLights.size();
+    push.lightNums.y = appState->directionalLights.size();
+    push.lightNums.z = appState->spotLights.size();
 
     SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
 

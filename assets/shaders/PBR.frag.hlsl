@@ -1,16 +1,11 @@
 #include "assets/shaders/includes/Lights.hlsl"
-#define PI 3.14159265359
 
 cbuffer PushConstants : register(b0, space3)
 {
-    float4  viewPos;
-    float4  albedo;
-    float   metallic;
-    float   roughness;
-    float   ao;
-    int     num_point_lights;
-    int     num_dir_lights;
-    int     num_spot_lights;
+    float4 viewPos;
+    float4 albedo;
+    float4 colorORM;
+    float4 lightNums; // num_point_lights, num_dir_lights, num_spot_lights
 }
 
 struct PSInput {
@@ -26,42 +21,6 @@ StructuredBuffer<PointLight> pointLights : register(t0, space2);
 StructuredBuffer<DirectionalLight> directionalLights : register(t1, space2);
 StructuredBuffer<SpotLight> spotLights : register(t2, space2);
 
-float DistributionGGX(float3 N, float3 H, float roughness){
-    float a = roughness*roughness;
-    float a2 = a*a;
-    float NdotH = max(dot(N, H), 0.0);
-    float NdotH2 = NdotH*NdotH;
-
-    float nom   = a2;
-    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
-    denom = PI * denom * denom;
-
-    return nom / denom;
-}
-
-float GeometrySchlickGGX(float NdotV, float roughness){
-    float r = (roughness + 1.0);
-    float k = (r*r) / 8.0;
-
-    float nom   = NdotV;
-    float denom = NdotV * (1.0 - k) + k;
-
-    return nom / denom;
-}
-
-float GeometrySmith(float3 N, float3 V, float3 L, float roughness){
-    float NdotV = max(dot(N, V), 0.0);
-    float NdotL = max(dot(N, L), 0.0);
-    float ggx2 = GeometrySchlickGGX(NdotV, roughness);
-    float ggx1 = GeometrySchlickGGX(NdotL, roughness);
-
-    return ggx1 * ggx2;
-}
-
-float3 fresnelSchlick(float cosTheta, float3 F0){
-    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
-}
-
 float4 main(PSInput input) : SV_TARGET {
     float3 N = input.worldNormal;
     float3 V = normalize(viewPos.xyz - input.worldPos);
@@ -69,11 +28,11 @@ float4 main(PSInput input) : SV_TARGET {
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0
     // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)
     float3 F0 = float3(0.04, 0.04, 0.04);
-    F0 = lerp(F0, albedo.xyz, metallic);
+    F0 = lerp(F0, albedo.xyz, colorORM.z);
 
     // reflectance equation
     float3 Lo = float3(0, 0, 0);
-    for(int i = 0; i < num_point_lights; ++i) {
+    for(int i = 0; i < lightNums.x; ++i) {
         // calculate per-light radiance
         float3 L = normalize(pointLights[i].position.xyz - input.worldPos);
         float3 H = normalize(V + L);
@@ -82,11 +41,11 @@ float4 main(PSInput input) : SV_TARGET {
         float3 radiance = pointLights[i].color.xyz * pointLights[i].color.w * attenuation;
 
         // Cook-Torrance BRDF
-        float NDF = DistributionGGX(N, H, roughness);
-        float G   = GeometrySmith(N, V, L, roughness);
-        float3 F    = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
+        float NDF = DistributionGGX(N, H, colorORM.y);
+        float G = GeometrySmith(N, V, L, colorORM.y);
+        float3 F = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
 
-        float3 numerator    = NDF * G * F;
+        float3 numerator = NDF * G * F;
         float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001; // + 0.0001 to prevent divide by zero
         float3 specular = numerator / denominator;
 
@@ -99,7 +58,7 @@ float4 main(PSInput input) : SV_TARGET {
         // multiply kD by the inverse metalness such that only non-metals
         // have diffuse lighting, or a linear blend if partly metal (pure metals
         // have no diffuse light).
-        kD *= 1.0 - metallic;
+        kD *= 1.0 - colorORM.z;
 
         // scale light by NdotL
         float NdotL = max(dot(N, L), 0.0);
@@ -108,9 +67,61 @@ float4 main(PSInput input) : SV_TARGET {
         Lo += (kD * albedo.xyz / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
     }
 
-    // ambient lighting (note that the next IBL tutorial will replace
-    // this ambient lighting with environment lighting).
-    float3 ambient = float3(0.03, 0.03, 0.03) * albedo.xyz * ao;
+    for(int i = 0; i < lightNums.y; ++i) {
+        float3 L = normalize(-directionalLights[i].direction.xyz);
+        float3 H = normalize(V + L);
+
+        float3 radiance = directionalLights[i].color.xyz * directionalLights[i].color.w;
+
+        float NDF = DistributionGGX(N, H, colorORM.y);
+        float G = GeometrySmith(N, V, L, colorORM.y);
+        float3 F = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
+
+        float3 numerator = NDF * G * F;
+        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+        float3 specular = numerator / denominator;
+
+        float3 kS = F;
+        float3 kD = float3(1, 1, 1) - kS;
+        kD *= 1.0 - colorORM.z;
+
+        float NdotL = max(dot(N, L), 0.0);
+
+        Lo += (kD * albedo.xyz / PI + specular) * radiance * NdotL;
+    }
+
+    for(int i = 0; i < lightNums.z; ++i) {
+        float3 L = normalize(spotLights[i].position.xyz - input.worldPos);
+        float3 H = normalize(V + L);
+
+        float distance = length(spotLights[i].position.xyz - input.worldPos);
+        float attenuation = 1.0 / (spotLights[i].params.x + spotLights[i].params.y * distance + spotLights[i].params.z * (distance * distance));
+
+        float theta = dot(L, normalize(-spotLights[i].direction.xyz));
+        float epsilon = spotLights[i].position.w - spotLights[i].direction.w;
+        float intensity = clamp((theta - spotLights[i].direction.w) / epsilon, 0.0, 1.0);
+
+        float3 radiance = spotLights[i].color.xyz * spotLights[i].color.w * attenuation * intensity;
+
+        float NDF = DistributionGGX(N, H, colorORM.y);
+        float G = GeometrySmith(N, V, L, colorORM.y);
+        float3 F = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
+
+        float3 numerator = NDF * G * F;
+        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+        float3 specular = numerator / denominator;
+
+        float3 kS = F;
+        float3 kD = float3(1, 1, 1) - kS;
+        kD *= 1.0 - colorORM.z;
+
+        float NdotL = max(dot(N, L), 0.0);
+
+        Lo += (kD * albedo.xyz / PI + specular) * radiance * NdotL;
+    }
+
+    // ambient lighting (note that the next IBL tutorial will replace this ambient lighting with environment lighting).
+    float3 ambient = float3(0.03, 0.03, 0.03) * albedo.xyz * colorORM.x;
 
     float3 color = ambient + Lo;
 
