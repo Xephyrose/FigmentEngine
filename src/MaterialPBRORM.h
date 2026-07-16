@@ -2,7 +2,7 @@
 #define FIGMENTENGINE_MATERIALPBRORM_H
 #include "MaterialPBR.h"
 
-struct MaterialPBRORM : MaterialPBR{
+struct MaterialPBRORM : MaterialPBR {
     using MaterialPBR::MaterialPBR;
     std::string textureORM = "none";
     std::string textureNormalMap = "none";

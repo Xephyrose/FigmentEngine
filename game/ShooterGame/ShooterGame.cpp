@@ -24,25 +24,26 @@ void ShooterGame::Init(AppState &appState) {
     // pointLight1->color.y  = 0.5f;
     // addChild(std::unique_ptr<Node>(pointLight1));
 
-    auto* pointLight2 = new PointLight3D(&appState);
-    pointLight2->localTransform.position.x = 17;
-    pointLight2->localTransform.position.y = 5;
-    pointLight2->localTransform.position.z = 6;
-    pointLight2->brightness = 50;
-    addChild(std::unique_ptr<Node>(pointLight2));
+    // auto* pointLight2 = new PointLight3D(&appState);
+    // pointLight2->localTransform.position.x = 17;
+    // pointLight2->localTransform.position.y = 5;
+    // pointLight2->localTransform.position.z = 6;
+    // pointLight2->brightness = 50;
+    // addChild(std::unique_ptr<Node>(pointLight2));
 
     auto* directionalLight = new DirectionalLight3D(&appState);
     directionalLight->localTransform.rotation.x = -135;
     directionalLight->localTransform.rotation.y = -135;
     directionalLight->localTransform.position.x = 50;
     directionalLight->localTransform.position.z = 50;
+    directionalLight->brightness = 5;
     addChild(std::unique_ptr<Node>(directionalLight));
 
-    auto* spotLight = new SpotLight3D(&appState);
-    spotLight->localTransform.position.x = 17;
-    spotLight->localTransform.position.y = 1;
-    spotLight->localTransform.position.z = 5;
-    addChild(std::unique_ptr<Node>(spotLight));
+    // auto* spotLight = new SpotLight3D(&appState);
+    // spotLight->localTransform.position.x = 17;
+    // spotLight->localTransform.position.y = 1;
+    // spotLight->localTransform.position.z = 5;
+    // addChild(std::unique_ptr<Node>(spotLight));
 
     auto* meshInstance = new MeshInstance3D();
     meshInstance->mesh = "zoo.glb";

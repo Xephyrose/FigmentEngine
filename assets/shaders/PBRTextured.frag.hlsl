@@ -3,11 +3,11 @@
 Texture2D g_albedo : register(t0, space2);
 Texture2D g_orm : register(t1, space2);
 Texture2D g_normal_map : register(t2, space2);
-//Texture2D g_shadow_map : register(t3, space2);
+Texture2D g_shadow_map : register(t3, space2);
 SamplerState g_sampler_albedo : register(s0, space2);
 SamplerState g_sampler_orm : register(s1, space2);
 SamplerState g_sampler_normal_map : register(s2, space2);
-//SamplerComparisonState g_sampler_shadow : register(s3, space2);
+SamplerComparisonState g_sampler_shadow : register(s3, space2);
 
 cbuffer PushConstants : register(b0, space3)
 {
@@ -27,9 +27,9 @@ struct PSInput {
     float4 shadowCoord : TEXCOORD5;
 };
 
-StructuredBuffer<PointLight> pointLights : register(t3, space2);
-StructuredBuffer<DirectionalLight> directionalLights : register(t4, space2);
-StructuredBuffer<SpotLight> spotLights : register(t5, space2);
+StructuredBuffer<PointLight> pointLights : register(t4, space2);
+StructuredBuffer<DirectionalLight> directionalLights : register(t5, space2);
+StructuredBuffer<SpotLight> spotLights : register(t6, space2);
 
 float4 main(PSInput input) : SV_TARGET {
     float4 calcAlbedo;
@@ -50,7 +50,6 @@ float4 main(PSInput input) : SV_TARGET {
         calcRoughness = texColor.y * colorORM.y;
         calcMetallic = texColor.z * colorORM.z;
     }
-
 
     float3 N = input.worldNormal;
     if (texturesUsed.z == true) {
@@ -114,7 +113,8 @@ float4 main(PSInput input) : SV_TARGET {
         float3 L = normalize(-directionalLights[i].direction.xyz);
         float3 H = normalize(V + L);
 
-        float3 radiance = directionalLights[i].color.xyz * directionalLights[i].color.w;
+        float3 radiance = directionalLights[i].color.xyz * directionalLights[i].color.w * CalcDirectionalLightShadows(directionalLights[i], g_shadow_map, g_sampler_shadow, input.shadowCoord, N, 1);
+//        float3 radiance = directionalLights[i].color.xyz * directionalLights[i].color.w * (1 + 0.001 * CalcDirectionalLightShadows(directionalLights[i], g_shadow_map, g_sampler_shadow, input.shadowCoord, N, 1));
 
         float NDF = DistributionGGX(N, H, calcRoughness);
         float G = GeometrySmith(N, V, L, calcRoughness);
@@ -168,10 +168,9 @@ float4 main(PSInput input) : SV_TARGET {
 
     float3 color = ambient + Lo;
 
-    // HDR tonemapping
+    // HDR tonemapping + gamma correct
     color = color / (color + float3(1, 1, 1));
-    // gamma correct
     color = pow(color, float3(1/2.2, 1/2.2, 1/2.2));
 
-    return float4(color, 1.0);
+    return float4(color, calcAlbedo.w);
 }

@@ -5,8 +5,8 @@
 
 struct MaterialPBR : MaterialUnlitTextured {
     using MaterialUnlitTextured::MaterialUnlitTextured;
-    float colorMetallic = 0.5f;
-    float colorRoughness = 0.5f;
+    float colorMetallic = 0.0f;
+    float colorRoughness = 1.0f;
     float colorAO = 1.0f;
 
     void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer, glm::mat4 model) override;

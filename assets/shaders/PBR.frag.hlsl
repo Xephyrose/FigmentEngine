@@ -1,5 +1,8 @@
 #include "assets/shaders/includes/Lights.hlsl"
 
+Texture2D g_shadow_map : register(t0, space2);
+SamplerComparisonState g_sampler_shadow : register(s0, space2);
+
 cbuffer PushConstants : register(b0, space3)
 {
     float4 viewPos;
@@ -17,9 +20,9 @@ struct PSInput {
      float4 shadowCoord : TEXCOORD5;
 };
 
-StructuredBuffer<PointLight> pointLights : register(t0, space2);
-StructuredBuffer<DirectionalLight> directionalLights : register(t1, space2);
-StructuredBuffer<SpotLight> spotLights : register(t2, space2);
+StructuredBuffer<PointLight> pointLights : register(t1, space2);
+StructuredBuffer<DirectionalLight> directionalLights : register(t2, space2);
+StructuredBuffer<SpotLight> spotLights : register(t3, space2);
 
 float4 main(PSInput input) : SV_TARGET {
     float3 N = input.worldNormal;
@@ -71,7 +74,8 @@ float4 main(PSInput input) : SV_TARGET {
         float3 L = normalize(-directionalLights[i].direction.xyz);
         float3 H = normalize(V + L);
 
-        float3 radiance = directionalLights[i].color.xyz * directionalLights[i].color.w;
+        float3 radiance = directionalLights[i].color.xyz * directionalLights[i].color.w * CalcDirectionalLightShadows(directionalLights[i], g_shadow_map, g_sampler_shadow, input.shadowCoord, N, 1);
+//        float3 radiance = directionalLights[i].color.xyz * directionalLights[i].color.w * (1 + 0.001 * CalcDirectionalLightShadows(directionalLights[i], g_shadow_map, g_sampler_shadow, input.shadowCoord, N, 1));
 
         float NDF = DistributionGGX(N, H, colorORM.y);
         float G = GeometrySmith(N, V, L, colorORM.y);
@@ -130,5 +134,5 @@ float4 main(PSInput input) : SV_TARGET {
     // gamma correct
     color = pow(color, float3(1/2.2, 1/2.2, 1/2.2));
 
-    return float4(color, 1.0);
+    return float4(color, albedo.w);
 }

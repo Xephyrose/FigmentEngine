@@ -3,6 +3,14 @@
 
 #include "Camera3D.h"
 
+glm::vec3 SRGBToLinear(glm::vec3 c)
+{
+    glm::vec3 low = c / 12.92f;
+    glm::vec3 high = glm::pow((c + 0.055f) / 1.055f, glm::vec3(2.4f));
+
+    return glm::mix(low, high, glm::step(glm::vec3(0.04045f), c));
+}
+
 void MaterialPBRORM::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, glm::mat4 model) {
     if (!appState->current_camera_3d) return;
     BindVertexUniformDataMMNL(appState, commandBuffer, model);
@@ -26,7 +34,7 @@ void MaterialPBRORM::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffe
         {getAlbedo, getSamplerAlbedo},      // t0
         {getORM, getSamplerORM},           // t1
         {getNormal, getSamplerNormalMap}, // t2
-        // {appState->shadowMap, appState->GetSampler("shadow_sampler")} // t3
+        {appState->shadowMap, appState->GetSampler("shadow_sampler")} // t3
     };
     SDL_BindGPUFragmentSamplers(appState->renderPass, 0, bindings, std::size(bindings));
 
@@ -39,7 +47,7 @@ void MaterialPBRORM::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffe
     };
     PushData push{};
     push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransform().position, 0);
-    push.colorAlbedo = colorAlbedo;
+    push.colorAlbedo = glm::vec4(SRGBToLinear(colorAlbedo), colorAlbedo.w);
     push.texturesUsed.x = (textureAlbedo == "none" ? 0 : 1);
     push.texturesUsed.y = (textureORM == "none" ? 0 : 1);
     push.texturesUsed.z = (textureNormalMap == "none" ? 0 : 1);

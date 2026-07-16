@@ -15,6 +15,11 @@ void MaterialPBR::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, 
 
     SDL_BindGPUGraphicsPipeline(appState->renderPass, gotPipeline);
 
+    const SDL_GPUTextureSamplerBinding bindings[] = {
+        {appState->shadowMap, appState->GetSampler("shadow_sampler")} // t0
+    };
+    SDL_BindGPUFragmentSamplers(appState->renderPass, 0, bindings, std::size(bindings));
+
     struct PushData {
         glm::vec4 viewPos;
         glm::vec4 colorAlbedo;

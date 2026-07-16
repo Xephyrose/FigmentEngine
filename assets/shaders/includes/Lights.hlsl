@@ -137,8 +137,7 @@ float CalcDirectionalLightShadows(DirectionalLight light, Texture2D shadowMap, S
                 shadow += currentDepth - bias > pcfDepth ? 0.0 : 1.0;
             }
         }
-        shadow /= div;
-        return shadow;
+        return shadow / div;
     }
 }
 

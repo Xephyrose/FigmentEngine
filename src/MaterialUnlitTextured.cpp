@@ -33,8 +33,8 @@ void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* comma
         bool      useTexture;
     };
     PushData push{};
-    push.colorAlbedo = this->colorAlbedo;
-    push.useTexture = (this->textureAlbedo == "none" ? 0 : 1);
+    push.colorAlbedo = colorAlbedo;
+    push.useTexture = (textureAlbedo == "none" ? 0 : 1);
 
     SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
 }
