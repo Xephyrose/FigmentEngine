@@ -131,6 +131,7 @@ add_executable(FigmentEngine
         src/MaterialPBR.h
         src/MaterialPBRORM.cpp
         src/MaterialPBRORM.h
+        src/Material.cpp
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

@@ -11,20 +11,7 @@ MaterialColor::MaterialColor(AppState *appState, const std::string &name, const 
 
 void MaterialColor::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, glm::mat4 model) {
     if (!appState->current_camera_3d) return;
-    const glm::mat4 view = appState->current_camera_3d->GetViewMatrix();
-    const glm::mat4 proj = appState->current_camera_3d->GetProjectionMatrix(appState->currentAspectRatio);
-    const glm::mat4 mvp = proj * view * model;
-
-    struct TransformData {
-        glm::mat4 mvp;
-        glm::mat4 model;
-    };
-
-    TransformData data{};
-    data.mvp = mvp;
-    data.model = model;
-
-    SDL_PushGPUVertexUniformData(commandBuffer, 0, &data, sizeof(data));
+    BindVertexUniformDataMMNL(appState, commandBuffer, model);
 
     SDL_GPUGraphicsPipeline* gotPipeline = appState->GetPipeline(pipeline);
     if (!gotPipeline) {

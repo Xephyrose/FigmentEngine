@@ -10,6 +10,8 @@ struct Material {
 
     virtual ~Material() = default;
     virtual void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer, glm::mat4 model) = 0;
+
+    static void BindVertexUniformDataMMNL(const AppState *appState, SDL_GPUCommandBuffer* commandBuffer, glm::mat4 model);
 };
 
 #endif //FIGMENTENGINE_MATERIAL_H

@@ -26,8 +26,7 @@ StructuredBuffer<PointLight> pointLights : register(t0, space2);
 StructuredBuffer<DirectionalLight> directionalLights : register(t1, space2);
 StructuredBuffer<SpotLight> spotLights : register(t2, space2);
 
-float DistributionGGX(float3 N, float3 H, float roughness)
-{
+float DistributionGGX(float3 N, float3 H, float roughness){
     float a = roughness*roughness;
     float a2 = a*a;
     float NdotH = max(dot(N, H), 0.0);
@@ -40,8 +39,7 @@ float DistributionGGX(float3 N, float3 H, float roughness)
     return nom / denom;
 }
 
-float GeometrySchlickGGX(float NdotV, float roughness)
-{
+float GeometrySchlickGGX(float NdotV, float roughness){
     float r = (roughness + 1.0);
     float k = (r*r) / 8.0;
 
@@ -51,8 +49,7 @@ float GeometrySchlickGGX(float NdotV, float roughness)
     return nom / denom;
 }
 
-float GeometrySmith(float3 N, float3 V, float3 L, float roughness)
-{
+float GeometrySmith(float3 N, float3 V, float3 L, float roughness){
     float NdotV = max(dot(N, V), 0.0);
     float NdotL = max(dot(N, L), 0.0);
     float ggx2 = GeometrySchlickGGX(NdotV, roughness);
@@ -61,13 +58,12 @@ float GeometrySmith(float3 N, float3 V, float3 L, float roughness)
     return ggx1 * ggx2;
 }
 
-float3 fresnelSchlick(float cosTheta, float3 F0)
-{
+float3 fresnelSchlick(float cosTheta, float3 F0){
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
 float4 main(PSInput input) : SV_TARGET {
-    float3 N = normalize(input.worldNormal);
+    float3 N = input.worldNormal;
     float3 V = normalize(viewPos.xyz - input.worldPos);
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0

@@ -11,23 +11,7 @@ MaterialUnlitTextured::MaterialUnlitTextured(AppState* appState, const std::stri
 
 void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* commandBuffer, const glm::mat4 model) {
     if (!appState->current_camera_3d) return;
-    const glm::mat4 view = appState->current_camera_3d->GetViewMatrix();
-    const glm::mat4 proj = appState->current_camera_3d->GetProjectionMatrix(appState->currentAspectRatio);
-    const glm::mat4 mvp = proj * view * model;
-    // const glm::mat4 normalMatrix = glm::transpose(glm::inverse(model));
-
-    struct TransformData {
-        glm::mat4 mvp;
-        glm::mat4 model;
-        // glm::mat4 normalMatrix;
-    };
-
-    TransformData data{};
-    data.mvp = mvp;
-    data.model = model;
-    // data.normalMatrix = normalMatrix;
-
-    SDL_PushGPUVertexUniformData(commandBuffer, 0, &data, sizeof(data));
+    BindVertexUniformDataMMNL(appState, commandBuffer, model);
 
     SDL_GPUGraphicsPipeline* gotPipeline = appState->GetPipeline(pipeline);
     if (!gotPipeline) {
