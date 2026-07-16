@@ -73,8 +73,7 @@ float4 main(PSInput input) : SV_TARGET {
 
     // reflectance equation
     float3 Lo = float3(0, 0, 0);
-    for(int i = 0; i < num_point_lights; ++i)
-    {
+    for(int i = 0; i < num_point_lights; ++i) {
         // calculate per-light radiance
         float3 L = normalize(pointLights[i].position.xyz - input.worldPos);
         float3 H = normalize(V + L);

@@ -1,1 +1,79 @@
 #include "MaterialPBRORM.h"
+#include <SDL3/SDL_log.h>
+
+#include "Camera3D.h"
+
+void MaterialPBRORM::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, glm::mat4 model) {
+    if (!appState->current_camera_3d) return;
+    BindVertexUniformDataMMNL(appState, commandBuffer, model);
+
+    SDL_GPUGraphicsPipeline* gotPipeline = appState->GetPipeline(pipeline);
+    if (!gotPipeline) {
+        SDL_Log("ERROR: Pipeline '%s' not found!", pipeline.c_str());
+        return;
+    }
+
+    SDL_BindGPUGraphicsPipeline(appState->renderPass, gotPipeline);
+
+    SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
+    SDL_GPUTexture* getORM = appState->GetTexture(textureORM);
+    SDL_GPUSampler* getSamplerAlbedo = appState->GetSampler(sampler);
+    SDL_GPUSampler* getSamplerORM = appState->GetSampler(sampler);
+
+    const SDL_GPUTextureSamplerBinding bindings[] = {
+        {getAlbedo, getSamplerAlbedo},       // t0
+        {getORM, getSamplerORM},    // t1
+        // {appState->shadowMap, appState->GetSampler("shadow_sampler")} // t2
+    };
+    SDL_BindGPUFragmentSamplers(appState->renderPass, 0, bindings, std::size(bindings));
+
+    struct PushData {
+        glm::vec4 viewPos;
+        glm::vec4 colorAlbedo;
+        glm::uvec4 texturesUsed; // albedo, orm, TODO normal
+        glm::vec4 colorORM;
+        glm::vec4 lightNums; // num_point_lights, num_dir_lights, num_spot_lights
+    };
+    PushData push{};
+    push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransform().position, 0);
+    push.colorAlbedo = colorAlbedo;
+    push.texturesUsed.x = (textureAlbedo == "none" ? 0 : 1);
+    push.texturesUsed.y = (textureORM == "none" ? 0 : 1);
+    // push.texturesUsed.z = (textureNormalMap == "none" ? 0 : 1);
+    push.colorORM.x = colorAO;
+    push.colorORM.y = colorRoughness;
+    push.colorORM.z = colorMetallic;
+    push.lightNums.x = appState->pointLights.size();
+    push.lightNums.y = appState->directionalLights.size();
+    push.lightNums.z = appState->spotLights.size();
+
+    SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
+
+    SDL_BindGPUFragmentStorageBuffers(
+        appState->renderPass,
+        0,
+        &appState->pointLightBuffer,
+        1
+    );
+
+    SDL_BindGPUFragmentStorageBuffers(
+        appState->renderPass,
+        1,
+        &appState->directionalLightBuffer,
+        1
+        );
+
+    SDL_BindGPUFragmentStorageBuffers(
+        appState->renderPass,
+        2,
+        &appState->spotLightBuffer,
+        1
+    );
+}
+
+void MaterialPBRORM::setTextureORM(AppState *appState, const std::string &texture) {
+    textureORM = texture;
+    if (textureORM != "none") {
+        appState->LoadTexture(textureORM);
+    }
+}

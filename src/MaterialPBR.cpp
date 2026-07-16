@@ -90,31 +90,10 @@ void MaterialPBR::setColorMetallic(const float color) {
     colorMetallic = color;
 }
 
-void MaterialPBR::setTextureMetallic(AppState *appState, const std::string &texture) {
-    textureMetallic = texture;
-    if (textureMetallic != "none") {
-        appState->LoadTexture(textureMetallic);
-    }
-}
-
 void MaterialPBR::setColorRoughness(const float color) {
     colorRoughness = color;
 }
 
-void MaterialPBR::setTextureRoughness(AppState *appState, const std::string &texture) {
-    textureRoughness = texture;
-    if (textureRoughness != "none") {
-        appState->LoadTexture(textureRoughness);
-    }
-}
-
 void MaterialPBR::setColorAO(const float color) {
     colorAO = color;
-}
-
-void MaterialPBR::setTextureAO(AppState *appState, const std::string &texture) {
-    textureAO = texture;
-    if (textureAO != "none") {
-        appState->LoadTexture(textureAO);
-    }
 }

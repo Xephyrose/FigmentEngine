@@ -11,20 +11,25 @@ void ShooterGame::Init(AppState &appState) {
     appState.current_camera_3d = freeCam;
     addChild(std::unique_ptr<Node>(freeCam));
 
-    // auto* pointLight = new PointLight3D(appState);
+    // auto* pointLight = new PointLight3D(&appState);
     // pointLight->localTransform.position.x = -43;
     // pointLight->localTransform.position.y = 5;
     // pointLight->localTransform.position.z = -14;
     // pointLight->color.x = 0.5f;
-    // pointLight->constant = 0;
     // addChild(std::unique_ptr<Node>(pointLight));
     //
-    // auto* pointLight1 = new PointLight3D(appState);
+    // auto* pointLight1 = new PointLight3D(&appState);
     // pointLight1->localTransform.position.x = -36;
     // pointLight1->localTransform.position.y = 5;
     // pointLight1->color.y  = 0.5f;
-    // pointLight1->constant = 0;
     // addChild(std::unique_ptr<Node>(pointLight1));
+
+    auto* pointLight2 = new PointLight3D(&appState);
+    pointLight2->localTransform.position.x = 17;
+    pointLight2->localTransform.position.y = 5;
+    pointLight2->localTransform.position.z = 6;
+    pointLight2->brightness = 50;
+    addChild(std::unique_ptr<Node>(pointLight2));
 
     auto* directionalLight = new DirectionalLight3D(&appState);
     directionalLight->localTransform.rotation.x = -135;

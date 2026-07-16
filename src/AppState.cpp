@@ -13,6 +13,7 @@
 #include "Material2D.h"
 #include "MaterialColor.h"
 #include "MaterialPBR.h"
+#include "MaterialPBRORM.h"
 #include "Vertex.h"
 #include "SDL3/SDL_log.h"
 #include "thirdparty/json.hpp"
@@ -892,8 +893,15 @@ void AppState::CreateDefaultMaterials() {
     auto* blend_brick_concrete = new MaterialPhongTextured(this, "blend_brick_concrete", "BlinnPhongTextured");
     blend_brick_concrete->setColorAlbedo(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
 
+    // auto* pbr = new MaterialPBR(this, "pbr", "PBR");
+    // pbr->setColorAlbedo(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+
     auto* pbr = new MaterialPBR(this, "pbr", "PBR");
-    pbr->setColorAlbedo(glm::vec4(0, 0, 0, 1.0f));
+    pbr->setColorAlbedo(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+    auto* pbr_orm = new MaterialPBRORM(this, "pbr_orm", "PBRORM");
+    pbr_orm->setColorAlbedo(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+    pbr_orm->setTextureAlbedo(this, "learnopengl_rustediron2_basecolor.png");
+    pbr_orm->setTextureORM(this, "learnopengl_rustediron2_orm.png");
 }
 
 void AppState::CreateDefaultSamplers() {
