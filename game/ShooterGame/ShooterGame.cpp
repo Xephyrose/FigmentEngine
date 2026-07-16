@@ -38,12 +38,10 @@ void ShooterGame::Init(AppState &appState) {
     directionalLight->localTransform.position.z = 50;
     addChild(std::unique_ptr<Node>(directionalLight));
 
-    // auto* spotLight = new SpotLight3D(appState);
-    // spotLight->localTransform.position.x = -46;
+    // auto* spotLight = new SpotLight3D(&appState);
+    // spotLight->localTransform.position.x = 17;
     // spotLight->localTransform.position.y = 1;
-    // spotLight->localTransform.position.z = 14;
-    // spotLight->brightness = 27;
-    // // spotLight->intensity = 0;
+    // spotLight->localTransform.position.z = 5;
     // addChild(std::unique_ptr<Node>(spotLight));
 
     auto* meshInstance = new MeshInstance3D();

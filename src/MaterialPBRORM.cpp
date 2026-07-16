@@ -17,20 +17,23 @@ void MaterialPBRORM::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffe
 
     SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
     SDL_GPUTexture* getORM = appState->GetTexture(textureORM);
+    SDL_GPUTexture* getNormal = appState->GetTexture(textureNormalMap);
     SDL_GPUSampler* getSamplerAlbedo = appState->GetSampler(sampler);
     SDL_GPUSampler* getSamplerORM = appState->GetSampler(sampler);
+    SDL_GPUSampler* getSamplerNormalMap = appState->GetSampler(sampler);
 
     const SDL_GPUTextureSamplerBinding bindings[] = {
-        {getAlbedo, getSamplerAlbedo},       // t0
-        {getORM, getSamplerORM},    // t1
-        // {appState->shadowMap, appState->GetSampler("shadow_sampler")} // t2
+        {getAlbedo, getSamplerAlbedo},      // t0
+        {getORM, getSamplerORM},           // t1
+        {getNormal, getSamplerNormalMap}, // t2
+        // {appState->shadowMap, appState->GetSampler("shadow_sampler")} // t3
     };
     SDL_BindGPUFragmentSamplers(appState->renderPass, 0, bindings, std::size(bindings));
 
     struct PushData {
         glm::vec4 viewPos;
         glm::vec4 colorAlbedo;
-        glm::uvec4 texturesUsed; // albedo, orm, TODO normal
+        glm::uvec4 texturesUsed; // albedo, orm, normal
         glm::vec4 colorORM;
         glm::vec4 lightNums; // num_point_lights, num_dir_lights, num_spot_lights
     };
@@ -39,7 +42,7 @@ void MaterialPBRORM::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffe
     push.colorAlbedo = colorAlbedo;
     push.texturesUsed.x = (textureAlbedo == "none" ? 0 : 1);
     push.texturesUsed.y = (textureORM == "none" ? 0 : 1);
-    // push.texturesUsed.z = (textureNormalMap == "none" ? 0 : 1);
+    push.texturesUsed.z = (textureNormalMap == "none" ? 0 : 1);
     push.colorORM.x = colorAO;
     push.colorORM.y = colorRoughness;
     push.colorORM.z = colorMetallic;
@@ -75,5 +78,12 @@ void MaterialPBRORM::setTextureORM(AppState *appState, const std::string &textur
     textureORM = texture;
     if (textureORM != "none") {
         appState->LoadTexture(textureORM);
+    }
+}
+
+void MaterialPBRORM::setTextureNormalMap(AppState *appState, const std::string &texture) {
+    textureNormalMap = texture;
+    if (textureNormalMap != "none") {
+        appState->LoadTexture(textureNormalMap);
     }
 }

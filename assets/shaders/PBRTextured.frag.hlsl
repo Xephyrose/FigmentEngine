@@ -3,11 +3,11 @@
 
 Texture2D g_albedo : register(t0, space2);
 Texture2D g_orm : register(t1, space2);
-//Texture2D g_normal_map : register(t2, space2);
+Texture2D g_normal_map : register(t2, space2);
 //Texture2D g_shadow_map : register(t3, space2);
 SamplerState g_sampler_albedo : register(s0, space2);
 SamplerState g_sampler_orm : register(s1, space2);
-//SamplerState g_sampler_normal_map : register(s2, space2);
+SamplerState g_sampler_normal_map : register(s2, space2);
 //SamplerComparisonState g_sampler_shadow : register(s3, space2);
 
 cbuffer PushConstants : register(b0, space3)
@@ -28,9 +28,9 @@ struct PSInput {
     float4 shadowCoord : TEXCOORD5;
 };
 
-StructuredBuffer<PointLight> pointLights : register(t2, space2);
-StructuredBuffer<DirectionalLight> directionalLights : register(t3, space2);
-StructuredBuffer<SpotLight> spotLights : register(t4, space2);
+StructuredBuffer<PointLight> pointLights : register(t3, space2);
+StructuredBuffer<DirectionalLight> directionalLights : register(t4, space2);
+StructuredBuffer<SpotLight> spotLights : register(t5, space2);
 
 float DistributionGGX(float3 N, float3 H, float roughness){
     float a = roughness*roughness;
@@ -90,19 +90,19 @@ float4 main(PSInput input) : SV_TARGET {
 
 
     float3 worldNormal = input.worldNormal;
-//    if (false) { // TODO: normal map
-//        float3 sampledNormal = g_normal_map.Sample(g_sampler_normal_map, input.uv).rgb;
-//        float3 tangentNormal = sampledNormal * 2.0 - 1.0;
-//
-//        float3 N = normalize(input.worldNormal);
-//        float3 T = normalize(input.worldTangent);
-//        float3 B = normalize(input.worldBitangent);
-//
-//        T = normalize(T - dot(T, N) * N);
-//        B = cross(N, T);
-//
-//        worldNormal = normalize(T * tangentNormal.x + B * tangentNormal.y + N * tangentNormal.z);
-//    }
+    if (texturesUsed.z == true) {
+        float3 sampledNormal = g_normal_map.Sample(g_sampler_normal_map, input.uv).rgb;
+        float3 tangentNormal = sampledNormal * 2.0 - 1.0;
+
+        float3 N = normalize(input.worldNormal);
+        float3 T = normalize(input.worldTangent);
+        float3 B = normalize(input.worldBitangent);
+
+        T = normalize(T - dot(T, N) * N);
+        B = cross(N, T);
+
+        worldNormal = normalize(T * tangentNormal.x + B * tangentNormal.y + N * tangentNormal.z);
+    }
 
     float3 V = normalize(viewPos.xyz - input.worldPos);
 
