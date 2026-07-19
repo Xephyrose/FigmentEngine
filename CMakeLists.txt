@@ -40,12 +40,12 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(box2d)
 
 FetchContent_Declare(
-        JoltPhysics
-        GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG "v5.6.0"
-        SOURCE_SUBDIR "Build"
+        Box3D
+        GIT_REPOSITORY "https://github.com/erincatto/box3d"
+        GIT_TAG main
+        GIT_SHALLOW TRUE
 )
-FetchContent_MakeAvailable(JoltPhysics)
+FetchContent_MakeAvailable(Box3D)
 
 add_executable(FigmentEngine
     src/main.cpp
@@ -132,6 +132,14 @@ add_executable(FigmentEngine
         src/MaterialPBRORM.cpp
         src/MaterialPBRORM.h
         src/Material.cpp
+        game/ShooterGame/Player3D.cpp
+        game/ShooterGame/Player3D.h
+        src/PhysicsBody3D.cpp
+        src/PhysicsBody3D.h
+        src/CapsuleBody3D.cpp
+        src/CapsuleBody3D.h
+        src/BoxBody3D.cpp
+        src/BoxBody3D.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
@@ -140,6 +148,7 @@ target_link_libraries(FigmentEngine PRIVATE
     SDL3::SDL3
     SDL3_image::SDL3_image
     box2d
+    box3d
     ${CMAKE_DL_LIBS}
     pthread
 )

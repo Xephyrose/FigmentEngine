@@ -7,7 +7,7 @@ struct Node3D : Node {
     Node3D();
     void ImGuiDraw() override;
     Transform3D localTransform;
-    [[nodiscard]] Transform3D GetGlobalTransform() const;
+    [[nodiscard]] virtual Transform3D GetGlobalTransform() const;
 };
 
 

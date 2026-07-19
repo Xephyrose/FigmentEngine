@@ -1,6 +1,8 @@
 #include <vector>
 #include <SDL3/SDL.h>
+
 #include "box2d/box2d.h"
+#include "box3d/box3d.h"
 #include "thirdparty/imgui/imgui.h"
 #include "thirdparty/imgui/imgui_impl_sdl3.h"
 #include "thirdparty/imgui/imgui_impl_sdlgpu3.h"
@@ -16,13 +18,12 @@
 #include "AppState.h"
 #include "Camera3D.h"
 #include "DirectionalLight3D.h"
+#include "EditorThemeManager.h"
 #include "Input.h"
 #include "Material.h"
 #include "Sprite2D.h"
 #include "Vertex.h"
 #include "thirdparty/tiny_gltf.h"
-
-#include "EditorThemeManager.h"
 
 #ifdef __linux__
 #include <dlfcn.h>
@@ -49,7 +50,8 @@ void FixedDelta(AppState* appState) {
     while (appState->fixedTimeStepAccumulator >= appState->fixedTimeStep) {
         HandleInput(appState);
         appState->root.FixedUpdate(*appState);
-        b2World_Step(appState->worldId, static_cast<float>(appState->fixedTimeStep), 4);
+        b2World_Step(appState->worldId2, static_cast<float>(appState->fixedTimeStep), 4);
+        b3World_Step(appState->worldId3, static_cast<float>(appState->fixedTimeStep), 4);
         appState->fixedTimeStepAccumulator -= appState->fixedTimeStep;
         Input::UpdateInputs();
     }
@@ -70,9 +72,13 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     auto* appState = new AppState();
     *appstate = appState;
 
-    b2WorldDef worldDef = b2DefaultWorldDef();
-    worldDef.gravity = (b2Vec2){0.0f, 19.6f};
-    appState->worldId = b2CreateWorld(&worldDef);
+    b2WorldDef worldDef2 = b2DefaultWorldDef();
+    worldDef2.gravity = (b2Vec2){0.0f, 19.6f};
+    appState->worldId2 = b2CreateWorld(&worldDef2);
+
+    b3WorldDef worldDef3 = b3DefaultWorldDef();
+    worldDef3.gravity = (b3Vec3){0.0f, -2.45f, 0.0f};
+    appState->worldId3 = b3CreateWorld(&worldDef3);
 
     float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     if (main_scale < 1.0f) {
@@ -546,7 +552,8 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
 
     if (appState->depthTexture) {SDL_ReleaseGPUTexture(appState->device, appState->depthTexture);}
 
-    b2DestroyWorld(appState->worldId);
+    b2DestroyWorld(appState->worldId2);
+    b3DestroyWorld(appState->worldId3);
 
     SDL_ReleaseWindowFromGPUDevice(appState->device, appState->window);
     // hehehe kill rog astral 5090 with hammers

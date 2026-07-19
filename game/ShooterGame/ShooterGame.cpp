@@ -1,23 +1,32 @@
 #include "ShooterGame.h"
 
+#include "Player3D.h"
 #include "src/AppState.h"
+#include "src/BoxBody3D.h"
 #include "src/DirectionalLight3D.h"
 #include "src/FreeCam3D.h"
 #include "src/MeshInstance3D.h"
 
 void ShooterGame::Init(AppState &appState) {
 
+    auto* box = new BoxBody3D(appState, b3_staticBody, 0, -0.738988f * 30.0f, 0, 100, 0.01f, 100);
+    addChild(std::unique_ptr<Node>(box));
+
+    // auto* player = new Player3D(appState, 0, 15, 0, 0.5, 2);
+    // addChild(std::unique_ptr<Node>(player));
+
     auto* freeCam = new FreeCam3D();
     appState.current_camera_3d = freeCam;
+    // player->addChild(std::unique_ptr<Node>(freeCam));
     addChild(std::unique_ptr<Node>(freeCam));
 
-    // auto* pointLight = new PointLight3D(&appState);
-    // pointLight->localTransform.position.x = -43;
-    // pointLight->localTransform.position.y = 5;
-    // pointLight->localTransform.position.z = -14;
-    // pointLight->color.x = 0.5f;
-    // addChild(std::unique_ptr<Node>(pointLight));
-    //
+    auto* pointLight = new PointLight3D(&appState);
+    pointLight->localTransform.position.x = -43;
+    pointLight->localTransform.position.y = 5;
+    pointLight->localTransform.position.z = -14;
+    pointLight->color.x = 0.5f;
+    addChild(std::unique_ptr<Node>(pointLight));
+
     // auto* pointLight1 = new PointLight3D(&appState);
     // pointLight1->localTransform.position.x = -36;
     // pointLight1->localTransform.position.y = 5;
@@ -39,11 +48,11 @@ void ShooterGame::Init(AppState &appState) {
     directionalLight->brightness = 5;
     addChild(std::unique_ptr<Node>(directionalLight));
 
-    // auto* spotLight = new SpotLight3D(&appState);
-    // spotLight->localTransform.position.x = 17;
-    // spotLight->localTransform.position.y = 1;
-    // spotLight->localTransform.position.z = 5;
-    // addChild(std::unique_ptr<Node>(spotLight));
+    auto* spotLight = new SpotLight3D(&appState);
+    spotLight->localTransform.position.x = 17;
+    spotLight->localTransform.position.y = 1;
+    spotLight->localTransform.position.z = 5;
+    addChild(std::unique_ptr<Node>(spotLight));
 
     auto* meshInstance = new MeshInstance3D();
     meshInstance->mesh = "zoo.glb";

@@ -12,6 +12,7 @@
 #include "Light3DGPU.h"
 #include "Transform3D.h"
 #include "box2d/box2d.h"
+#include "box3d/box3d.h"
 #include "game/ShooterGame/ShooterGame.h"
 
 struct Mesh;
@@ -34,7 +35,8 @@ struct AppState {
     bool isMouseRelative = false;
 
     ShooterGame root;
-    b2WorldId worldId;
+    b2WorldId worldId2;
+    b3WorldId worldId3;
 
     Mesh* quadMesh = nullptr;
     Camera2D* current_camera_2d;

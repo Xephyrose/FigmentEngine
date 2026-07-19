@@ -7,7 +7,7 @@ PhysicsBody2D::PhysicsBody2D(AppState &appState, b2BodyType bodyType, float size
     b2BodyDef bodyDef = b2DefaultBodyDef();
     bodyDef.type = bodyType;
     bodyDef.position = (b2Vec2){pos_x / 50, pos_y / 50};
-    bodyId = b2CreateBody(appState.worldId, &bodyDef);
+    bodyId = b2CreateBody(appState.worldId2, &bodyDef);
     b2Polygon box = b2MakeBox(size_x / 50, size_y / 50);
 
     b2ShapeDef shapeDef = b2DefaultShapeDef();
