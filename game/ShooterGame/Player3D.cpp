@@ -38,8 +38,11 @@ Player3D::Player3D(AppState &appState, const float pos_x, const float pos_y, con
 void Player3D::FixedUpdate(AppState &appState) {
     // Keep in mind this is the velocity at the START of the method
     auto [velX, velY, velZ] = b3Body_GetLinearVelocity(bodyId);
-    if (Input::IsJustPressed(SDL_SCANCODE_SPACE)) b3Body_ApplyLinearImpulseToCenter(bodyId, b3Vec3(0, 1000, 0), true);
-
+    if (Input::IsJustPressed(SDL_SCANCODE_SPACE)) {
+        // b3Body_SetLinearVelocity(bodyId, b3Vec3(velX, 12, velZ));
+        b3Body_SetLinearVelocity(bodyId, b3Vec3(velX, 0, velZ));
+        b3Body_ApplyLinearImpulseToCenter(bodyId, b3Vec3(0, 1100, 0), true);
+    }
 
     const glm::vec3 forward = yaw->localTransform.getForward();
     const glm::vec3 right = yaw->localTransform.getRight();
