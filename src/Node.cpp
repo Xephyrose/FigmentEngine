@@ -72,3 +72,12 @@ void Node::killChild(const std::string& _name) {
         children.erase(it);
     }
 }
+
+Node * Node::getChild(const std::string &_name) const {
+    for (const auto & i : children) {
+        if (i->name == _name) {
+            return i.get();
+        }
+    }
+    return nullptr;
+}

@@ -27,7 +27,8 @@ struct Node {
     virtual void Event(AppState& appState, SDL_Event &event);
     void addChild(std::unique_ptr<Node> child);
     void killChild(Node* child);
-    void killChild(const std::string& name);
+    void killChild(const std::string& _name);
+    Node* getChild(const std::string& _name) const;
 };
 
 #endif //FIGMENTENGINE_NODE_H

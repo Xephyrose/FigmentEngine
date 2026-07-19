@@ -4,28 +4,22 @@
 #include "src/AppState.h"
 #include "src/BoxBody3D.h"
 #include "src/DirectionalLight3D.h"
-#include "src/FreeCam3D.h"
 #include "src/MeshInstance3D.h"
 
 void ShooterGame::Init(AppState &appState) {
 
-    auto* box = new BoxBody3D(appState, b3_staticBody, 0, -0.738988f * 30.0f, 0, 100, 0.01f, 100);
+    auto* box = new BoxBody3D(appState, b3_staticBody, 0, -0.738988f, 0, 100, 0.01f, 100);
     addChild(std::unique_ptr<Node>(box));
 
-    // auto* player = new Player3D(appState, 0, 15, 0, 0.5, 2);
-    // addChild(std::unique_ptr<Node>(player));
+    auto* player = new Player3D(appState, 17, 5, 23, 0.5, 100);
+    addChild(std::unique_ptr<Node>(player));
 
-    auto* freeCam = new FreeCam3D();
-    appState.current_camera_3d = freeCam;
-    // player->addChild(std::unique_ptr<Node>(freeCam));
-    addChild(std::unique_ptr<Node>(freeCam));
-
-    auto* pointLight = new PointLight3D(&appState);
-    pointLight->localTransform.position.x = -43;
-    pointLight->localTransform.position.y = 5;
-    pointLight->localTransform.position.z = -14;
-    pointLight->color.x = 0.5f;
-    addChild(std::unique_ptr<Node>(pointLight));
+    // auto* pointLight = new PointLight3D(&appState);
+    // pointLight->localTransform.position.x = -43;
+    // pointLight->localTransform.position.y = 5;
+    // pointLight->localTransform.position.z = -14;
+    // pointLight->color.x = 0.5f;
+    // addChild(std::unique_ptr<Node>(pointLight));
 
     // auto* pointLight1 = new PointLight3D(&appState);
     // pointLight1->localTransform.position.x = -36;
@@ -33,12 +27,12 @@ void ShooterGame::Init(AppState &appState) {
     // pointLight1->color.y  = 0.5f;
     // addChild(std::unique_ptr<Node>(pointLight1));
 
-    // auto* pointLight2 = new PointLight3D(&appState);
-    // pointLight2->localTransform.position.x = 17;
-    // pointLight2->localTransform.position.y = 5;
-    // pointLight2->localTransform.position.z = 6;
-    // pointLight2->brightness = 50;
-    // addChild(std::unique_ptr<Node>(pointLight2));
+    auto* pointLight2 = new PointLight3D(&appState);
+    pointLight2->localTransform.position.x = 17;
+    pointLight2->localTransform.position.y = 5;
+    pointLight2->localTransform.position.z = 6;
+    pointLight2->brightness = 50;
+    addChild(std::unique_ptr<Node>(pointLight2));
 
     auto* directionalLight = new DirectionalLight3D(&appState);
     directionalLight->localTransform.rotation.x = -135;
@@ -57,11 +51,5 @@ void ShooterGame::Init(AppState &appState) {
     auto* meshInstance = new MeshInstance3D();
     meshInstance->mesh = "zoo.glb";
     addChild(std::unique_ptr<Node>(meshInstance));
-
-    auto* meshInstance2 = new MeshInstance3D();
-    meshInstance2->mesh = "lynx.glb";
-    meshInstance2->localTransform.position = glm::vec3(0.35f, -0.5f, -0.25f);
-    meshInstance2->localTransform.rotation = glm::vec3(0.0f, 180, 0.0f);
-    freeCam->addChild(std::unique_ptr<Node>(meshInstance2));
 }
 
