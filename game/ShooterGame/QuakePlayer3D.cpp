@@ -1,17 +1,56 @@
 #include "QuakePlayer3D.h"
 
 #include "../../src/Input.h"
+#include "SDL3/SDL_log.h"
 #include "src/GLMHelper.h"
 
 void QuakePlayer3D::FixedUpdate(AppState &appState) {
+    onGround = IsGrounded(appState);
+    SDL_Log("Grounded: %b", onGround);
+    // CheckLanded();
+    // GroundNormal();
+    // StepUp();
+    // StickToGround();
+    // Reground();
+
     glm::vec3 velocity = GetLinearVelocity(bodyId);
-    if (Input::IsJustPressed(SDL_SCANCODE_SPACE)) {
+    if (Input::IsPressed(SDL_SCANCODE_SPACE) && onGround) {
         b3Body_SetLinearVelocity(bodyId, b3Vec3(velocity.x, 0, velocity.z));
-        b3Body_ApplyLinearImpulseToCenter(bodyId, b3Vec3(0, 1100, 0), true);
+        b3Body_ApplyLinearImpulseToCenter(bodyId, b3Vec3(0, 25, 0), true);
+    }
+    velocity = GetLinearVelocity(bodyId);
+
+    SV_AirMove(velocity, static_cast<float>(appState.fixedTimeStep));
+}
+
+bool QuakePlayer3D::IsStandableSurface(const b3Vec3 normal) const
+{
+    const float maxSlopeCos = cosf( maxSlopeAngle * B3_PI / 180.0f );
+    return b3Dot( normal, b3Vec3_axisY ) >= maxSlopeCos;
+}
+
+bool QuakePlayer3D::IsGrounded(const AppState &appState) const {
+    auto [feetx, feety, feetz] = b3Body_GetPosition( bodyId );
+    const b3Pos feet = { feetx, feety - height * 0.5f, feetz };
+
+    const b3Pos from = { feet.x, feet.y + 0.125f, feet.z };
+    const b3Pos to = { feet.x, feet.y - 0.125f, feet.z };
+
+    float radiusScale = 1.0f;
+    TraceResult tr = TraceCapsule(appState, from, to, radius, height);
+
+    // Shrink radius if started solid or hit non-standable surface
+    while ( tr.startedSolid || ( tr.hit && !IsStandableSurface( tr.normal ) ) )
+    {
+        radiusScale -= 0.1f;
+        if ( radiusScale < 0.7f )
+        {
+            return false;
+        }
+        tr = TraceCapsule(appState, from, to, radius * radiusScale, height);
     }
 
-    //CheckLanded();
-    SV_AirMove(velocity, static_cast<float>(appState.fixedTimeStep));
+    return !tr.startedSolid && tr.hit && IsStandableSurface(tr.normal);
 }
 
 void QuakePlayer3D::SV_AirMove(glm::vec3 &velocity, const float delta) const {
@@ -24,11 +63,11 @@ void QuakePlayer3D::SV_AirMove(glm::vec3 &velocity, const float delta) const {
     if (Input::IsPressed(SDL_SCANCODE_D)) wishVel += right * sv_maxspeed;
     if (Input::IsPressed(SDL_SCANCODE_A)) wishVel -= right * sv_maxspeed;
 
-    float wishSpeed = glm::length(wishVel);
+    const float wishSpeed = glm::length(wishVel);
 
     const glm::vec3 wishDir = wishSpeed > 0.0f ? wishVel / wishSpeed : glm::vec3(0.0f);
 
-    wishSpeed = std::max(wishSpeed, sv_stopspeed);
+    // wishSpeed = std::max(wishSpeed, sv_stopspeed); // uhhhhh I forgor why this is here
 
     // if is_on_floor():
     //     SV_UserFriction(delta)
@@ -56,7 +95,7 @@ void QuakePlayer3D::SV_UserFriction(glm::vec3 &velocity, const float delta) cons
     velocity.z *= newSpeed;
 }
 
-void QuakePlayer3D::SV_Accelerate(glm::vec3 &velocity, glm::vec3 wishDir, float wishSpeed, float delta) const {
+void QuakePlayer3D::SV_Accelerate(glm::vec3 &velocity, const glm::vec3 &wishDir, const float wishSpeed, const float delta) const {
     const float currentSpeed = glm::dot(glm::vec3(velocity.x, 0, velocity.z), wishDir);
     const float addSpeed = wishSpeed - currentSpeed;
 
@@ -67,7 +106,7 @@ void QuakePlayer3D::SV_Accelerate(glm::vec3 &velocity, glm::vec3 wishDir, float 
     velocity += accelSpeed * wishDir;
 }
 
-void QuakePlayer3D::SV_AirAccelerate(glm::vec3 &velocity, glm::vec3 wishDir, float wishSpeed, float delta) const {
+void QuakePlayer3D::SV_AirAccelerate(glm::vec3 &velocity, const glm::vec3 &wishDir, const float wishSpeed, const float delta) const {
     const float cappedWishSpeed = std::min(wishSpeed, 30.0f);
     const float currentSpeed = glm::dot(glm::vec3(velocity.x, 0, velocity.z), wishDir);
     const float addSpeed = cappedWishSpeed - currentSpeed;

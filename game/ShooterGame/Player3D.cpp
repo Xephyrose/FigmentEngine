@@ -7,7 +7,7 @@
 
 #include "src/MeshInstance3D.h"
 
-Player3D::Player3D(AppState &appState, const float pos_x, const float pos_y, const float pos_z, float radius, float height) : CapsuleBody3D(appState, b3_dynamicBody, pos_x, pos_y, pos_z, radius, height) {
+Player3D::Player3D(AppState &appState, const float pos_x, const float pos_y, const float pos_z, float radius, float height) : CapsuleBody3D(appState, b3_dynamicBody, pos_x, pos_y, pos_z, radius, height), height(height), radius(radius) {
     name = "Player3D";
     b3MotionLocks locks = {};
     locks.angularX = true;
@@ -17,7 +17,7 @@ Player3D::Player3D(AppState &appState, const float pos_x, const float pos_y, con
 
     yaw = new Node3D();
     yaw->name = "Yaw";
-    yaw->localTransform.position = glm::vec3(0.0f, 1.882f - radius, 0.0f);
+    yaw->localTransform.position = glm::vec3(0.0f, 1.882f - height / 2 - radius, 0.0f);
     addChild(std::unique_ptr<Node>(yaw));
 
     pitch = new Node3D();
@@ -36,10 +36,8 @@ Player3D::Player3D(AppState &appState, const float pos_x, const float pos_y, con
 }
 
 void Player3D::FixedUpdate(AppState &appState) {
-    // Keep in mind this is the velocity at the START of the method
     auto [velX, velY, velZ] = b3Body_GetLinearVelocity(bodyId);
     if (Input::IsJustPressed(SDL_SCANCODE_SPACE)) {
-        // b3Body_SetLinearVelocity(bodyId, b3Vec3(velX, 12, velZ));
         b3Body_SetLinearVelocity(bodyId, b3Vec3(velX, 0, velZ));
         b3Body_ApplyLinearImpulseToCenter(bodyId, b3Vec3(0, 1100, 0), true);
     }

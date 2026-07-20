@@ -7,6 +7,8 @@ struct Player3D : CapsuleBody3D {
     Player3D(AppState &appState, float pos_x, float pos_y, float pos_z, float radius, float height);
     void FixedUpdate(AppState& appState) override;
     void Event(AppState& appState, SDL_Event &event) override;
+    const float height;
+    const float radius;
     const float speed = 10.0f;
     Camera3D* cam;
     Node3D* yaw;
