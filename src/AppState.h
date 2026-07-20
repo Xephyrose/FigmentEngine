@@ -78,7 +78,7 @@ struct AppState {
     Uint64 lastTime = 0;
     Uint64 delta = 0;
     double fixedTimeStepAccumulator = 0;
-    double fixedTimeStep = 1.0 / 120.0;
+    double fixedTimeStep = 1.0 / 240.0;
 
     std::string material_override;
 
