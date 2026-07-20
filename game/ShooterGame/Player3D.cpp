@@ -17,7 +17,7 @@ Player3D::Player3D(AppState &appState, const float pos_x, const float pos_y, con
 
     yaw = new Node3D();
     yaw->name = "Yaw";
-    yaw->localTransform.position = glm::vec3(0.0f, 2.0f, 0.0f);
+    yaw->localTransform.position = glm::vec3(0.0f, 1.882f - radius, 0.0f);
     addChild(std::unique_ptr<Node>(yaw));
 
     pitch = new Node3D();
@@ -47,14 +47,13 @@ void Player3D::FixedUpdate(AppState &appState) {
     const glm::vec3 forward = yaw->localTransform.getForward();
     const glm::vec3 right = yaw->localTransform.getRight();
 
-    moveDirection = glm::vec3(0.0f);
+    auto moveDirection = glm::vec3(0.0f);
     if (Input::IsPressed(SDL_SCANCODE_W)) moveDirection += forward;
     if (Input::IsPressed(SDL_SCANCODE_S)) moveDirection -= forward;
     if (Input::IsPressed(SDL_SCANCODE_D)) moveDirection += right;
     if (Input::IsPressed(SDL_SCANCODE_A)) moveDirection -= right;
     if (Input::IsPressed(SDL_SCANCODE_SPACE)) moveDirection += UP;
     if (Input::IsPressed(SDL_SCANCODE_LCTRL)) moveDirection -= UP;
-
 
     if (Input::IsPressed(SDL_SCANCODE_LCTRL)) {
         b3Body_SetGravityScale(bodyId, 2);

@@ -8,7 +8,6 @@ struct Player3D : CapsuleBody3D {
     void FixedUpdate(AppState& appState) override;
     void Event(AppState& appState, SDL_Event &event) override;
     const float speed = 10.0f;
-    glm::vec3 moveDirection = glm::vec3(0.0f);
     Camera3D* cam;
     Node3D* yaw;
     Node3D* pitch;

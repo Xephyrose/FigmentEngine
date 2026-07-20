@@ -140,6 +140,9 @@ add_executable(FigmentEngine
         src/CapsuleBody3D.h
         src/BoxBody3D.cpp
         src/BoxBody3D.h
+        game/ShooterGame/QuakePlayer3D.cpp
+        game/ShooterGame/QuakePlayer3D.h
+        src/GLMHelper.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
