@@ -14,7 +14,7 @@ void QuakePlayer3D::FixedUpdate(AppState &appState) {
     glm::vec3 velocity = GetLinearVelocity(bodyId);
     if (Input::IsPressed(SDL_SCANCODE_SPACE) && onGround) {
         b3Body_SetLinearVelocity(bodyId, b3Vec3(velocity.x, 0, velocity.z));
-        b3Body_ApplyLinearImpulseToCenter(bodyId, b3Vec3(0, 12, 0), true);
+        b3Body_ApplyLinearImpulseToCenter(bodyId, b3Vec3(0, 9, 0), true);
     }
     velocity = GetLinearVelocity(bodyId);
 
