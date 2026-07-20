@@ -7,7 +7,7 @@
 
 #include "src/MeshInstance3D.h"
 
-Player3D::Player3D(AppState &appState, const float pos_x, const float pos_y, const float pos_z, float radius, float height) : CapsuleBody3D(appState, b3_dynamicBody, pos_x, pos_y, pos_z, radius, height), height(height), radius(radius) {
+Player3D::Player3D(AppState &appState, const float pos_x, const float pos_y, const float pos_z, const float radius, const float height) : CapsuleBody3D(appState, b3_dynamicBody, pos_x, pos_y, pos_z, radius, height), height(height), radius(radius) {
     name = "Player3D";
     b3MotionLocks locks = {};
     locks.angularX = true;

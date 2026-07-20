@@ -11,7 +11,7 @@ void ShooterGame::Init(AppState &appState) {
     auto* box = new BoxBody3D(appState, b3_staticBody, 0, -0.738988f, 0, 100, 0.01f, 100);
     addChild(std::unique_ptr<Node>(box));
 
-    auto* player = new QuakePlayer3D(appState, 17, 5, 23, 0.5, 2);
+    auto* player = new QuakePlayer3D(appState, 17, 10, 23, 0.35f, 2);
     addChild(std::unique_ptr<Node>(player));
 
     // auto* pointLight = new PointLight3D(&appState);
