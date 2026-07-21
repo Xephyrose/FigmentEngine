@@ -98,7 +98,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     SDL_SetWindowAspectRatio(appState->window, 16.0f / 9, 16.0f / 9);
     SDL_MaximizeWindow(appState->window);
 
-    constexpr SDL_GPUShaderFormat formatFlags = SDL_GPU_SHADERFORMAT_SPIRV;
+    constexpr SDL_GPUShaderFormat formatFlags = SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL;
     appState->device = SDL_CreateGPUDevice(formatFlags, true, nullptr);
     if (appState->device == nullptr)
     {
