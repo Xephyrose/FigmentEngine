@@ -28,7 +28,7 @@ struct Node {
     void addChild(std::unique_ptr<Node> child);
     void killChild(Node* child);
     void killChild(const std::string& _name);
-    Node* getChild(const std::string& _name) const;
+    [[nodiscard]] Node* getChild(const std::string& _name) const;
 };
 
 #endif //FIGMENTENGINE_NODE_H
