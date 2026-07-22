@@ -524,6 +524,9 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
         }
     }
     appState->textures.clear();
+    SDL_ReleaseGPUTexture(appState->device, appState->depthTexture);
+    SDL_ReleaseGPUTexture(appState->device, appState->shadowMap);
+    SDL_ReleaseGPUTexture(appState->device, appState->msaaColorTarget);
 
     for (const auto &sampler: appState->samplers | std::views::values) {
         if (sampler) {
@@ -532,12 +535,19 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
     }
     appState->samplers.clear();
 
+    for (auto &mesh: appState->meshes | std::views::values) {
+        mesh.ReleaseGPUResources(appState);
+    }
+    appState->meshes.clear();
+    appState->quadMesh->ReleaseGPUResources(appState);
+
     for (const auto &pipeline: appState->pipelines | std::views::values) {
         if (pipeline) {
             SDL_ReleaseGPUGraphicsPipeline(appState->device, pipeline);
         }
     }
     appState->pipelines.clear();
+    SDL_ReleaseGPUGraphicsPipeline(appState->device, appState->shadowPipeline);
 
     for (const auto &shader: appState->shaders | std::views::values) {
         if (shader) {
@@ -550,7 +560,9 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
     SDL_ReleaseGPUBuffer(appState->device, appState->directionalLightBuffer);
     SDL_ReleaseGPUBuffer(appState->device, appState->spotLightBuffer);
 
-    if (appState->depthTexture) {SDL_ReleaseGPUTexture(appState->device, appState->depthTexture);}
+    SDL_ReleaseGPUTransferBuffer(appState->device, appState->pointLightTransferBuffer);
+    SDL_ReleaseGPUTransferBuffer(appState->device, appState->directionalLightTransferBuffer);
+    SDL_ReleaseGPUTransferBuffer(appState->device, appState->spotLightTransferBuffer);
 
     b2DestroyWorld(appState->worldId2);
     b3DestroyWorld(appState->worldId3);
