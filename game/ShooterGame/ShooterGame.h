@@ -6,5 +6,4 @@ struct ShooterGame : Game {
     void Init(AppState &appState) override;
 };
 
-
 #endif //FIGMENTENGINE_SHOOTERGAME_H

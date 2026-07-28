@@ -23,6 +23,7 @@ struct Transform3D;
 struct Material;
 
 struct AppState {
+    ~AppState();
     SDL_Window* window = nullptr;
     SDL_GPUDevice* device = nullptr;
     SDL_GPURenderPass *renderPass;
@@ -69,6 +70,7 @@ struct AppState {
     std::unordered_map<std::string, SDL_GPUShader*> shaders;
     std::unordered_map<std::string, SDL_GPUSampler*> samplers;
     std::unordered_map<std::string, SDL_GPUTexture*> textures;
+    std::unordered_map<std::string, SDL_Surface*> surfaces;
     std::unordered_map<std::string, SDL_GPUGraphicsPipeline*> pipelines;
     std::unordered_map<std::string, SDL_GPUColorTargetBlendState> blendStates;
     std::unordered_map<std::string, SDL_GPURasterizerState> rasterizerStates;
@@ -87,7 +89,7 @@ struct AppState {
 
     bool LoadMesh(const std::string& path);
     bool LoadShader(const std::string& path);
-    bool LoadTexture(const std::string& path);
+    bool LoadTexture(const std::string& path, SDL_PixelFormat preferred_format = SDL_PIXELFORMAT_RGBA32);
 
     Mesh* GetMesh(const std::string& path);
     Material* GetMaterial(const std::string& key) const;
@@ -123,7 +125,7 @@ struct AppState {
     void RecreateAllPipelines();
 
     // EDITOR
-    bool debug = true;
+    bool debug = false;
     Node* editorSelected = nullptr;
     std::string editorMesh;
     std::string editorSprite;

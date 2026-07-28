@@ -327,6 +327,8 @@ SDL_AppResult RenderFrame(AppState* appState) {
 
         ImGui::Begin("Debug");
 
+        ImGui::Image(static_cast<ImTextureID>(reinterpret_cast<intptr_t>(appState->textures["missing.png"])), ImVec2(256.0f, 256.0f));
+
         ImGui::Text("Material Override");
         static const char* mat_items[] = { "", "pbr_orm", "pbr", "phong", "phong_textured", "blinn_phong", "blinn_phong_textured", "missing", "line" };
         static int mat_selected_idx = 0;
@@ -515,61 +517,5 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
 
     SDL_WaitForGPUIdle(appState->device);
 
-    for (const auto &material: appState->materials | std::views::values) {delete material;}
-    appState->materials.clear();
-
-    for (const auto &texture: appState->textures | std::views::values) {
-        if (texture) {
-            SDL_ReleaseGPUTexture(appState->device, texture);
-        }
-    }
-    appState->textures.clear();
-    SDL_ReleaseGPUTexture(appState->device, appState->depthTexture);
-    SDL_ReleaseGPUTexture(appState->device, appState->shadowMap);
-    SDL_ReleaseGPUTexture(appState->device, appState->msaaColorTarget);
-
-    for (const auto &sampler: appState->samplers | std::views::values) {
-        if (sampler) {
-            SDL_ReleaseGPUSampler(appState->device, sampler);
-        }
-    }
-    appState->samplers.clear();
-
-    for (auto &mesh: appState->meshes | std::views::values) {
-        mesh.ReleaseGPUResources(appState);
-    }
-    appState->meshes.clear();
-    appState->quadMesh->ReleaseGPUResources(appState);
-
-    for (const auto &pipeline: appState->pipelines | std::views::values) {
-        if (pipeline) {
-            SDL_ReleaseGPUGraphicsPipeline(appState->device, pipeline);
-        }
-    }
-    appState->pipelines.clear();
-    SDL_ReleaseGPUGraphicsPipeline(appState->device, appState->shadowPipeline);
-
-    for (const auto &shader: appState->shaders | std::views::values) {
-        if (shader) {
-            SDL_ReleaseGPUShader(appState->device, shader);
-        }
-    }
-    appState->shaders.clear();
-
-    SDL_ReleaseGPUBuffer(appState->device, appState->pointLightBuffer);
-    SDL_ReleaseGPUBuffer(appState->device, appState->directionalLightBuffer);
-    SDL_ReleaseGPUBuffer(appState->device, appState->spotLightBuffer);
-
-    SDL_ReleaseGPUTransferBuffer(appState->device, appState->pointLightTransferBuffer);
-    SDL_ReleaseGPUTransferBuffer(appState->device, appState->directionalLightTransferBuffer);
-    SDL_ReleaseGPUTransferBuffer(appState->device, appState->spotLightTransferBuffer);
-
-    b2DestroyWorld(appState->worldId2);
-    b3DestroyWorld(appState->worldId3);
-
-    SDL_ReleaseWindowFromGPUDevice(appState->device, appState->window);
-    // hehehe kill rog astral 5090 with hammers
-    SDL_DestroyGPUDevice(appState->device);
-    SDL_DestroyWindow(appState->window);
     delete appState;
 }

@@ -42,6 +42,14 @@ void ShooterGame::Init(AppState &appState) {
     directionalLight->brightness = 5;
     addChild(std::unique_ptr<Node>(directionalLight));
 
+    // auto* directionalLight2 = new DirectionalLight3D(&appState);
+    // directionalLight2->localTransform.rotation.x = -54;
+    // directionalLight2->localTransform.rotation.y = -135;
+    // directionalLight2->localTransform.position.x = 50;
+    // directionalLight2->localTransform.position.z = 50;
+    // directionalLight2->brightness = 5;
+    // addChild(std::unique_ptr<Node>(directionalLight2));
+
     auto* spotLight = new SpotLight3D(&appState);
     spotLight->localTransform.position.x = 17;
     spotLight->localTransform.position.y = 1;
@@ -51,5 +59,7 @@ void ShooterGame::Init(AppState &appState) {
     auto* meshInstance = new MeshInstance3D();
     meshInstance->mesh = "zoo.glb";
     addChild(std::unique_ptr<Node>(meshInstance));
+
+    appState.LoadTexture("learnopengl_iceland_height.png", SDL_PIXELFORMAT_INDEX4LSB); // changing format = shits self when imgui renders it
 }
 

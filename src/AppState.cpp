@@ -18,6 +18,72 @@
 #include "SDL3/SDL_log.h"
 #include "thirdparty/json.hpp"
 
+AppState::~AppState() {
+    for (const auto &material: materials | std::views::values) {delete material;}
+    materials.clear();
+
+    for (const auto &texture: textures | std::views::values) {
+        if (texture) {
+            SDL_ReleaseGPUTexture(device, texture);
+        }
+    }
+    textures.clear();
+    SDL_ReleaseGPUTexture(device, depthTexture);
+    SDL_ReleaseGPUTexture(device, shadowMap);
+    SDL_ReleaseGPUTexture(device, msaaColorTarget);
+
+    for (const auto &surface: surfaces | std::views::values) {
+        if (surface) {
+            SDL_DestroySurface(surface);
+        }
+    }
+    textures.clear();
+
+    for (const auto &sampler: samplers | std::views::values) {
+        if (sampler) {
+            SDL_ReleaseGPUSampler(device, sampler);
+        }
+    }
+    samplers.clear();
+
+    for (auto &mesh: meshes | std::views::values) {
+        mesh.ReleaseGPUResources(this);
+    }
+    meshes.clear();
+    quadMesh->ReleaseGPUResources(this);
+
+    for (const auto &pipeline: pipelines | std::views::values) {
+        if (pipeline) {
+            SDL_ReleaseGPUGraphicsPipeline(device, pipeline);
+        }
+    }
+    pipelines.clear();
+    SDL_ReleaseGPUGraphicsPipeline(device, shadowPipeline);
+
+    for (const auto &shader: shaders | std::views::values) {
+        if (shader) {
+            SDL_ReleaseGPUShader(device, shader);
+        }
+    }
+    shaders.clear();
+
+    SDL_ReleaseGPUBuffer(device, pointLightBuffer);
+    SDL_ReleaseGPUBuffer(device, directionalLightBuffer);
+    SDL_ReleaseGPUBuffer(device, spotLightBuffer);
+
+    SDL_ReleaseGPUTransferBuffer(device, pointLightTransferBuffer);
+    SDL_ReleaseGPUTransferBuffer(device, directionalLightTransferBuffer);
+    SDL_ReleaseGPUTransferBuffer(device, spotLightTransferBuffer);
+
+    b2DestroyWorld(worldId2);
+    b3DestroyWorld(worldId3);
+
+    SDL_ReleaseWindowFromGPUDevice(device, window);
+    // hehehe kill rog astral 5090 with hammers
+    SDL_DestroyGPUDevice(device);
+    SDL_DestroyWindow(window);
+}
+
 bool AppState::CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader, const std::string& rasterizerState, const std::string &blendState, const
                               bool &depth_test, const bool &depth_write) {
     SDL_GPUShader* vertexShader = GetShader(vertShader + ".vert");
@@ -379,7 +445,7 @@ bool AppState::LoadShader(const std::string& path) {
     }
 }
 
-bool AppState::LoadTexture(const std::string& path) {
+bool AppState::LoadTexture(const std::string& path, const SDL_PixelFormat preferred_format) {
     const std::string fullPath = (std::filesystem::path(SDL_GetBasePath()) / "assets" / "textures" / path).string();
 
     // 1. Load the image surface
@@ -390,7 +456,7 @@ bool AppState::LoadTexture(const std::string& path) {
     }
 
     // Convert to RGBA32 (SDL_ConvertSurface doesn't take a third argument anymore)
-    SDL_Surface* converted = SDL_ConvertSurface(surface, SDL_PIXELFORMAT_RGBA32);
+    SDL_Surface* converted = SDL_ConvertSurface(surface, preferred_format);
     SDL_DestroySurface(surface);
     if (!converted) {
         SDL_Log("Failed to convert surface format: %s", SDL_GetError());
@@ -529,6 +595,7 @@ bool AppState::LoadTexture(const std::string& path) {
 
     // 7. Store the texture
     textures.insert_or_assign(path, texture);
+    surfaces.insert_or_assign(path, converted);
 
     return true;
 }
