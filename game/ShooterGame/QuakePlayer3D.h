@@ -12,6 +12,7 @@ struct QuakePlayer3D : Player3D {
     void SV_UserFriction(glm::vec3 &velocity, float delta) const;
     void SV_Accelerate(glm::vec3 &velocity, const glm::vec3 &wishDir, float wishSpeed, float delta) const;
     void SV_AirAccelerate(glm::vec3 &velocity, const glm::vec3 &wishDir, float wishSpeed, float delta) const;
+    void Reground(const AppState& appState) const;
     const float QUAKE_TO_GODOT_SCALE = 52.49f * 0.4f; // should actually be 52.49f
     const float sv_friction = 6.0f;                             // Quake: 6.0
     const float sv_stopspeed = 100.0f / QUAKE_TO_GODOT_SCALE;   // Quake: 100.0

@@ -50,11 +50,10 @@ TraceResult PhysicsBody3D::TraceCapsule(const AppState &appState, const b3Pos fr
     const b3Vec3 translation = to - from;
     if (b3Length(translation) < 1e-6f) return result;
 
-
     b3Vec3 points[2];
 
-    points[0] = {0.0f, -height / 2, 0.0f};
-    points[1] = {0.0f, height / 2, 0.0f};
+    points[0] = {0.0f, (height * 0.5f - radius), 0.0f};
+    points[1] = {0.0f, -(height * 0.5f - radius), 0.0f};
 
     const b3ShapeProxy proxy{points,2, radius};
 
