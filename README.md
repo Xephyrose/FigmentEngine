@@ -6,20 +6,21 @@
 
 ## What is Figment Engine?
 
-Figment Engine is a 2D & 3D game engine written in C++, utilizing the SDL_GPU API. This engine is primarily being written to teach myself basic engine programming, but possibly to make some games down the line. It currently features GLTF meshes in the form of .glb files, as well as texture loading (.png). Physics are not yet implemented, but will eventually use [Jolt Physics](https://github.com/jrouwe/joltphysics) for 3D, and [Box2D](https://github.com/erincatto/box2d) for 2D. 
+Figment Engine is a 2D & 3D game engine written in C++, utilizing the SDL_GPU API. This engine is primarily being written to teach myself basic engine programming, but possibly to make some games down the line. It currently features GLTF meshes in the form of .glb files, as well as texture loading (.png). Physics are now implemented, using [Box3D](https://github.com/erincatto/box3d) for 3D, and [Box2D](https://github.com/erincatto/box2d) for 2D. 
 
 ## How do I use it?
 
-For the time being, there's no main place to put a game loop. In main.cpp, there's SDL_AppInit(), which runs once upon the game starting. Contast to SDL_AppQuit(), which runs when the game is closed. SDL_AppEvent() runs when there is a user input, and SDL_AppIterate() is the main game loop.
+This engine follows a simple Node tree structure. A Node is essentially any kind of object, there are no components.
 
-To get started, you can add children to the root node. Here's an example, spawning a FreeCam3D that will allow you to fly around in a 3d environment:
+A good place to start is the Game struct. This struct contains basic game loop functionality, such as Init() which runs one time when the game starts, Event() which runs when there is a user input, and Update() contains the main game loop.
+
+To get started, you can add children to the root node. Here's an example, spawning a FreeCam3D that will allow you to fly around in a 3D environment:
 
 ```c++
 auto* freeCam = new FreeCam3D();
 appState->current_camera_3d = freeCam;
 appState->root.addChild(std::unique_ptr<Node>(freeCam));
 ```
-
 ...and another example, spawning a mesh as a child of the root:
 ```c++
 auto* meshInstance = new MeshInstance3D();
@@ -27,16 +28,25 @@ meshInstance->mesh = "zulu.glb";
 appState->root.addChild(std::unique_ptr<Node>(meshInstance));
 ```
 
-The primary Nodes are Node, Node2D/Node3D, Camera2D/Camera3D, MeshInstance3D, and Sprite2D. Most systems can be built off of these.
+The primary Nodes are: MeshInstance3D, and Sprite2D. 
+- Node / Node2D / Node3D
+- Camera2D / Camera3D
+- MeshInstance3D
+- BoxBody3D / CapsuleBody3D / HeightFieldBody3D
+- DirectionalLight3D / PointLight3D / SpotLight3D
+
+Most systems can be built off of these alone.
 
 ## Compiling
 Compiling has been tested on and supports both windows and linux. While tested on CachyOS & Windows 11, it should be relatively platform-agnostic. To build, run:
 
 ```shell
 # Windows
-"C:\Program Files\JetBrains\CLion 2026.1.2\bin\cmake\win\x64\bin\cmake.exe" --build C:\Repos\FigmentEngine\cmake-build-debug --target FigmentEngine -j 10
+cmake --build ./cmake-build-debug --target FigmentEngine -j 10
 ```
 ```bash
 # Linux
-/home/max/.local/share/JetBrains/Toolbox/apps/clion/bin/cmake/linux/x64/bin/cmake --build /home/max/Repos/FigmentEngine/cmake-build-debug --target FigmentEngine -- -j 10
+cmake --build ./cmake-build-debug --target FigmentEngine -- -j 10
 ```
+
+WARNING: Only Vulkan is known to work. Metal is untested, and DirectX fails to bind any pipeline that includes a StructuredBuffer (?). For this reason, DirectX is currently force-disabled.
