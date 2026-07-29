@@ -12,6 +12,7 @@
 #include "Light3DGPU.h"
 #include "Material2D.h"
 #include "MaterialColor.h"
+#include "MaterialHeightMap.h"
 #include "MaterialPBR.h"
 #include "MaterialPBRORM.h"
 #include "Vertex.h"
@@ -702,6 +703,7 @@ SDL_GPUColorTargetBlendState AppState::GetBlendState(const std::string &key) con
 void AppState::CreateDefaultMeshes() {
     LoadMesh("zoo.glb");
     LoadMesh("crate_medium.glb");
+    LoadMesh("subdivided_plane.glb");
 }
 
 void AppState::CreateDepthTexture() {
@@ -861,6 +863,9 @@ void AppState::CreateDefaultMaterials() {
     pbr_orm->setTextureAlbedo(this, "learnopengl_rustediron2_basecolor.png");
     pbr_orm->setTextureORM(this, "learnopengl_rustediron2_orm.png");
     pbr_orm->setTextureNormalMap(this, "learnopengl_rustediron2_normal.png");
+
+    auto* heightmap = new MaterialHeightMap(this, "heightmap", "HeightMap");
+    heightmap->setTextureAlbedo(this, "learnopengl_iceland_height.png");
 
     auto* concrete_bricks = new MaterialPBRORM(this, "concrete_bricks", "PBRORM");
     concrete_bricks->setTextureAlbedo(this, "brick_concrete_albedo.png");
@@ -1108,6 +1113,8 @@ void AppState::CreateDefaultPipelines() {
 
     CreatePipeline("PBRAlpha", "Default", "PBR", "FrontFaces", "Alpha", true, false);
     CreatePipeline("PBRORMAlpha", "Default", "PBRTextured", "FrontFaces", "Alpha", true, false);
+
+    CreatePipeline("HeightMap", "HeightMap", "UnlitColor", "Line", "Default", true, true);
 }
 
 void AppState::CreateDefaultRasterizerStates() {

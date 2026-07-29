@@ -21,7 +21,7 @@ void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* comma
 
     SDL_BindGPUGraphicsPipeline(appState->renderPass, gotPipeline);
 
-    SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
+    SDL_GPUTexture* getAlbedo = appState->GetTexture(texture);
     // SDL_GPUTexture* getAlbedo = appState->shadowMap;
     SDL_GPUSampler* getSampler = appState->GetSampler(sampler);
 
@@ -33,20 +33,20 @@ void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* comma
         bool      useTexture;
     };
     PushData push{};
-    push.colorAlbedo = colorAlbedo;
-    push.useTexture = (textureAlbedo == "none" ? 0 : 1);
+    push.colorAlbedo = color;
+    push.useTexture = (texture == "none" ? 0 : 1);
 
     SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
 }
 
-void MaterialUnlitTextured::setColorAlbedo(const glm::vec4 color) {
-    colorAlbedo = color;
+void MaterialUnlitTextured::setColorAlbedo(const glm::vec4 new_color) {
+    color = new_color;
 }
 
-void MaterialUnlitTextured::setTextureAlbedo(AppState* appState, const std::string &texture) {
-    textureAlbedo = texture;
-    if (textureAlbedo != "none") {
-        appState->LoadTexture(textureAlbedo);
+void MaterialUnlitTextured::setTextureAlbedo(AppState* appState, const std::string &new_texture) {
+    texture = new_texture;
+    if (texture != "none") {
+        appState->LoadTexture(texture);
     }
 }
 

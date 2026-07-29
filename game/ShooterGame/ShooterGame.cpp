@@ -9,8 +9,8 @@
 
 void ShooterGame::Init(AppState &appState) {
 
-    auto* box = new BoxBody3D(appState, b3_staticBody, 0, -0.738988f, 0, 100, 0.01f, 100);
-    addChild(std::unique_ptr<Node>(box));
+    // auto* box = new BoxBody3D(appState, b3_staticBody, 0, -0.738988f, 0, 100, 0.01f, 100);
+    // addChild(std::unique_ptr<Node>(box));
 
     auto* player = new QuakePlayer3D(appState, 17, 10, 23, 0.35f, 1.5f);
     addChild(std::unique_ptr<Node>(player));
@@ -66,5 +66,13 @@ void ShooterGame::Init(AppState &appState) {
 
     auto* terrain = new HeightFieldBody3D(appState, b3_staticBody, 0, 0, 0, height, appState.surfaces["learnopengl_iceland_height.png"]->w, appState.surfaces["learnopengl_iceland_height.png"]->h, b3Vec3(1, 10, 1));
     addChild(std::unique_ptr<Node>(terrain));
+
+    auto* meshInstance2 = new MeshInstance3D();
+    meshInstance2->mesh = "subdivided_plane.glb";
+    meshInstance2->localTransform.scale = glm::vec3(appState.surfaces["learnopengl_iceland_height.png"]->w, 10, appState.surfaces["learnopengl_iceland_height.png"]->h);
+
+    meshInstance2->localTransform.position = glm::vec3(static_cast<float>(appState.surfaces["learnopengl_iceland_height.png"]->w) * 0.5f,0,static_cast<float>(appState.surfaces["learnopengl_iceland_height.png"]->h) * 0.5f);
+
+    addChild(std::unique_ptr<Node>(meshInstance2));
 }
 

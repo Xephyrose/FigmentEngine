@@ -8,6 +8,5 @@ struct PSInput {
 };
 
 float4 main(PSInput input) : SV_TARGET {
-    float3 normalColor = input.worldNormal * 0.5 + 0.5;
-    return float4(normalColor, 1.0);
+    return float4(input.worldPos, 1.0);
 }

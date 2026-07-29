@@ -23,7 +23,7 @@ void MaterialPBRORM::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffe
 
     SDL_BindGPUGraphicsPipeline(appState->renderPass, gotPipeline);
 
-    SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
+    SDL_GPUTexture* getAlbedo = appState->GetTexture(texture);
     SDL_GPUTexture* getORM = appState->GetTexture(textureORM);
     SDL_GPUTexture* getNormal = appState->GetTexture(textureNormalMap);
     SDL_GPUSampler* getSamplerAlbedo = appState->GetSampler(sampler);
@@ -47,8 +47,8 @@ void MaterialPBRORM::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffe
     };
     PushData push{};
     push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransform().position, 0);
-    push.colorAlbedo = glm::vec4(SRGBToLinear(colorAlbedo), colorAlbedo.w);
-    push.texturesUsed.x = (textureAlbedo == "none" ? 0 : 1);
+    push.colorAlbedo = glm::vec4(SRGBToLinear(color), color.w);
+    push.texturesUsed.x = (texture == "none" ? 0 : 1);
     push.texturesUsed.y = (textureORM == "none" ? 0 : 1);
     push.texturesUsed.z = (textureNormalMap == "none" ? 0 : 1);
     push.colorORM.x = colorAO;

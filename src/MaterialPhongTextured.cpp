@@ -15,7 +15,7 @@ void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *comma
 
     SDL_BindGPUGraphicsPipeline(appState->renderPass, gotPipeline);
 
-    SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
+    SDL_GPUTexture* getAlbedo = appState->GetTexture(texture);
     SDL_GPUTexture* getAmbient = appState->GetTexture(textureAmbient);
     SDL_GPUTexture* getSpecular = appState->GetTexture(textureSpecular);
     SDL_GPUTexture* getNormalMap = appState->GetTexture(textureNormalMap);
@@ -46,8 +46,8 @@ void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *comma
     PushData push{};
     push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransform().position, 0);
     push.params.x = shininess;
-    push.colorAlbedo = colorAlbedo;
-    push.texturesUsed.x = textureAlbedo == "none" ? 0 : 1;
+    push.colorAlbedo = color;
+    push.texturesUsed.x = texture == "none" ? 0 : 1;
     push.colorAmbient = glm::vec4(colorAmbient, 0.0f);
     push.texturesUsed.y = textureAmbient == "none" ? 0 : 1;
     push.colorSpecular = glm::vec4(colorSpecular, 0.0f);

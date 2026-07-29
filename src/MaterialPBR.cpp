@@ -28,7 +28,7 @@ void MaterialPBR::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, 
     };
     PushData push{};
     push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransform().position, 0);
-    push.colorAlbedo = colorAlbedo;
+    push.colorAlbedo = color;
     push.colorORM.x = colorAO;
     push.colorORM.y = colorRoughness;
     push.colorORM.z = colorMetallic;

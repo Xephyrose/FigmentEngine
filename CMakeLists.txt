@@ -145,6 +145,8 @@ add_executable(FigmentEngine
         src/GLMHelper.h
         src/HeightFieldBody3D.cpp
         src/HeightFieldBody3D.h
+        src/MaterialHeightMap.cpp
+        src/MaterialHeightMap.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

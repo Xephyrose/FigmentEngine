@@ -28,7 +28,7 @@ void Material2D::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, g
 
     SDL_BindGPUGraphicsPipeline(appState->renderPass, gotPipeline);
 
-    SDL_GPUTexture* getAlbedo = appState->GetTexture(textureAlbedo);
+    SDL_GPUTexture* getAlbedo = appState->GetTexture(texture);
     SDL_GPUSampler* getSampler = appState->GetSampler(sampler);
 
     const SDL_GPUTextureSamplerBinding binding = {getAlbedo, getSampler};
@@ -39,8 +39,8 @@ void Material2D::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, g
         bool      useTexture;
     };
     PushData push{};
-    push.colorAlbedo = this->colorAlbedo;
-    push.useTexture = (this->textureAlbedo == "none" ? 0 : 1);
+    push.colorAlbedo = this->color;
+    push.useTexture = (this->texture == "none" ? 0 : 1);
 
     SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
 }
