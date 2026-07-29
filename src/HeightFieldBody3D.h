@@ -6,6 +6,7 @@
 struct HeightFieldBody3D : PhysicsBody3D {
     HeightFieldBody3D(AppState &appState, b3BodyType bodyType, float pos_x, float pos_y, float pos_z, float *heights, int countX, int countZ, b3Vec3 scale);
     HeightFieldBody3D(AppState &appState, b3BodyType bodyType, float pos_x, float pos_y, float pos_z, b3HeightFieldDef collider);
+    HeightFieldBody3D(AppState &appState, b3BodyType bodyType, float pos_x, float pos_y, float pos_z, SDL_Surface* surface, int countX, int countZ, b3Vec3 scale);
 };
 
 inline float* CreateHeights(SDL_Surface *surface) {

@@ -4,7 +4,7 @@ BoxBody3D::BoxBody3D(AppState &appState, b3BodyType bodyType, float pos_x, float
     b3BoxHull collider = b3MakeBoxHull(width, height, depth);
 
     b3ShapeDef shapeDef = b3DefaultShapeDef();
-    shapeDef.baseMaterial.friction = 0.0f;
+    shapeDef.baseMaterial.friction = 100.0f;
     shapeDef.density = 1.0f;
 
     b3CreateHullShape(bodyId, &shapeDef, &collider.base);

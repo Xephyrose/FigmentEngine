@@ -6,7 +6,7 @@ CapsuleBody3D::CapsuleBody3D(AppState &appState, const b3BodyType bodyType, cons
     collider.center2 = b3Vec3(0, -totalHeight / 2 - radius, 0);
 
     b3ShapeDef shapeDef = b3DefaultShapeDef();
-    shapeDef.baseMaterial.friction = 0.0f;
+    shapeDef.baseMaterial.friction = 100.0f;
     shapeDef.density = 1.0f;
 
     shapeId = b3CreateCapsuleShape(bodyId, &shapeDef, &collider);
