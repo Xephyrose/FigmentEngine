@@ -558,8 +558,6 @@ bool AppState::LoadTexture(const std::string& path, const SDL_PixelFormat prefer
 
     SDL_UploadToGPUTexture(copyPass, &uploadInfo, &region, false);
 
-    SDL_DestroySurface(converted);
-
     // 7. End the copy pass and submit
     SDL_EndGPUCopyPass(copyPass);
 

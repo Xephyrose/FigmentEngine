@@ -125,7 +125,7 @@ struct AppState {
     void RecreateAllPipelines();
 
     // EDITOR
-    bool debug = false;
+    bool debug = true;
     Node* editorSelected = nullptr;
     std::string editorMesh;
     std::string editorSprite;

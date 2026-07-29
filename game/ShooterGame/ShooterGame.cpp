@@ -4,6 +4,7 @@
 #include "src/AppState.h"
 #include "src/BoxBody3D.h"
 #include "src/DirectionalLight3D.h"
+#include "src/HeightFieldBody3D.h"
 #include "src/MeshInstance3D.h"
 
 void ShooterGame::Init(AppState &appState) {
@@ -60,6 +61,10 @@ void ShooterGame::Init(AppState &appState) {
     meshInstance->mesh = "zoo.glb";
     addChild(std::unique_ptr<Node>(meshInstance));
 
-    appState.LoadTexture("learnopengl_iceland_height.png", SDL_PIXELFORMAT_INDEX4LSB); // changing format = shits self when imgui renders it
+    appState.LoadTexture("learnopengl_iceland_height.png");
+    float* height = CreateHeights(appState.surfaces["learnopengl_iceland_height.png"]);
+
+    auto* terrain = new HeightFieldBody3D(appState, b3_staticBody, 0, 0, 0, height, appState.surfaces["learnopengl_iceland_height.png"]->w, appState.surfaces["learnopengl_iceland_height.png"]->h, b3Vec3(1, 10, 1));
+    addChild(std::unique_ptr<Node>(terrain));
 }
 
