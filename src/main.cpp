@@ -49,11 +49,11 @@ void FixedDelta(AppState* appState) {
 
     while (appState->fixedTimeStepAccumulator >= appState->fixedTimeStep) {
         HandleInput(appState);
-        appState->root.FixedUpdate(*appState);
         b2World_Step(appState->worldId2, static_cast<float>(appState->fixedTimeStep), 4);
         b3World_Step(appState->worldId3, static_cast<float>(appState->fixedTimeStep), 4);
-        appState->fixedTimeStepAccumulator -= appState->fixedTimeStep;
+        appState->root.FixedUpdate(*appState);
         Input::UpdateInputs();
+        appState->fixedTimeStepAccumulator -= appState->fixedTimeStep;
     }
 }
 
@@ -220,7 +220,7 @@ void PreparePointLightBuffer(AppState *appState, SDL_GPUCommandBuffer *commandBu
     for (const PointLight3D* light : appState->pointLights) {
         PointLight3DGPU gpu;
         gpu.color = glm::vec4(light->color, light->brightness);
-        gpu.position = glm::vec4(light->GetGlobalTransform().position, 0);
+        gpu.position = glm::vec4(light->GetGlobalTransformInterpolated().position, 0);
         gpu.params = glm::vec4(light->constant, light->linear, light->quadratic, 0);
         appState->pointLightGPUs.push_back(gpu);
     }
@@ -254,7 +254,7 @@ void PrepareDirectionalLightBuffer(AppState *appState, SDL_GPUCommandBuffer *com
     for (const DirectionalLight3D* light : appState->directionalLights) {
         DirectionalLight3DGPU gpu;
         gpu.color = glm::vec4(light->color, light->brightness);
-        gpu.direction = glm::vec4(light->GetGlobalTransform().getForward(), 0);
+        gpu.direction = glm::vec4(light->GetGlobalTransformInterpolated().getForward(), 0);
         appState->directionalLightGPUs.push_back(gpu);
     }
 
@@ -286,8 +286,8 @@ void PrepareSpotLightBuffer(AppState *appState, SDL_GPUCommandBuffer *commandBuf
     for (const SpotLight3D* light : appState->spotLights) {
         SpotLight3DGPU gpu;
         gpu.color = glm::vec4(light->color, light->brightness);
-        gpu.position = glm::vec4(light->GetGlobalTransform().position, glm::cos(glm::radians(light->cutoff)));
-        gpu.direction = glm::vec4(light->GetGlobalTransform().getForward(), glm::cos(glm::radians(light->outerCutoff)));
+        gpu.position = glm::vec4(light->GetGlobalTransformInterpolated().position, glm::cos(glm::radians(light->cutoff)));
+        gpu.direction = glm::vec4(light->GetGlobalTransformInterpolated().getForward(), glm::cos(glm::radians(light->outerCutoff)));
         gpu.params = glm::vec4(light->constant, light->linear, light->quadratic, 0);
         appState->spotLightGPUs.push_back(gpu);
     }
@@ -350,8 +350,8 @@ SDL_AppResult RenderFrame(AppState* appState) {
             auto* meshInstance = new MeshInstance3D();
             meshInstance->mesh = appState->editorMesh;
             SDL_Log("Mesh spawned: %s", appState->editorMesh.c_str());
-            meshInstance->localTransform.position = appState->current_camera_3d->GetGlobalTransform().position;
-            meshInstance->localTransform.rotation = appState->current_camera_3d->GetGlobalTransform().rotation * glm::vec3(0.0f, 1.0f, 0.0f);
+            meshInstance->localTransform.position = appState->current_camera_3d->GetGlobalTransformInterpolated().position;
+            meshInstance->localTransform.rotation = appState->current_camera_3d->GetGlobalTransformInterpolated().rotation * glm::vec3(0.0f, 1.0f, 0.0f);
             appState->root.addChild(std::unique_ptr<Node>(meshInstance));
         }
 

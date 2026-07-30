@@ -32,7 +32,7 @@ Player3D::Player3D(AppState &appState, const float pos_x, const float pos_y, con
     auto* meshInstance2 = new MeshInstance3D();
     meshInstance2->mesh = "lynx.glb";
     meshInstance2->localTransform.position = glm::vec3(0.35f, -0.5f, -0.25f);
-    meshInstance2->localTransform.rotation = glm::vec3(0.0f, 180, 0.0f);
+    meshInstance2->localTransform.setRotation(glm::vec3(0, 180, 0));
     pitch->addChild(std::unique_ptr<Node>(meshInstance2));
 }
 

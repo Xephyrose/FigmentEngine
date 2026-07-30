@@ -35,9 +35,10 @@ struct PhysicsBody3D : Node3D {
     b3ShapeId shapeId{};
     Transform3D last_tick_transform;
 
-    [[nodiscard]] Transform3D GetGlobalTransform(double factor = 1.0) const override;
-    [[nodiscard]] Transform3D GetGlobalTransformInterpolated(double factor = 1.0) const override;
     void FixedUpdate(AppState& appState) override;
+    [[nodiscard]] Transform3D GetGlobalTransform() const override;
+protected:
+    [[nodiscard]] Transform3D GetGlobalTransformInterpolatedREAL(double factor) const override;
 };
 
 #endif //FIGMENTENGINE_PHYSICSBODY3D_H

@@ -33,7 +33,7 @@ void MaterialPhong::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer
         int       num_spot_lights;
     };
     PushData push{};
-    push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransformInterpolated(appState->fixedTimeStepAccumulator).position, 0);
+    push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransformInterpolated(appState->fixedTimeStepAccumulator / appState->fixedTimeStep).position, 0);
     push.num_point_lights = appState->pointLights.size();
     push.num_dir_lights = appState->directionalLights.size();
     push.num_spot_lights = appState->spotLights.size();

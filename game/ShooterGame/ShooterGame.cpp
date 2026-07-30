@@ -16,7 +16,7 @@ void ShooterGame::Init(AppState &appState) {
     // auto* player = new FreeCam3D();
     // appState.current_camera_3d = player;
 
-    auto* player = new QuakePlayer3D(appState, 0, 10, 0, 0.35f, 2.2f);
+    auto* player = new Player3D(appState, 0, 10, 0, 0.35f, 2.2f);
 
     // auto* player = new Player3D(appState, 0, 10, 0, 0.35f, 2.2f);
     addChild(std::unique_ptr<Node>(player));

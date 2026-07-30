@@ -27,7 +27,7 @@ void MaterialPBR::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, 
         glm::vec4 lightNums; // num_point_lights, num_dir_lights, num_spot_lights
     };
     PushData push{};
-    push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransformInterpolated(appState->fixedTimeStepAccumulator).position, 0);
+    push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransformInterpolated(appState->fixedTimeStepAccumulator / appState->fixedTimeStep).position, 0);
     push.colorAlbedo = color;
     push.colorORM.x = colorAO;
     push.colorORM.y = colorRoughness;

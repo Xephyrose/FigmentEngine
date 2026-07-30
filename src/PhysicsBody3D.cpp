@@ -1,6 +1,7 @@
 #include "PhysicsBody3D.h"
 
 #include "AppState.h"
+#include "SDL3/SDL_log.h"
 
 inline glm::quat ToGLM(const b3Quat& q)
 {
@@ -27,17 +28,27 @@ PhysicsBody3D::PhysicsBody3D(AppState &appState, b3BodyType bodyType, float pos_
     bodyId = b3CreateBody(appState.worldId3, &bodyDef);
 }
 
-Transform3D PhysicsBody3D::GetGlobalTransform(double factor) const {
+Transform3D PhysicsBody3D::GetGlobalTransform() const {
     return localTransform;
 }
 
-Transform3D PhysicsBody3D::GetGlobalTransformInterpolated(const double factor) const {
+Transform3D PhysicsBody3D::GetGlobalTransformInterpolatedREAL(double factor) const {
+    factor = std::clamp(factor, 0.0, 1.0);
+
     // interpolate between last_tick_transform and localTransform by a factor of factor
     Transform3D interpolated;
 
-    interpolated.position.x = std::lerp(last_tick_transform.position.x, localTransform.position.x, factor);
-    interpolated.position.y = std::lerp(last_tick_transform.position.y, localTransform.position.y, factor);
-    interpolated.position.z = std::lerp(last_tick_transform.position.z, localTransform.position.z, factor);
+    interpolated.position = glm::mix(last_tick_transform.position, localTransform.position, static_cast<float>(factor));
+    interpolated.quaternion = glm::slerp(last_tick_transform.quaternion, localTransform.quaternion, static_cast<float>(factor));
+    interpolated.rotation = glm::mix(last_tick_transform.rotation, localTransform.rotation, static_cast<float>(factor));
+
+    SDL_Log("last=%f current=%f interp=%f alpha=%f name=%s",
+            last_tick_transform.position.x,
+            localTransform.position.x,
+            interpolated.position.x,
+            factor,
+            name.c_str());
+
     return interpolated;
 }
 

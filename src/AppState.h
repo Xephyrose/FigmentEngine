@@ -80,7 +80,7 @@ struct AppState {
     Uint64 lastTime = 0;
     Uint64 delta = 0;
     double fixedTimeStepAccumulator = 0;
-    double fixedTimeStep = 1.0f / 64.0f;
+    double fixedTimeStep = 1.0f / 16.0f;
 
     std::string material_override;
 
@@ -119,7 +119,7 @@ struct AppState {
     void CreateShadowPipeline();
     void RenderShadowMap(SDL_GPUCommandBuffer* cmdBuf, const glm::mat4& lightViewProj);
     glm::mat4 GetLightViewProjection() const;
-    glm::mat4 GetOffsetLightViewProjection();
+    glm::mat4 GetOffsetLightViewProjection() const;
 
     void RecreateAllMultisampleStates();
     void RecreateAllPipelines();
