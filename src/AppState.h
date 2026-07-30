@@ -79,10 +79,13 @@ struct AppState {
     Uint64 currentTime = 0;
     Uint64 lastTime = 0;
     Uint64 delta = 0;
+    int physics_tps = 32;
     double fixedTimeStepAccumulator = 0;
-    double fixedTimeStep = 1.0f / 32.0f;
+    double fixedTimeStep = 1.0f / static_cast<float>(physics_tps);
 
     std::string material_override;
+
+    void updatePhysicsTimeStep();
 
     bool CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader, const std::string& rasterizerState, const
                         std::string &blendState, const bool &depth_test, const bool &depth_write);

@@ -402,6 +402,9 @@ SDL_AppResult RenderFrame(AppState* appState) {
             appState->CreateDepthTexture();
             appState->RecreateAllPipelines();
         }
+        if (ImGui::InputInt("Physics Tick Rate", &appState->physics_tps)) {
+            appState->updatePhysicsTimeStep();
+        }
         ImGui::End();
 
         ImGui::Render();

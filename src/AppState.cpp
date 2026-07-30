@@ -85,6 +85,10 @@ AppState::~AppState() {
     SDL_DestroyWindow(window);
 }
 
+void AppState::updatePhysicsTimeStep() {
+    fixedTimeStep = 1.0f / static_cast<float>(physics_tps);
+}
+
 bool AppState::CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader, const std::string& rasterizerState, const std::string &blendState, const
                               bool &depth_test, const bool &depth_write) {
     SDL_GPUShader* vertexShader = GetShader(vertShader + ".vert");

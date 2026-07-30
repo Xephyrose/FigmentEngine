@@ -64,9 +64,5 @@ Transform3D Node3D::GetGlobalTransformInterpolatedREAL(double factor) const {
     globalTransform.scale = parentGlobalTransform.scale * localTransform.scale;
     globalTransform.rotation = glm::degrees(glm::eulerAngles(globalTransform.quaternion));
 
-    SDL_Log("current=%f name=%s",
-            globalTransform.position.x,
-            name.c_str());
-
     return globalTransform;
 }
