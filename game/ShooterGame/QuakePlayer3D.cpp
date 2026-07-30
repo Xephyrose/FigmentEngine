@@ -16,6 +16,7 @@ void QuakePlayer3D::FixedUpdate(AppState &appState) {
     velocity = GetLinearVelocity(bodyId);
 
     SV_AirMove(velocity, static_cast<float>(appState.fixedTimeStep));
+    CapsuleBody3D::FixedUpdate(appState);
 }
 
 void QuakePlayer3D::SV_AirMove(glm::vec3 &velocity, const float delta) const {

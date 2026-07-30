@@ -5,7 +5,7 @@
 
 void MaterialPBR::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, glm::mat4 model) {
     if (!appState->current_camera_3d) return;
-    BindVertexUniformDataMMNL(appState, commandBuffer, model);
+    BindVertexUniformDataMMNL(*appState, commandBuffer, model);
 
     SDL_GPUGraphicsPipeline* gotPipeline = appState->GetPipeline(pipeline);
     if (!gotPipeline) {
@@ -27,7 +27,7 @@ void MaterialPBR::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, 
         glm::vec4 lightNums; // num_point_lights, num_dir_lights, num_spot_lights
     };
     PushData push{};
-    push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransform().position, 0);
+    push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransformInterpolated(appState->fixedTimeStepAccumulator).position, 0);
     push.colorAlbedo = color;
     push.colorORM.x = colorAO;
     push.colorORM.y = colorRoughness;

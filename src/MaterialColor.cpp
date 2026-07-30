@@ -11,7 +11,7 @@ MaterialColor::MaterialColor(AppState *appState, const std::string &name, const 
 
 void MaterialColor::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, glm::mat4 model) {
     if (!appState->current_camera_3d) return;
-    BindVertexUniformDataMMNL(appState, commandBuffer, model);
+    BindVertexUniformDataMMNL(*appState, commandBuffer, model);
 
     SDL_GPUGraphicsPipeline* gotPipeline = appState->GetPipeline(pipeline);
     if (!gotPipeline) {

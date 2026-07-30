@@ -27,17 +27,26 @@ PhysicsBody3D::PhysicsBody3D(AppState &appState, b3BodyType bodyType, float pos_
     bodyId = b3CreateBody(appState.worldId3, &bodyDef);
 }
 
-Transform3D PhysicsBody3D::GetGlobalTransform() const {
+Transform3D PhysicsBody3D::GetGlobalTransform(double factor) const {
     return localTransform;
 }
 
-void PhysicsBody3D::Update(AppState &appState) {
-    localTransform.quaternion = ToGLM(b3Body_GetRotation(bodyId));
-    localTransform.position.x = b3Body_GetPosition(bodyId).x;
-    localTransform.position.y = b3Body_GetPosition(bodyId).y;
-    localTransform.position.z = b3Body_GetPosition(bodyId).z;
+Transform3D PhysicsBody3D::GetGlobalTransformInterpolated(const double factor) const {
+    // interpolate between last_tick_transform and localTransform by a factor of factor
+    Transform3D interpolated;
+
+    interpolated.position.x = std::lerp(last_tick_transform.position.x, localTransform.position.x, factor);
+    interpolated.position.y = std::lerp(last_tick_transform.position.y, localTransform.position.y, factor);
+    interpolated.position.z = std::lerp(last_tick_transform.position.z, localTransform.position.z, factor);
+    return interpolated;
+}
+
+void PhysicsBody3D::FixedUpdate(AppState &appState) {
+    last_tick_transform = localTransform;
+    localTransform.setQuaternion(ToGLM(b3Body_GetRotation(bodyId)));
+    localTransform.setPosition(b3Body_GetPosition(bodyId));
     // localTransform.logTransform();
-    Node3D::Update(appState);
+    Node3D::FixedUpdate(appState);
 }
 
 TraceResult PhysicsBody3D::TraceCapsule(const AppState &appState, const b3Pos from, const b3Pos to, const float radius, const float height) const {

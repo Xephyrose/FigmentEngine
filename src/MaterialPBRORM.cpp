@@ -13,7 +13,7 @@ glm::vec3 SRGBToLinear(glm::vec3 c)
 
 void MaterialPBRORM::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, glm::mat4 model) {
     if (!appState->current_camera_3d) return;
-    BindVertexUniformDataMMNL(appState, commandBuffer, model);
+    BindVertexUniformDataMMNL(*appState, commandBuffer, model);
 
     SDL_GPUGraphicsPipeline* gotPipeline = appState->GetPipeline(pipeline);
     if (!gotPipeline) {
@@ -46,7 +46,7 @@ void MaterialPBRORM::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffe
         glm::vec4 lightNums; // num_point_lights, num_dir_lights, num_spot_lights
     };
     PushData push{};
-    push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransform().position, 0);
+    push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransformInterpolated(appState->fixedTimeStepAccumulator).position, 0);
     push.colorAlbedo = glm::vec4(SRGBToLinear(color), color.w);
     push.texturesUsed.x = (texture == "none" ? 0 : 1);
     push.texturesUsed.y = (textureORM == "none" ? 0 : 1);

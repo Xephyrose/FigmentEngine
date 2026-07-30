@@ -9,7 +9,7 @@ struct Camera3D : Node3D {
     float nearPlane = 0.1f;
     float farPlane = 500.0f;
 
-    [[nodiscard]] glm::mat4 GetViewMatrix() const;
+    [[nodiscard]] glm::mat4 GetViewMatrix(double factor = 1.0) const;
     [[nodiscard]] glm::mat4 GetProjectionMatrix(float aspectRatio) const;
 };
 

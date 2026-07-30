@@ -71,6 +71,7 @@ void Player3D::FixedUpdate(AppState &appState) {
     }
 
     b3Body_SetLinearVelocity(bodyId, b3Vec3(moveDirection.x * speed, b3Body_GetLinearVelocity(bodyId).y, moveDirection.z * speed));
+    CapsuleBody3D::FixedUpdate(appState);
 }
 
 void Player3D::Event(AppState &appState, SDL_Event &event) {

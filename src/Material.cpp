@@ -2,9 +2,9 @@
 
 #include "Camera3D.h"
 
-void Material::BindVertexUniformDataMMNL(const AppState *appState, SDL_GPUCommandBuffer *commandBuffer, glm::mat4 model) {
-    const glm::mat4 view = appState->current_camera_3d->GetViewMatrix();
-    const glm::mat4 proj = appState->current_camera_3d->GetProjectionMatrix(appState->currentAspectRatio);
+void Material::BindVertexUniformDataMMNL(AppState &appState, SDL_GPUCommandBuffer *commandBuffer, const glm::mat4 &model) {
+    const glm::mat4 view = appState.current_camera_3d->GetViewMatrix();
+    const glm::mat4 proj = appState.current_camera_3d->GetProjectionMatrix(appState.currentAspectRatio);
     const glm::mat4 mvp = proj * view * model;
     const glm::mat4 normalMatrix = glm::transpose(glm::inverse(model));
 
@@ -19,7 +19,7 @@ void Material::BindVertexUniformDataMMNL(const AppState *appState, SDL_GPUComman
     data.mvp = mvp;
     data.model = model;
     data.normalMatrix = normalMatrix;
-    data.lightVP = appState->GetOffsetLightViewProjection();
+    data.lightVP = appState.GetOffsetLightViewProjection();
 
     SDL_PushGPUVertexUniformData(commandBuffer, 0, &data, sizeof(data));
 }

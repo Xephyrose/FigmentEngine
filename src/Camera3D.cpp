@@ -1,5 +1,6 @@
 #include "Camera3D.h"
 
+#include "AppState.h"
 #include "ImGuiWidgets.h"
 #include "thirdparty/imgui/imgui.h"
 
@@ -16,10 +17,11 @@ void Camera3D::ImGuiDraw() {
     }
 }
 
-glm::mat4 Camera3D::GetViewMatrix() const {
-    const glm::vec3 forward = GetGlobalTransform().getForward();
-    const glm::vec3 target = GetGlobalTransform().position + forward;
-    return glm::lookAt(GetGlobalTransform().position, target, GetGlobalTransform().getUp());
+glm::mat4 Camera3D::GetViewMatrix(const double factor) const {
+    const Transform3D transform = GetGlobalTransformInterpolated(factor);
+    const glm::vec3 forward = transform.getForward();
+    const glm::vec3 target = transform.position + forward;
+    return glm::lookAt(transform.position, target, transform.getUp());
 }
 
 glm::mat4 Camera3D::GetProjectionMatrix(const float aspectRatio) const {

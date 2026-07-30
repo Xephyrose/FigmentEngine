@@ -1227,7 +1227,7 @@ glm::mat4 AppState::GetLightViewProjection() const {
     const DirectionalLight3D* light = directionalLights[0];
     if (!light) return {1.0f};
 
-    const auto& transform = light->GetGlobalTransform();
+    const auto& transform = light->GetGlobalTransform(1);
 
     const glm::vec3 lightDir = glm::normalize(transform.getForward());
     const glm::vec3 lightPos = transform.position;
@@ -1250,12 +1250,12 @@ glm::mat4 AppState::GetLightViewProjection() const {
     return lightProj * lightView;
 }
 
-glm::mat4 AppState::GetOffsetLightViewProjection() const {
+glm::mat4 AppState::GetOffsetLightViewProjection() {
     const DirectionalLight3D* light = directionalLights[0];
     if (!light) return {1.0f};
 
-    const auto& transform = light->GetGlobalTransform();
-    const glm::vec3 cameraPos = current_camera_3d->GetGlobalTransform().position;
+    const auto& transform = light->GetGlobalTransform(1);
+    const glm::vec3 cameraPos = current_camera_3d->GetGlobalTransform(1).position;
     constexpr float lightDistance = 50.0f;
 
     const glm::vec3 lightDir = glm::normalize(transform.getForward());

@@ -5,7 +5,7 @@
 
 void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, const glm::mat4 model) {
     if (!appState->current_camera_3d) return;
-    BindVertexUniformDataMMNL(appState, commandBuffer, model);
+    BindVertexUniformDataMMNL(*appState, commandBuffer, model);
 
     SDL_GPUGraphicsPipeline* gotPipeline = appState->GetPipeline(pipeline);
     if (!gotPipeline) {
@@ -44,7 +44,7 @@ void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *comma
         glm::vec4 params; // shininess
     };
     PushData push{};
-    push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransform().position, 0);
+    push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransformInterpolated(appState->fixedTimeStepAccumulator).position, 0);
     push.params.x = shininess;
     push.colorAlbedo = color;
     push.texturesUsed.x = texture == "none" ? 0 : 1;

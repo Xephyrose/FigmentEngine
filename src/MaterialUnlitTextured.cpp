@@ -11,7 +11,7 @@ MaterialUnlitTextured::MaterialUnlitTextured(AppState* appState, const std::stri
 
 void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* commandBuffer, const glm::mat4 model) {
     if (!appState->current_camera_3d) return;
-    BindVertexUniformDataMMNL(appState, commandBuffer, model);
+    BindVertexUniformDataMMNL(*appState, commandBuffer, model);
 
     SDL_GPUGraphicsPipeline* gotPipeline = appState->GetPipeline(pipeline);
     if (!gotPipeline) {

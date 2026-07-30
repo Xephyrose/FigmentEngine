@@ -59,6 +59,12 @@ void Transform3D::rotate(const glm::vec3& eulerDegrees) {
     updateQuaternion();
 }
 
+void Transform3D::setPosition(const b3Vec3 &new_position) {
+    position.x = new_position.x;
+    position.y = new_position.y;
+    position.z = new_position.z;
+}
+
 void Transform3D::rotateX(const float degrees) { rotate(glm::vec3(degrees, 0, 0)); }
 void Transform3D::rotateY(const float degrees) { rotate(glm::vec3(0, degrees, 0)); }
 void Transform3D::rotateZ(const float degrees) { rotate(glm::vec3(0, 0, degrees)); }

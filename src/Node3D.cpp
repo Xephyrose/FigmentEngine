@@ -13,7 +13,7 @@ void Node3D::ImGuiDraw() {
     }
 }
 
-Transform3D Node3D::GetGlobalTransform() const {
+Transform3D Node3D::GetGlobalTransform(double factor) const {
     if (parent == nullptr) {
         return localTransform;
     }
@@ -23,7 +23,7 @@ Transform3D Node3D::GetGlobalTransform() const {
         return localTransform;
     }
 
-    Transform3D parentWorld = par->GetGlobalTransform();
+    Transform3D parentWorld = par->GetGlobalTransformInterpolated(factor);
 
     // ----- 1. Build the quaternions directly from the Euler rotations -----
     //    This avoids any caching issues. If your 'rotation' is already
@@ -53,4 +53,8 @@ Transform3D Node3D::GetGlobalTransform() const {
     world.rotation = glm::degrees(glm::eulerAngles(world.quaternion));
 
     return world;
+}
+
+Transform3D Node3D::GetGlobalTransformInterpolated(const double factor) const {
+    return GetGlobalTransform(factor); // default Node3D is not interpolated, inherited structs may be though
 }

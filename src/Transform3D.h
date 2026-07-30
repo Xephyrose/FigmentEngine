@@ -6,6 +6,8 @@
 #include <thirdparty/glm/gtc/matrix_transform.hpp>
 #include <thirdparty/glm/gtc/quaternion.hpp>
 
+#include "box3d/math_functions.h"
+
 struct Transform3D {
     void ImGuiDraw();
     glm::vec3 position{0.0f, 0.0f, 0.0f};
@@ -23,6 +25,8 @@ struct Transform3D {
     const glm::quat& getQuaternion();
     const glm::vec3& getEuler();
     void rotate(const glm::vec3& eulerDegrees);
+
+    void setPosition(const b3Vec3& new_position);
 
     void rotateX(float degrees);
     void rotateY(float degrees);

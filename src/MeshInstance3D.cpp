@@ -35,7 +35,7 @@ void MeshInstance3D::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffe
         else {
             material = appState.GetMaterial(submesh.material);
         }
-        material->Bind(&appState, commandBuffer, GetGlobalTransform().getMatrix());
+        material->Bind(&appState, commandBuffer, GetGlobalTransformInterpolated(appState.fixedTimeStepAccumulator).getMatrix());
         if (!_mesh->indices.empty()) {
             SDL_DrawGPUIndexedPrimitives(appState.renderPass, submesh.indexCount, 1, submesh.startIndex, 0, 0);
         } else {
@@ -72,7 +72,7 @@ void MeshInstance3D::DrawShadow(AppState &appState, SDL_GPUCommandBuffer *comman
 
         // 3. Compute LightVP × Model
         glm::mat4 lightVP = appState.GetOffsetLightViewProjection();
-        glm::mat4 model = GetGlobalTransform().getMatrix();
+        glm::mat4 model = GetGlobalTransformInterpolated(appState.fixedTimeStepAccumulator).getMatrix();
         glm::mat4 mvp = lightVP * model;
 
         // 4. Push to vertex shader

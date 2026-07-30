@@ -38,7 +38,7 @@ void ShooterGame::Init(AppState &appState) {
     pointLight2->localTransform.position.x = 17;
     pointLight2->localTransform.position.y = 5;
     pointLight2->localTransform.position.z = 6;
-    pointLight2->brightness = 50;
+    pointLight2->brightness = 5;
     addChild(std::unique_ptr<Node>(pointLight2));
 
     auto* directionalLight = new DirectionalLight3D(&appState);
