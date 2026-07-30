@@ -4,7 +4,7 @@
 #include "src/GLMHelper.h"
 
 void QuakePlayer3D::FixedUpdate(AppState &appState) {
-    onGround = IsGrounded(appState);
+    IsGrounded(appState);
     b3Body_SetGravityScale(bodyId, !onGround);
 
     glm::vec3 velocity = GetLinearVelocity(bodyId);
@@ -16,7 +16,6 @@ void QuakePlayer3D::FixedUpdate(AppState &appState) {
     velocity = GetLinearVelocity(bodyId);
 
     SV_AirMove(velocity, static_cast<float>(appState.fixedTimeStep));
-    // Reground(appState);
 }
 
 void QuakePlayer3D::SV_AirMove(glm::vec3 &velocity, const float delta) const {
@@ -82,51 +81,4 @@ void QuakePlayer3D::SV_AirAccelerate(glm::vec3 &velocity, const glm::vec3 &wishD
     float accelSpeed = sv_accelerate * wishSpeed * delta;
     accelSpeed = std::min(accelSpeed, addSpeed);
     velocity += accelSpeed * wishDir;
-}
-
-void QuakePlayer3D::Reground(const AppState& appState) const
-{
-    if (!onGround || GetLinearVelocity(bodyId).y > 0.5f) return;
-
-    const b3Pos pos = b3Body_GetPosition(bodyId);
-
-    // Cast the actual capsule down a little bit.
-    const b3Pos from = pos + b3Vec3(0, 0.05f, 0);
-    const b3Pos to   = pos - b3Vec3(0, 0.10f, 0);
-
-    const TraceResult tr = TraceCapsule(
-        appState,
-        from,
-        to,
-        radius,
-        height
-    );
-
-    if (!tr.hit || !IsStandableSurface(tr.normal))
-        return;
-
-    SetLinearVelocity(bodyId, GetLinearVelocity(bodyId) * glm::vec3(1, 0, 1));
-
-    b3Pos target = pos;
-
-    // Put feet at the hit point.
-    // No X/Z movement.
-    target.y = tr.hitPoint.y + height * 0.5f;
-
-    const b3Quat rotation = b3Body_GetRotation(bodyId);
-
-    b3Body_SetTransform(
-        bodyId,
-        target,
-        rotation
-    );
-
-    // Kill only velocity into the floor.
-    b3Vec3 velocity = b3Body_GetLinearVelocity(bodyId);
-
-    if (const float intoGround = b3Dot(velocity, tr.normal); intoGround < 0)
-    {
-        velocity -= intoGround * tr.normal;
-        b3Body_SetLinearVelocity(bodyId, velocity);
-    }
 }

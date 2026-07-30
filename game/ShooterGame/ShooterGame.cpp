@@ -13,11 +13,12 @@ void ShooterGame::Init(AppState &appState) {
     // auto* box = new BoxBody3D(appState, b3_staticBody, 0, -0.738988f, 0, 100, 0.01f, 100);
     // addChild(std::unique_ptr<Node>(box));
 
-    auto* player = new FreeCam3D();
-    appState.current_camera_3d = player;
+    // auto* player = new FreeCam3D();
+    // appState.current_camera_3d = player;
 
-    // auto* player = new QuakePlayer3D(appState, 17, 10, 23, 0.35f, 2.2f);
-    // auto* player = new QuakePlayer3D(appState, 0, 10, 0, 0.35f, 2.2f);
+    auto* player = new QuakePlayer3D(appState, 0, 10, 0, 0.35f, 2.2f);
+
+    // auto* player = new Player3D(appState, 0, 10, 0, 0.35f, 2.2f);
     addChild(std::unique_ptr<Node>(player));
 
     // auto* pointLight = new PointLight3D(&appState);

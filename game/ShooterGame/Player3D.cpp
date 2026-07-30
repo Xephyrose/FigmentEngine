@@ -4,6 +4,7 @@
 #include "SDL3/SDL_log.h"
 #include "src/AppState.h"
 #include "src/Camera3D.h"
+#include "src/GLMHelper.h"
 
 #include "src/MeshInstance3D.h"
 
@@ -36,10 +37,14 @@ Player3D::Player3D(AppState &appState, const float pos_x, const float pos_y, con
 }
 
 void Player3D::FixedUpdate(AppState &appState) {
-    auto [velX, velY, velZ] = b3Body_GetLinearVelocity(bodyId);
-    if (Input::IsJustPressed(SDL_SCANCODE_SPACE)) {
-        b3Body_SetLinearVelocity(bodyId, b3Vec3(velX, 0, velZ));
-        b3Body_ApplyLinearImpulseToCenter(bodyId, b3Vec3(0, 1100, 0), true);
+    IsGrounded(appState);
+    b3Body_SetGravityScale(bodyId, !onGround);
+
+    glm::vec3 velocity = GetLinearVelocity(bodyId);
+    if ((Input::IsJustPressed(SDL_SCANCODE_SPACE) or (autobhop && Input::IsPressed(SDL_SCANCODE_SPACE))) && onGround) {
+        b3Body_SetGravityScale(bodyId, true);
+        b3Body_SetLinearVelocity(bodyId, b3Vec3(velocity.x, 0, velocity.z));
+        b3Body_ApplyLinearImpulseToCenter(bodyId, b3Vec3(0, 9, 0), true);
     }
 
     const glm::vec3 forward = yaw->localTransform.getForward();
@@ -55,7 +60,7 @@ void Player3D::FixedUpdate(AppState &appState) {
 
     if (Input::IsPressed(SDL_SCANCODE_LCTRL)) {
         b3Body_SetGravityScale(bodyId, 2);
-        if (velY > 0) b3Body_SetLinearVelocity(bodyId, b3Vec3(velX, 0, velZ));
+        if (velocity.y > 0) b3Body_SetLinearVelocity(bodyId, b3Vec3(velocity.x, 0, velocity.z));
     }
     else {
         b3Body_SetGravityScale(bodyId, 1);
@@ -88,7 +93,7 @@ bool Player3D::IsStandableSurface(const b3Vec3 normal) const
     return b3Dot( normal, b3Vec3_axisY ) >= maxSlopeCos;
 }
 
-bool Player3D::IsGrounded(const AppState &appState) const {
+bool Player3D::IsGrounded(const AppState &appState) {
     const b3Pos pos = b3Body_GetPosition(bodyId);
 
     b3Pos from = pos;
@@ -99,5 +104,6 @@ bool Player3D::IsGrounded(const AppState &appState) const {
 
     const TraceResult tr = TraceCapsule(appState, from, to, radius, height);
 
-    return tr.hit && IsStandableSurface(tr.normal);
+    onGround = tr.hit && IsStandableSurface(tr.normal);
+    return onGround;
 }
