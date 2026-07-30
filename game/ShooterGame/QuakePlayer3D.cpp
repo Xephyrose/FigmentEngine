@@ -1,7 +1,6 @@
 #include "QuakePlayer3D.h"
 
 #include "../../src/Input.h"
-#include "SDL3/SDL_log.h"
 #include "src/GLMHelper.h"
 
 void QuakePlayer3D::FixedUpdate(AppState &appState) {
@@ -27,7 +26,7 @@ bool QuakePlayer3D::IsStandableSurface(const b3Vec3 normal) const
 }
 
 bool QuakePlayer3D::IsGrounded(const AppState &appState) const {
-    b3Pos pos = b3Body_GetPosition(bodyId);
+    const b3Pos pos = b3Body_GetPosition(bodyId);
 
     b3Pos from = pos;
     from.y += 0.05f;
@@ -105,44 +104,64 @@ void QuakePlayer3D::SV_AirAccelerate(glm::vec3 &velocity, const glm::vec3 &wishD
     velocity += accelSpeed * wishDir;
 }
 
-void QuakePlayer3D::Reground(const AppState& appState) const {
+void QuakePlayer3D::Reground(const AppState& appState) const
+{
     if (!onGround)
         return;
 
     const b3Pos pos = b3Body_GetPosition(bodyId);
 
-    // Start slightly above the current position.
-    b3Pos from = pos;
-    from.y += 0.10f;
+    // Cast the actual capsule down a little bit.
+    const b3Pos from = pos + b3Vec3(0, 0.05f, 0);
+    const b3Pos to   = pos - b3Vec3(0, 0.20f, 0);
 
-    b3Pos to = pos;
-    to.y -= 0.20f;
-
-    const TraceResult tr = TraceCapsule(appState, from, to, radius, height);
-
-    SDL_Log("hit=%d startedSolid=%d fraction=%f",
-        tr.hit, tr.startedSolid, tr.fraction);
+    TraceResult tr = TraceCapsule(
+        appState,
+        from,
+        to,
+        radius,
+        height
+    );
 
     if (!tr.hit || !IsStandableSurface(tr.normal))
         return;
 
-    // Move the body to the contact position.
-    const b3Quat rot = b3Body_GetRotation(bodyId);
-    b3Pos target = tr.hitPoint;
 
-    // Move the body center above the contact point.
-    target.x += tr.normal.x * radius;
-    target.y += tr.normal.y * radius + (height * 0.5f - radius);
-    target.z += tr.normal.z * radius;
+    /*
+        Find capsule support distance along the hit normal.
+
+        For a vertical capsule:
+        - sphere radius contributes radius
+        - cylindrical half-height contributes (height/2 - radius)
+    */
+
+    const float halfSegment = height * 0.5f - radius;
+
+    const float support =
+        radius +
+        fabs(b3Dot(tr.normal, b3Vec3(0, halfSegment, 0)));
 
 
-    SDL_Log("Pos: %f, %f, %f\ntarget: %f, %f, %f", pos.x, pos.y, pos.z, target.x, target.y, target.z);
-    b3Body_SetTransform(bodyId, target, rot);
+    b3Pos target = tr.hitPoint + tr.normal * support;
 
-    // Remove downward velocity.
-    b3Vec3 vel = b3Body_GetLinearVelocity(bodyId);
-    if (vel.y < 0.0f)
-        vel.y = 0.0f;
 
-    b3Body_SetLinearVelocity(bodyId, vel);
+    const b3Quat rotation = b3Body_GetRotation(bodyId);
+
+    b3Body_SetTransform(
+        bodyId,
+        target,
+        rotation
+    );
+
+
+    // Kill only velocity into the floor.
+    b3Vec3 velocity = b3Body_GetLinearVelocity(bodyId);
+
+    const float intoGround = b3Dot(velocity, tr.normal);
+
+    if (intoGround < 0)
+    {
+        velocity -= intoGround * tr.normal;
+        b3Body_SetLinearVelocity(bodyId, velocity);
+    }
 }
