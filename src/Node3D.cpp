@@ -1,5 +1,6 @@
 #include "Node3D.h"
 
+#include "SDL3/SDL_log.h"
 #include "thirdparty/imgui/imgui.h"
 
 Node3D::Node3D() {
@@ -62,6 +63,10 @@ Transform3D Node3D::GetGlobalTransformInterpolatedREAL(double factor) const {
     globalTransform.quaternion = parentQuat * localQuat;
     globalTransform.scale = parentGlobalTransform.scale * localTransform.scale;
     globalTransform.rotation = glm::degrees(glm::eulerAngles(globalTransform.quaternion));
+
+    SDL_Log("current=%f name=%s",
+            globalTransform.position.x,
+            name.c_str());
 
     return globalTransform;
 }

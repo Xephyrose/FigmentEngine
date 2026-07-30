@@ -36,6 +36,7 @@ struct PhysicsBody3D : Node3D {
     Transform3D last_tick_transform;
 
     void FixedUpdate(AppState& appState) override;
+    void PostPhysicsUpdate(AppState& appState) override;
     [[nodiscard]] Transform3D GetGlobalTransform() const override;
 protected:
     [[nodiscard]] Transform3D GetGlobalTransformInterpolatedREAL(double factor) const override;

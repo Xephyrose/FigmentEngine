@@ -26,6 +26,12 @@ void Node::FixedUpdate(AppState& appState) {
     }
 }
 
+void Node::PostPhysicsUpdate(AppState &appState) {
+    for (const auto & i : children) {
+        i->PostPhysicsUpdate(appState);
+    }
+}
+
 void Node::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) {
     for (const auto & i : children) {
         i->Draw(appState, commandBuffer);

@@ -33,7 +33,7 @@ Transform3D PhysicsBody3D::GetGlobalTransform() const {
 }
 
 Transform3D PhysicsBody3D::GetGlobalTransformInterpolatedREAL(double factor) const {
-    factor = std::clamp(factor, 0.0, 1.0);
+    // factor = std::clamp(factor, 0.0, 1.0);
 
     // interpolate between last_tick_transform and localTransform by a factor of factor
     Transform3D interpolated;
@@ -54,10 +54,14 @@ Transform3D PhysicsBody3D::GetGlobalTransformInterpolatedREAL(double factor) con
 
 void PhysicsBody3D::FixedUpdate(AppState &appState) {
     last_tick_transform = localTransform;
+    Node3D::FixedUpdate(appState);
+}
+
+void PhysicsBody3D::PostPhysicsUpdate(AppState &appState) {
     localTransform.setQuaternion(ToGLM(b3Body_GetRotation(bodyId)));
     localTransform.setPosition(b3Body_GetPosition(bodyId));
     // localTransform.logTransform();
-    Node3D::FixedUpdate(appState);
+    Node3D::PostPhysicsUpdate(appState);
 }
 
 TraceResult PhysicsBody3D::TraceCapsule(const AppState &appState, const b3Pos from, const b3Pos to, const float radius, const float height) const {

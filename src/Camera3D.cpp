@@ -17,7 +17,13 @@ void Camera3D::ImGuiDraw() {
     }
 }
 
-glm::mat4 Camera3D::GetViewMatrix(const double factor) const {
+glm::mat4 Camera3D::GetViewMatrix() const {
+    const Transform3D transform = GetGlobalTransform();
+    const glm::vec3 forward = transform.getForward();
+    const glm::vec3 target = transform.position + forward;
+    return glm::lookAt(transform.position, target, transform.getUp());
+}
+glm::mat4 Camera3D::GetViewMatrixInterpolated(const double factor) const {
     const Transform3D transform = GetGlobalTransformInterpolated(factor);
     const glm::vec3 forward = transform.getForward();
     const glm::vec3 target = transform.position + forward;

@@ -49,9 +49,10 @@ void FixedDelta(AppState* appState) {
 
     while (appState->fixedTimeStepAccumulator >= appState->fixedTimeStep) {
         HandleInput(appState);
+        appState->root.FixedUpdate(*appState);
         b2World_Step(appState->worldId2, static_cast<float>(appState->fixedTimeStep), 4);
         b3World_Step(appState->worldId3, static_cast<float>(appState->fixedTimeStep), 4);
-        appState->root.FixedUpdate(*appState);
+        appState->root.PostPhysicsUpdate(*appState);
         Input::UpdateInputs();
         appState->fixedTimeStepAccumulator -= appState->fixedTimeStep;
     }
