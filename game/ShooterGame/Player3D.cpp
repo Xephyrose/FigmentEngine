@@ -17,7 +17,7 @@ Player3D::Player3D(AppState &appState, const float pos_x, const float pos_y, con
 
     yaw = new Node3D();
     yaw->name = "Yaw";
-    yaw->localTransform.position = glm::vec3(0.0f, 1.882f - height / 2 - radius, 0.0f);
+    yaw->localTransform.position = glm::vec3(0.0f, height * 0.5f - radius, 0.0f);
     addChild(std::unique_ptr<Node>(yaw));
 
     pitch = new Node3D();
@@ -32,7 +32,7 @@ Player3D::Player3D(AppState &appState, const float pos_x, const float pos_y, con
     meshInstance2->mesh = "lynx.glb";
     meshInstance2->localTransform.position = glm::vec3(0.35f, -0.5f, -0.25f);
     meshInstance2->localTransform.rotation = glm::vec3(0.0f, 180, 0.0f);
-    cam->addChild(std::unique_ptr<Node>(meshInstance2));
+    pitch->addChild(std::unique_ptr<Node>(meshInstance2));
 }
 
 void Player3D::FixedUpdate(AppState &appState) {
@@ -80,4 +80,24 @@ void Player3D::Event(AppState &appState, SDL_Event &event) {
     }
 
     CapsuleBody3D::Event(appState, event);
+}
+
+bool Player3D::IsStandableSurface(const b3Vec3 normal) const
+{
+    const float maxSlopeCos = cosf( maxSlopeAngle * B3_PI / 180.0f );
+    return b3Dot( normal, b3Vec3_axisY ) >= maxSlopeCos;
+}
+
+bool Player3D::IsGrounded(const AppState &appState) const {
+    const b3Pos pos = b3Body_GetPosition(bodyId);
+
+    b3Pos from = pos;
+    from.y += 0.015625;
+
+    b3Pos to = pos;
+    to.y -= 0.015625;
+
+    const TraceResult tr = TraceCapsule(appState, from, to, radius, height);
+
+    return tr.hit && IsStandableSurface(tr.normal);
 }

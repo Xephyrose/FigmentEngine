@@ -8,7 +8,7 @@ void QuakePlayer3D::FixedUpdate(AppState &appState) {
     b3Body_SetGravityScale(bodyId, !onGround);
 
     glm::vec3 velocity = GetLinearVelocity(bodyId);
-    if (Input::IsPressed(SDL_SCANCODE_SPACE) && onGround) {
+    if ((Input::IsJustPressed(SDL_SCANCODE_SPACE) or (autobhop && Input::IsPressed(SDL_SCANCODE_SPACE))) && onGround) {
         b3Body_SetGravityScale(bodyId, true);
         b3Body_SetLinearVelocity(bodyId, b3Vec3(velocity.x, 0, velocity.z));
         b3Body_ApplyLinearImpulseToCenter(bodyId, b3Vec3(0, 9, 0), true);
@@ -17,26 +17,6 @@ void QuakePlayer3D::FixedUpdate(AppState &appState) {
 
     SV_AirMove(velocity, static_cast<float>(appState.fixedTimeStep));
     // Reground(appState);
-}
-
-bool QuakePlayer3D::IsStandableSurface(const b3Vec3 normal) const
-{
-    const float maxSlopeCos = cosf( maxSlopeAngle * B3_PI / 180.0f );
-    return b3Dot( normal, b3Vec3_axisY ) >= maxSlopeCos;
-}
-
-bool QuakePlayer3D::IsGrounded(const AppState &appState) const {
-    const b3Pos pos = b3Body_GetPosition(bodyId);
-
-    b3Pos from = pos;
-    from.y += 0.05f;
-
-    b3Pos to = pos;
-    to.y -= 0.10f;
-
-    const TraceResult tr = TraceCapsule(appState, from, to, radius, height);
-
-    return tr.hit && IsStandableSurface(tr.normal);
 }
 
 void QuakePlayer3D::SV_AirMove(glm::vec3 &velocity, const float delta) const {
@@ -106,16 +86,15 @@ void QuakePlayer3D::SV_AirAccelerate(glm::vec3 &velocity, const glm::vec3 &wishD
 
 void QuakePlayer3D::Reground(const AppState& appState) const
 {
-    if (!onGround)
-        return;
+    if (!onGround || GetLinearVelocity(bodyId).y > 0.5f) return;
 
     const b3Pos pos = b3Body_GetPosition(bodyId);
 
     // Cast the actual capsule down a little bit.
     const b3Pos from = pos + b3Vec3(0, 0.05f, 0);
-    const b3Pos to   = pos - b3Vec3(0, 0.20f, 0);
+    const b3Pos to   = pos - b3Vec3(0, 0.10f, 0);
 
-    TraceResult tr = TraceCapsule(
+    const TraceResult tr = TraceCapsule(
         appState,
         from,
         to,
@@ -126,24 +105,13 @@ void QuakePlayer3D::Reground(const AppState& appState) const
     if (!tr.hit || !IsStandableSurface(tr.normal))
         return;
 
+    SetLinearVelocity(bodyId, GetLinearVelocity(bodyId) * glm::vec3(1, 0, 1));
 
-    /*
-        Find capsule support distance along the hit normal.
+    b3Pos target = pos;
 
-        For a vertical capsule:
-        - sphere radius contributes radius
-        - cylindrical half-height contributes (height/2 - radius)
-    */
-
-    const float halfSegment = height * 0.5f - radius;
-
-    const float support =
-        radius +
-        fabs(b3Dot(tr.normal, b3Vec3(0, halfSegment, 0)));
-
-
-    b3Pos target = tr.hitPoint + tr.normal * support;
-
+    // Put feet at the hit point.
+    // No X/Z movement.
+    target.y = tr.hitPoint.y + height * 0.5f;
 
     const b3Quat rotation = b3Body_GetRotation(bodyId);
 
@@ -153,13 +121,10 @@ void QuakePlayer3D::Reground(const AppState& appState) const
         rotation
     );
 
-
     // Kill only velocity into the floor.
     b3Vec3 velocity = b3Body_GetLinearVelocity(bodyId);
 
-    const float intoGround = b3Dot(velocity, tr.normal);
-
-    if (intoGround < 0)
+    if (const float intoGround = b3Dot(velocity, tr.normal); intoGround < 0)
     {
         velocity -= intoGround * tr.normal;
         b3Body_SetLinearVelocity(bodyId, velocity);

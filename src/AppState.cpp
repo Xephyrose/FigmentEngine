@@ -865,7 +865,7 @@ void AppState::CreateDefaultMaterials() {
     pbr_orm->setTextureNormalMap(this, "learnopengl_rustediron2_normal.png");
 
     auto* heightmap = new MaterialHeightMap(this, "heightmap", "HeightMap");
-    heightmap->setTextureAlbedo(this, "learnopengl_iceland_height.png");
+    heightmap->setTextureAlbedo(this, "learnopengl_iceland_height_200_blurred.png");
 
     auto* concrete_bricks = new MaterialPBRORM(this, "concrete_bricks", "PBRORM");
     concrete_bricks->setTextureAlbedo(this, "brick_concrete_albedo.png");

@@ -6,8 +6,6 @@
 struct QuakePlayer3D : Player3D {
     using Player3D::Player3D;
     void FixedUpdate(AppState& appState) override;
-    [[nodiscard]] bool IsGrounded(const AppState &appState) const;
-    [[nodiscard]] bool IsStandableSurface(b3Vec3 normal) const;
     void SV_AirMove(glm::vec3 &velocity, float delta) const;
     void SV_UserFriction(glm::vec3 &velocity, float delta) const;
     void SV_Accelerate(glm::vec3 &velocity, const glm::vec3 &wishDir, float wishSpeed, float delta) const;
@@ -19,11 +17,10 @@ struct QuakePlayer3D : Player3D {
     const float sv_maxspeed = 320.0f / QUAKE_TO_GODOT_SCALE;    // Quake: 320
     const float sv_accelerate = 10.0f;                          // Quake: 10.0
     const float cl_movespeed = 200.0f / QUAKE_TO_GODOT_SCALE;   // Quake: 200
-    const float maxSlopeAngle = 45;
     glm::vec2 input_wishdir = glm::vec2(0);
     bool onGround = false;
     bool wish_jump = false;
-    bool autobhop = false;
+    bool autobhop = true;
 };
 
 

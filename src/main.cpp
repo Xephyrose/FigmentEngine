@@ -327,7 +327,7 @@ SDL_AppResult RenderFrame(AppState* appState) {
 
         ImGui::Begin("Debug");
 
-        ImGui::Image(static_cast<ImTextureID>(reinterpret_cast<intptr_t>(appState->textures["learnopengl_iceland_height.png"])), ImVec2(256.0f, 256.0f));
+        ImGui::Image(static_cast<ImTextureID>(reinterpret_cast<intptr_t>(appState->textures["learnopengl_iceland_height_200_blurred.png"])), ImVec2(256.0f, 256.0f));
 
         ImGui::Text("Material Override");
         static const char* mat_items[] = { "", "pbr_orm", "pbr", "phong", "phong_textured", "blinn_phong", "blinn_phong_textured", "missing", "line" };

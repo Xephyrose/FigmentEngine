@@ -5,7 +5,7 @@
 
 struct MaterialHeightMap : MaterialUnlitTextured {
     using MaterialUnlitTextured::MaterialUnlitTextured;
-    std::string texture = "learnopengl_iceland_height.png";
+    std::string texture = "learnopengl_iceland_height_200_blurred.png";
 
     void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer, glm::mat4 model) override;
 };

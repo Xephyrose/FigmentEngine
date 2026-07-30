@@ -4,7 +4,7 @@ HeightFieldBody3D::HeightFieldBody3D(AppState &appState, b3BodyType bodyType, fl
     b3HeightFieldDef collider{heights, nullptr, scale, countX, countZ, 0, 100, false};
 
     b3ShapeDef shapeDef = b3DefaultShapeDef();
-    shapeDef.baseMaterial.friction = 100.0f;
+    shapeDef.baseMaterial.friction = 0.0f;
     shapeDef.density = 1.0f;
 
     b3HeightFieldData* heightFieldData = b3CreateHeightField(&collider);

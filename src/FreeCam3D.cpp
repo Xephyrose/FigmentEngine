@@ -51,5 +51,13 @@ void FreeCam3D::Event(AppState &appState, SDL_Event &event) {
         SDL_SetWindowRelativeMouseMode(appState.window, appState.isMouseRelative);
     }
 
+    if (event.type == SDL_EVENT_MOUSE_WHEEL && appState.isMouseRelative) {
+        if (event.wheel.y > 0) {
+            speed *= 1.5f;
+        } else if (event.wheel.y < 0) {
+            speed /= 1.5f;
+        }
+    }
+
     Camera3D::Event(appState, event);
 }
