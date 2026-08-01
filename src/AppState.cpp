@@ -89,6 +89,38 @@ void AppState::updatePhysicsTimeStep() {
     fixedTimeStep = 1.0f / static_cast<float>(physics_tps);
 }
 
+SDL_Surface* AppState::DownloadGPUTexture(SDL_GPUTexture *texture) {
+    SDL_GPUTransferBufferCreateInfo createInfo{};
+    createInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_DOWNLOAD;
+    createInfo.size = 4096 * 4096 * 4;
+    SDL_GPUTransferBuffer* tbuffer = SDL_CreateGPUTransferBuffer(device, &createInfo);
+    SDL_GPUCommandBuffer* cbuffer = SDL_AcquireGPUCommandBuffer(device);
+    SDL_GPUCopyPass* cpass = SDL_BeginGPUCopyPass(cbuffer);
+
+    const SDL_GPUTextureRegion region{texture, 0, 0, 0, 0, 0, 4096, 4096, 1};
+    const SDL_GPUTextureTransferInfo destination{tbuffer, 0, 0, 0};
+
+    SDL_DownloadFromGPUTexture(cpass, &region, &destination);
+    SDL_EndGPUCopyPass(cpass);
+
+    SDL_SubmitGPUCommandBuffer(cbuffer);
+    SDL_WaitForGPUIdle(device);
+
+    const void* mapped_data = SDL_MapGPUTransferBuffer(device, tbuffer, false);
+
+    // Create a surface that OWNS its own memory (not just referencing the transfer buffer)
+    SDL_Surface* surface = SDL_CreateSurface(4096, 4096, SDL_PIXELFORMAT_RGBA32);
+    if (surface) {
+        // Copy the data from the transfer buffer to the surface's own memory
+        SDL_memcpy(surface->pixels, mapped_data, createInfo.size);
+    }
+
+    SDL_UnmapGPUTransferBuffer(device, tbuffer);
+    SDL_ReleaseGPUTransferBuffer(device, tbuffer);
+
+    return surface;
+}
+
 bool AppState::CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader, const std::string& rasterizerState, const std::string &blendState, const
                               bool &depth_test, const bool &depth_write) {
     SDL_GPUShader* vertexShader = GetShader(vertShader + ".vert");

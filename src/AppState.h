@@ -24,6 +24,7 @@ struct Material;
 
 struct AppState {
     ~AppState();
+
     SDL_Window* window = nullptr;
     SDL_GPUDevice* device = nullptr;
     SDL_GPURenderPass *renderPass;
@@ -44,6 +45,7 @@ struct AppState {
     Camera3D* current_camera_3d;
     Transform3D modelTransform;
 
+    const int shadowMapSize = 4096 * 4;
     SDL_GPUTexture* shadowMap = nullptr;
     SDL_GPUGraphicsPipeline* shadowPipeline = nullptr;
 
@@ -86,6 +88,7 @@ struct AppState {
     std::string material_override;
 
     void updatePhysicsTimeStep();
+    SDL_Surface* DownloadGPUTexture(SDL_GPUTexture* texture);
 
     bool CreatePipeline(const std::string& name, const std::string& vertShader, const std::string& fragShader, const std::string& rasterizerState, const
                         std::string &blendState, const bool &depth_test, const bool &depth_write);
