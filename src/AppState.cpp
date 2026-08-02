@@ -933,6 +933,7 @@ void AppState::CreateDefaultMaterials() {
     asphalt->setTextureAlbedo(this, "asphalt_albedo.png");
     asphalt->setSampler(this, "anisotropic_repeat");
     asphalt->setTextureNormalMap(this, "asphalt_normal.png");
+    asphalt->setColorRoughness(0.5f);
 
     auto* asphalt_2 = new MaterialPBRORM(this, "asphalt_2", "PBRORM");
     asphalt_2->setTextureAlbedo(this, "asphalt_2_albedo.png");
