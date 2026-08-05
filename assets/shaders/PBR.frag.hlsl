@@ -1,4 +1,4 @@
-#include "assets/shaders/includes/Lights.hlsl"
+#include "assets/shaders/includes/Lights.hlsli"
 
 Texture2D g_shadow_map : register(t0, space2);
 SamplerComparisonState g_sampler_shadow : register(s0, space2);

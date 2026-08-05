@@ -1,4 +1,4 @@
-#include "assets/shaders/includes/Lights.hlsl"
+#include "assets/shaders/includes/Lights.hlsli"
 
 Texture2D g_albedo : register(t0, space2);
 Texture2D g_ambient : register(t1, space2);

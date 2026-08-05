@@ -32,17 +32,7 @@ float CalcBlinnPhongSpecular(float3 lightDir, float3 norm, float3 viewDir, float
 }
 
 float3 CalcPointLightDiffuse(PointLight light, float3 normal, float3 fragPos) {
-    float3 lightColor = light.color.xyz * light.color.w;
-
-    float3 lightDir = normalize(light.position.xyz - fragPos);
-    float diff = max(dot(normal, lightDir), 0.0);
-
-    float distance = length(light.position.xyz - fragPos);
-    float attenuation = 1.0 / (light.params.x + light.params.y * distance + light.params.z * (distance * distance));
-
-    float3 diffuse = lightColor * diff;
-
-    return diffuse * attenuation * (light.params.w * 0.5 + 0.5);
+    return light.color.xyz * light.color.w;
 }
 
 float3 CalcPointLightSpecular(PointLight light, float3 fragPos, float3 calcSpecular, float spec) {
