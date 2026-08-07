@@ -10,6 +10,7 @@
 #include "Node.h"
 #include "PointLight3D.h"
 #include "Light3DGPU.h"
+#include "Resource.h"
 #include "Transform3D.h"
 #include "box2d/box2d.h"
 #include "box3d/box3d.h"
@@ -132,7 +133,7 @@ struct AppState {
 
     // EDITOR
     bool debug = true;
-    Node* editorSelected = nullptr;
+    Resource* editorSelected = nullptr;
     std::string editorMesh;
     std::string editorSprite;
 };

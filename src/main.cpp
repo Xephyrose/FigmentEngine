@@ -212,6 +212,28 @@ void DrawNodeTree(AppState* appState, Node* node) {
     ImGui::PopID();
 }
 
+void DrawMaterialList(AppState* appState) {
+    std::vector<std::string> materialNames;
+    materialNames.reserve(appState->materials.size());
+
+    for (const auto &key : appState->materials | std::views::keys) {
+        materialNames.push_back(key);
+    }
+
+    std::sort(materialNames.begin(), materialNames.end());
+
+    for (const auto& name : materialNames) {
+        Material* material = appState->materials[name];
+        ImGui::PushID(name.c_str());
+
+        if (ImGui::Selectable(name.c_str(), appState->editorSelected == material)) {
+            appState->editorSelected = material;
+        }
+
+        ImGui::PopID();
+    }
+}
+
 void PreparePointLightBuffer(AppState *appState, SDL_GPUCommandBuffer *commandBuffer) {
     // gpuLights is a vector of structs that store point light data. Here we clear this list, so we can upload the latest light data to the GPU.
     appState->pointLightGPUs.clear();
@@ -324,6 +346,10 @@ SDL_AppResult RenderFrame(AppState* appState) {
 
         ImGui::Begin("Node Heirarchy");
         DrawNodeTree(appState, &appState->root);
+        ImGui::End();
+
+        ImGui::Begin("Material List");
+        DrawMaterialList(appState);
         ImGui::End();
 
         ImGui::Begin("Debug");

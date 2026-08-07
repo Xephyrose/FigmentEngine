@@ -147,6 +147,7 @@ add_executable(FigmentEngine
         src/HeightFieldBody3D.h
         src/MaterialHeightMap.cpp
         src/MaterialHeightMap.h
+        src/Resource.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

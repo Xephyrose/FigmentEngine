@@ -4,13 +4,13 @@
 #include <string>
 #include <vector>
 
+#include "Resource.h"
 #include "SDL3/SDL_events.h"
 #include "SDL3/SDL_gpu.h"
 
 struct AppState;
 
-struct Node {
-    virtual ~Node() = default;
+struct Node : Resource {
     Node();
     explicit Node(std::string name);
 
@@ -18,7 +18,7 @@ struct Node {
     std::vector<std::unique_ptr<Node>> children;
 
     std::string name;
-    virtual void ImGuiDraw();
+    void ImGuiDraw() override;
     virtual void Update(AppState& appState);
     virtual void FixedUpdate(AppState& appState);
     virtual void PostPhysicsUpdate(AppState& appState);
