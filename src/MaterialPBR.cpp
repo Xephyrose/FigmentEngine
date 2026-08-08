@@ -2,6 +2,14 @@
 #include <SDL3/SDL_log.h>
 
 #include "Camera3D.h"
+#include "thirdparty/imgui/imgui.h"
+
+void MaterialPBR::ImGuiDraw() {
+    MaterialUnlitTextured::ImGuiDraw();
+    ImGui::DragFloat("Metallic", &colorMetallic, 0.1f);
+    ImGui::DragFloat("Roughness", &colorRoughness, 0.1f);
+    ImGui::DragFloat("Ambient Occlusion", &colorAO, 0.1f);
+}
 
 void MaterialPBR::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, glm::mat4 model) {
     if (!appState->current_camera_3d) return;

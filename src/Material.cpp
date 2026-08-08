@@ -1,14 +1,8 @@
 #include "Material.h"
 
 #include "Camera3D.h"
-#include "thirdparty/imgui/imgui.h"
-#include "../thirdparty/imgui/imgui_stdlib.h"
 
-void Material::ImGuiDraw() {
-    if (ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen)) {
-        ImGui::InputText("Pipeline", &pipeline);
-    }
-}
+void Material::ImGuiDraw() {}
 
 void Material::BindVertexUniformDataMMNL(const AppState &appState, SDL_GPUCommandBuffer *commandBuffer, const glm::mat4 &model) {
     const glm::mat4 view = appState.current_camera_3d->GetViewMatrixInterpolated(appState.fixedTimeStepAccumulator / appState.fixedTimeStep);

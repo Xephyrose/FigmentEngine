@@ -5,6 +5,7 @@
 
 struct MaterialPBR : MaterialUnlitTextured {
     using MaterialUnlitTextured::MaterialUnlitTextured;
+    void ImGuiDraw() override;
     float colorMetallic = 0.0f;
     float colorRoughness = 1.0f;
     float colorAO = 1.0f;

@@ -5,6 +5,7 @@
 
 struct MaterialPhongTextured : MaterialUnlitTextured {
     using MaterialUnlitTextured::MaterialUnlitTextured;
+    void ImGuiDraw() override;
     float shininess = 64;
     std::string textureAmbient = "none";
     glm::vec3 colorAmbient = glm::vec3(0.25f);

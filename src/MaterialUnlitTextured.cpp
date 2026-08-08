@@ -2,11 +2,27 @@
 #include <SDL3/SDL_log.h>
 
 #include "Camera3D.h"
+#include "ImGuiWidgets.h"
+#include "thirdparty/imgui/imgui.h"
+#include "thirdparty/imgui/imgui_stdlib.h"
 
 MaterialUnlitTextured::MaterialUnlitTextured(AppState* appState, const std::string &name, const std::string &pipeline) {
     this->name = name;
     this->pipeline = pipeline;
     appState->materials.insert_or_assign(name, this);
+}
+
+void MaterialUnlitTextured::ImGuiDraw() {
+    ImGui::InputText("Texture", &texture); // TODO: because we don't call setTextureAlbedo, this may not be safe if called on a bad texture
+
+    static const char* sampler_items[] = { "anisotropic_repeat", "linear_repeat", "linear_clamp", "nearest_repeat", "nearest_clamp" };
+    static int sampler_selected_idx = 0;
+    ImGui::Combo("Sampler", &sampler_selected_idx, sampler_items, IM_ARRAYSIZE(sampler_items));
+    sampler = sampler_items[sampler_selected_idx];
+
+    float col[4] = { color.x, color.y, color.z, color.w };
+    ImGui::ColoredDragFloat4RGBA("RGBA", col);
+    color = glm::vec4(col[0], col[1], col[2], col[3]);
 }
 
 void MaterialUnlitTextured::Bind(AppState *appState, SDL_GPUCommandBuffer* commandBuffer, const glm::mat4 model) {

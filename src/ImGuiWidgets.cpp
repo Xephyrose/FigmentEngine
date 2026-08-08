@@ -15,4 +15,8 @@ namespace ImGui {
         const char *xyz[3] = {"R", "G", "B"};
         ColoredDragFloat(label, v, xyz);
     }
+    void ColoredDragFloat4RGBA(const char *label, float (&v)[4]) {
+        const char *xyzw[4] = {"R", "G", "B", "A"};
+        ColoredDragFloat(label, v, xyzw);
+    }
 }

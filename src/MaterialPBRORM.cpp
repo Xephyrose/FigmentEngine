@@ -2,13 +2,33 @@
 #include <SDL3/SDL_log.h>
 
 #include "Camera3D.h"
+#include "ImGuiWidgets.h"
+#include "thirdparty/imgui/imgui_stdlib.h"
 
 glm::vec3 SRGBToLinear(glm::vec3 c)
 {
-    glm::vec3 low = c / 12.92f;
-    glm::vec3 high = glm::pow((c + 0.055f) / 1.055f, glm::vec3(2.4f));
+    const glm::vec3 low = c / 12.92f;
+    const glm::vec3 high = glm::pow((c + 0.055f) / 1.055f, glm::vec3(2.4f));
 
     return glm::mix(low, high, glm::step(glm::vec3(0.04045f), c));
+}
+
+void MaterialPBRORM::ImGuiDraw() {
+    ImGui::InputText("Texture", &texture);
+    float col[4] = { color.x, color.y, color.z, color.w };
+    ImGui::ColoredDragFloat4RGBA("RGBA", col);
+    color = glm::vec4(col[0], col[1], col[2], col[3]);
+
+    ImGui::InputText("ORM Map", &textureORM);
+    ImGui::InputText("Normal Map", &textureNormalMap);
+    ImGui::DragFloat("Metallic", &colorMetallic, 0.1f);
+    ImGui::DragFloat("Roughness", &colorRoughness, 0.1f);
+    ImGui::DragFloat("Ambient Occlusion", &colorAO, 0.1f);
+
+    static const char* sampler_items[] = { "anisotropic_repeat", "linear_repeat", "linear_clamp", "nearest_repeat", "nearest_clamp" };
+    static int sampler_selected_idx = 0;
+    ImGui::Combo("Sampler", &sampler_selected_idx, sampler_items, IM_ARRAYSIZE(sampler_items));
+    sampler = sampler_items[sampler_selected_idx];
 }
 
 void MaterialPBRORM::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, glm::mat4 model) {

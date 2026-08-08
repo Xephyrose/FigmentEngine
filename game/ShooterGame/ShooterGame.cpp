@@ -10,15 +10,15 @@
 
 void ShooterGame::Init(AppState &appState) {
 
-    // auto* box = new BoxBody3D(appState, b3_staticBody, 0, -0.738988f, 0, 100, 0.01f, 100);
-    // addChild(std::unique_ptr<Node>(box));
+    auto* box = new BoxBody3D(appState, b3_staticBody, 0, -0.738988f, 0, 100, 0.01f, 100);
+    addChild(std::unique_ptr<Node>(box));
 
     // auto* player = new FreeCam3D();
     // appState.current_camera_3d = player;
 
-    auto* player = new Player3D(appState, 0, 10, 0, 0.35f, 2.2f);
-
     // auto* player = new Player3D(appState, 0, 10, 0, 0.35f, 2.2f);
+
+    auto* player = new QuakePlayer3D(appState, 0, 10, 0, 0.35f, 2.2f);
     addChild(std::unique_ptr<Node>(player));
 
     // auto* pointLight = new PointLight3D(&appState);
@@ -63,23 +63,23 @@ void ShooterGame::Init(AppState &appState) {
     spotLight->localTransform.position.z = 5;
     addChild(std::unique_ptr<Node>(spotLight));
 
-    // auto* meshInstance = new MeshInstance3D();
-    // meshInstance->mesh = "zoo.glb";
-    // addChild(std::unique_ptr<Node>(meshInstance));
+    auto* meshInstance = new MeshInstance3D();
+    meshInstance->mesh = "zoo.glb";
+    addChild(std::unique_ptr<Node>(meshInstance));
 
-    appState.LoadTexture("learnopengl_iceland_height_200_blurred.png");
+    // appState.LoadTexture("learnopengl_iceland_height_200_blurred.png");
 
-    auto* terrain = new HeightFieldBody3D(appState, b3_staticBody, 0, 0, 0,
-        appState.surfaces["learnopengl_iceland_height_200_blurred.png"],
-        appState.surfaces["learnopengl_iceland_height_200_blurred.png"]->w,
-        appState.surfaces["learnopengl_iceland_height_200_blurred.png"]->h,
-        b3Vec3(1, 10, 1));
-    addChild(std::unique_ptr<Node>(terrain));
+    // auto* terrain = new HeightFieldBody3D(appState, b3_staticBody, 0, 0, 0,
+    //     appState.surfaces["learnopengl_iceland_height_200_blurred.png"],
+    //     appState.surfaces["learnopengl_iceland_height_200_blurred.png"]->w,
+    //     appState.surfaces["learnopengl_iceland_height_200_blurred.png"]->h,
+    //     b3Vec3(1, 10, 1));
+    // addChild(std::unique_ptr<Node>(terrain));
 
-    auto* meshInstance2 = new MeshInstance3D();
-    meshInstance2->mesh = "subdivided_plane.glb";
-    meshInstance2->localTransform.scale = glm::vec3(appState.surfaces["learnopengl_iceland_height_200_blurred.png"]->w, 10, appState.surfaces["learnopengl_iceland_height_200_blurred.png"]->h);
+    // auto* meshInstance2 = new MeshInstance3D();
+    // meshInstance2->mesh = "subdivided_plane.glb";
+    // meshInstance2->localTransform.scale = glm::vec3(appState.surfaces["learnopengl_iceland_height_200_blurred.png"]->w, 10, appState.surfaces["learnopengl_iceland_height_200_blurred.png"]->h);
 
-    addChild(std::unique_ptr<Node>(meshInstance2));
+    // addChild(std::unique_ptr<Node>(meshInstance2));
 }
 

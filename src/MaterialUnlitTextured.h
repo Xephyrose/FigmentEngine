@@ -5,6 +5,7 @@
 
 struct MaterialUnlitTextured : Material {
     MaterialUnlitTextured(AppState* appState, const std::string &name, const std::string &pipeline);
+    void ImGuiDraw() override;
     std::string texture = "none";
     std::string sampler = "anisotropic_repeat";
     glm::vec4 color = glm::vec4(1.0f);

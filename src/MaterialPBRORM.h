@@ -4,6 +4,7 @@
 
 struct MaterialPBRORM : MaterialPBR {
     using MaterialPBR::MaterialPBR;
+    void ImGuiDraw() override;
     std::string textureORM = "none";
     std::string textureNormalMap = "none";
 

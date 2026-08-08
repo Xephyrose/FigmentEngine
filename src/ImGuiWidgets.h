@@ -61,7 +61,7 @@ namespace ImGui {
 
             char id[32];
             sprintf(id, "##%s_%d", label, i);
-            DragFloat(id, &v[i]);
+            DragFloat(id, &v[i], 0.1f);
 
             auto lineStart = ImVec2(cursorPos.x + boxWidth, cursorPos.y + 2.0f);
             auto lineEnd = ImVec2(cursorPos.x + boxWidth, cursorPos.y + lineHeight - 2.0f);
@@ -79,6 +79,7 @@ namespace ImGui {
     void ColoredDragFloat1(const char *label, float &v, const char* letters);
     void ColoredDragFloat3XYZ(const char *label, float (&v)[3]);
     void ColoredDragFloat3RGB(const char *label, float (&v)[3]);
+    void ColoredDragFloat4RGBA(const char *label, float (&v)[4]);
 }
 
 #endif //FIGMENTENGINE_IMGUIWIDGETS_H

@@ -2,6 +2,34 @@
 #include <SDL3/SDL_log.h>
 
 #include "Camera3D.h"
+#include "ImGuiWidgets.h"
+#include "thirdparty/imgui/imgui_stdlib.h"
+
+void MaterialPhongTextured::ImGuiDraw() {
+    ImGui::InputText("Texture", &texture);
+    float col[4] = { color.x, color.y, color.z, color.w };
+    ImGui::ColoredDragFloat4RGBA("RGBA", col);
+    color = glm::vec4(col[0], col[1], col[2], col[3]);
+
+    ImGui::DragFloat("Shininess", &shininess);
+
+    ImGui::InputText("Ambient Map", &textureAmbient);
+    float ambient[3] = { colorAmbient.x, colorAmbient.y, colorAmbient.z };
+    ImGui::ColoredDragFloat3RGB("Ambient", ambient);
+    colorAmbient = glm::vec3(col[0], col[1], col[2]);
+
+    ImGui::InputText("Specular Map", &textureSpecular);
+    float specular[3] = { colorSpecular.x, colorSpecular.y, colorSpecular.z };
+    ImGui::ColoredDragFloat3RGB("Specular", specular);
+    colorSpecular = glm::vec3(col[0], col[1], col[2]);
+
+    ImGui::InputText("Normal Map", &textureNormalMap);
+
+    static const char* sampler_items[] = { "anisotropic_repeat", "linear_repeat", "linear_clamp", "nearest_repeat", "nearest_clamp" };
+    static int sampler_selected_idx = 0;
+    ImGui::Combo("Sampler", &sampler_selected_idx, sampler_items, IM_ARRAYSIZE(sampler_items));
+    sampler = sampler_items[sampler_selected_idx];
+}
 
 void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, const glm::mat4 model) {
     if (!appState->current_camera_3d) return;

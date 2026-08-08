@@ -2,11 +2,18 @@
 #include <SDL3/SDL_log.h>
 
 #include "Camera3D.h"
+#include "ImGuiWidgets.h"
 
 MaterialColor::MaterialColor(AppState *appState, const std::string &name, const std::string &pipeline) {
     this->name = name;
     this->pipeline = pipeline;
     appState->materials.insert_or_assign(name, this);
+}
+
+void MaterialColor::ImGuiDraw() {
+    float col[4] = { color.x, color.y, color.z, color.w };
+    ImGui::ColoredDragFloat4RGBA("RGBA", col);
+    color = glm::vec4(col[0], col[1], col[2], col[3]);
 }
 
 void MaterialColor::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, glm::mat4 model) {

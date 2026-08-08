@@ -1063,7 +1063,7 @@ void AppState::CreateDefaultSamplers() {
         .max_lod = FLT_MAX,
     };
     if (SDL_GPUSampler* nearestSampler = SDL_CreateGPUSampler(device, &nearestSamplerInfo)) {
-        samplers["nmearest_clamp"] = nearestSampler;
+        samplers["nearest_clamp"] = nearestSampler;
     } else {
         SDL_Log("Couldn't create nearest sampler: %s", SDL_GetError());
     }
