@@ -68,12 +68,10 @@ void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *comma
         glm::uvec4 texturesUsed; // albedo, ambient, specular, normal
         glm::vec4 colorAmbient;
         glm::vec4 colorSpecular;
-        glm::vec4 lightNums; // num_point_lights, num_dir_lights, num_spot_lights
-        glm::vec4 params; // shininess
+        glm::vec4 lightNums; // num_point_lights, num_dir_lights, num_spot_lights, shininess
     };
     PushData push{};
     push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransformInterpolated(appState->fixedTimeStepAccumulator / appState->fixedTimeStep).position, 0);
-    push.params.x = shininess;
     push.colorAlbedo = color;
     push.texturesUsed.x = texture == "none" ? 0 : 1;
     push.colorAmbient = glm::vec4(colorAmbient, 0.0f);
@@ -84,6 +82,7 @@ void MaterialPhongTextured::Bind(AppState *appState, SDL_GPUCommandBuffer *comma
     push.lightNums.x = appState->pointLights.size();
     push.lightNums.y = appState->directionalLights.size();
     push.lightNums.z = appState->spotLights.size();
+    push.lightNums.w = shininess;
 
     SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
 

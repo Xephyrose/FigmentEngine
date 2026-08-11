@@ -5,10 +5,8 @@ SamplerComparisonState g_shadow_sampler : register(s0, space2);
 
 cbuffer PushConstants : register(b0, space3)
 {
-    float4  viewPos;
-    int     num_point_lights;
-    int     num_dir_lights;
-    int     num_spot_lights;
+    float4 viewPos;
+    float4 params; // num_point_lights, num_dir_lights, num_spot_lights, padding
 }
 
 struct PSInput {
@@ -32,17 +30,17 @@ float4 main(PSInput input) : SV_TARGET {
 
     float3 diffuse = float3(0.0f, 0.0f, 0.0f);
     float3 specular = float3(0.0f, 0.0f, 0.0f);
-    for(int i = 0; i < num_point_lights; i++) {
+    for(int i = 0; i < params.x; i++) {
         diffuse += CalcPointLightDiffuse(pointLights[i], input.worldNormal, input.worldPos);
         specular += CalcPointLightSpecular(pointLights[i], input.worldNormal, calcSpecular, CalcBlinnPhongSpecular(normalize(-directionalLights[i].direction.xyz), input.worldNormal, normalize(viewPos.xyz - input.worldPos), shininess));
     }
-    for(int i = 0; i < num_dir_lights; i++) {
+    for(int i = 0; i < params.y; i++) {
         DirectionalLight light = directionalLights[i];
         light.direction.w = CalcDirectionalLightShadows(light, g_shadow_map, g_shadow_sampler, input.shadowCoord, input.worldNormal, 1);
         diffuse += CalcDirectionalLightDiffuse(light, input.worldNormal);
         specular += CalcDirectionalLightSpecular(light, calcSpecular, CalcBlinnPhongSpecular(normalize(-directionalLights[i].direction.xyz), input.worldNormal, normalize(viewPos.xyz - input.worldPos), shininess));
     }
-    for(int i = 0; i < num_spot_lights; i++) {
+    for(int i = 0; i < params.z; i++) {
         diffuse += CalcSpotLightDiffuse(spotLights[i], input.worldNormal, input.worldPos);
         specular += CalcSpotLightSpecular(spotLights[i], input.worldPos, calcSpecular, CalcBlinnPhongSpecular(normalize(-directionalLights[i].direction.xyz), input.worldNormal, normalize(viewPos.xyz - input.worldPos), shininess));
     }

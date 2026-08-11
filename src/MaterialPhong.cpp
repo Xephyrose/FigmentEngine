@@ -28,15 +28,13 @@ void MaterialPhong::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer
 
     struct PushData {
         glm::vec4 viewPos;
-        int       num_point_lights;
-        int       num_dir_lights;
-        int       num_spot_lights;
+        glm::vec4 params; // num_point_lights, num_dir_lights, num_spot_lights
     };
     PushData push{};
     push.viewPos = glm::vec4(appState->current_camera_3d->GetGlobalTransformInterpolated(appState->fixedTimeStepAccumulator / appState->fixedTimeStep).position, 0);
-    push.num_point_lights = appState->pointLights.size();
-    push.num_dir_lights = appState->directionalLights.size();
-    push.num_spot_lights = appState->spotLights.size();
+    push.params.x = appState->pointLights.size();
+    push.params.y = appState->directionalLights.size();
+    push.params.z = appState->spotLights.size();
 
     SDL_PushGPUFragmentUniformData(commandBuffer, 0, &push, sizeof(PushData));
 
