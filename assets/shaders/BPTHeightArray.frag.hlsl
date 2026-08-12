@@ -48,7 +48,7 @@ float4 getLayerAlbedo(uint layer, PSInput input) {
 
 float3 getLayerAmbient(uint layer, PSInput input) {
     float3 calcAmbient = colorAmbients[layer].xyz;
-    if (texturesUsed.y == true) {
+    if (texturesUsed[layer].y == true) {
         float3 texColor = g_ambient.Sample(g_sampler_ambient, float3(input.uv, layer)).xyz;
         calcAmbient = texColor * colorAmbients[layer].xyz;
     }
@@ -64,18 +64,11 @@ float3 getLayerSpecular(uint layer, PSInput input) {
     return calcSpecular;
 }
 
-float3 getLayerNormal(uint layer, PSInput input) {
-    float3 worldNormal = normalize(input.worldNormal);
+float3 getLayerNormal(uint layer, PSInput input, float3 T, float3 B, float3 N) {
+    float3 worldNormal = input.worldNormal;
     if (texturesUsed[layer].w == true) {
         float3 sampledNormal = g_normal_map.Sample(g_sampler_normal_map, float3(input.uv, layer)).rgb;
         float3 tangentNormal = sampledNormal * 2.0 - 1.0;
-
-        float3 N = normalize(input.worldNormal);
-        float3 T = normalize(input.worldTangent);
-        float3 B = normalize(input.worldBitangent);
-
-        T = normalize(T - dot(T, N) * N);
-        B = cross(N, T);
 
         worldNormal = normalize(T * tangentNormal.x + B * tangentNormal.y + N * tangentNormal.z);
     }
@@ -83,26 +76,34 @@ float3 getLayerNormal(uint layer, PSInput input) {
 }
 
 float4 main(PSInput input) : SV_TARGET {
-    float3 worldNormal = getLayerNormal(1, input);
+    float3 pos = normalize(viewPos.xyz - input.worldPos);
+    float3 N = normalize(input.worldNormal);
+    float3 T = normalize(input.worldTangent);
+    float3 B = normalize(input.worldBitangent);
+    T = normalize(T - dot(T, N) * N);
+    B = cross(N, T);
+
+    float3 worldNormal = getLayerNormal(1, input, T, B, N);
     float4 calcAlbedo = getLayerAlbedo(1, input);
     float3 calcAmbient = getLayerAmbient(1, input);
     float3 calcSpecular = getLayerSpecular(1, input);
 
     float3 diffuse = float3(0.0f, 0.0f, 0.0f);
     float3 specular = float3(0.0f, 0.0f, 0.0f);
+
     for(int i = 0; i < params.x; i++) {
         diffuse += CalcPointLightDiffuse(pointLights[i], worldNormal, input.worldPos);
-        specular += CalcPointLightSpecular(pointLights[i], worldNormal, calcSpecular, CalcBlinnPhongSpecular(normalize(pointLights[i].position.xyz - input.worldPos), worldNormal, normalize(viewPos.xyz - input.worldPos), params.w));
+        specular += CalcPointLightSpecular(pointLights[i], input.worldPos, calcSpecular, CalcBlinnPhongSpecular(normalize(pointLights[i].position.xyz - input.worldPos), worldNormal, pos, params.w));
     }
     for(int i = 0; i < params.y; i++) {
         DirectionalLight light = directionalLights[i];
         light.direction.w = CalcDirectionalLightShadows(light, g_shadow_map, g_shadow_sampler, input.shadowCoord, worldNormal, 1);
         diffuse += CalcDirectionalLightDiffuse(light, worldNormal);
-        specular += CalcDirectionalLightSpecular(light, calcSpecular, CalcBlinnPhongSpecular(normalize(-directionalLights[i].direction.xyz), worldNormal, normalize(viewPos.xyz - input.worldPos), params.w));
+        specular += CalcDirectionalLightSpecular(light, calcSpecular, CalcBlinnPhongSpecular(normalize(-directionalLights[i].direction.xyz), worldNormal, pos, params.w));
     }
     for(int i = 0; i < params.z; i++) {
         diffuse += CalcSpotLightDiffuse(spotLights[i], worldNormal, input.worldPos);
-        specular += CalcSpotLightSpecular(spotLights[i], input.worldPos, calcSpecular, CalcBlinnPhongSpecular(normalize(spotLights[i].position.xyz - input.worldPos), worldNormal, normalize(viewPos.xyz - input.worldPos), params.w));
+        specular += CalcSpotLightSpecular(spotLights[i], input.worldPos, calcSpecular, CalcBlinnPhongSpecular(normalize(spotLights[i].position.xyz - input.worldPos), worldNormal, pos, params.w));
     }
 
     float3 lighting = (calcAmbient.xyz + diffuse) * calcAlbedo.xyz + specular;

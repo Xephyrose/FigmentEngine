@@ -483,6 +483,7 @@ bool AppState::LoadShader(const std::string& path) {
 }
 
 bool AppState::LoadTexture(const std::string& path, const SDL_PixelFormat preferred_format) {
+    if (textures.contains(path)) return true;
     const std::string fullPath = (std::filesystem::path(SDL_GetBasePath()) / "assets" / "textures" / path).string();
 
     // 1. Load the image surface

@@ -148,6 +148,8 @@ add_executable(FigmentEngine
         src/MaterialHeightMap.cpp
         src/MaterialHeightMap.h
         src/Resource.h
+        src/MaterialPhongTexturedHeight.cpp
+        src/MaterialPhongTexturedHeight.h
 )
 
 target_include_directories(FigmentEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

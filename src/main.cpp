@@ -244,7 +244,7 @@ void PreparePointLightBuffer(AppState *appState, SDL_GPUCommandBuffer *commandBu
         PointLight3DGPU gpu;
         gpu.color = glm::vec4(light->color, light->brightness);
         gpu.position = glm::vec4(light->GetGlobalTransformInterpolated().position, 0);
-        gpu.params = glm::vec4(light->constant, light->linear, light->quadratic, 0);
+        gpu.params = glm::vec4(light->constant, light->linear, light->quadratic, 1);
         appState->pointLightGPUs.push_back(gpu);
     }
 
@@ -277,7 +277,7 @@ void PrepareDirectionalLightBuffer(AppState *appState, SDL_GPUCommandBuffer *com
     for (const DirectionalLight3D* light : appState->directionalLights) {
         DirectionalLight3DGPU gpu;
         gpu.color = glm::vec4(light->color, light->brightness);
-        gpu.direction = glm::vec4(light->GetGlobalTransformInterpolated().getForward(), 0);
+        gpu.direction = glm::vec4(light->GetGlobalTransformInterpolated().getForward(), 1);
         appState->directionalLightGPUs.push_back(gpu);
     }
 
@@ -311,7 +311,7 @@ void PrepareSpotLightBuffer(AppState *appState, SDL_GPUCommandBuffer *commandBuf
         gpu.color = glm::vec4(light->color, light->brightness);
         gpu.position = glm::vec4(light->GetGlobalTransformInterpolated().position, glm::cos(glm::radians(light->cutoff)));
         gpu.direction = glm::vec4(light->GetGlobalTransformInterpolated().getForward(), glm::cos(glm::radians(light->outerCutoff)));
-        gpu.params = glm::vec4(light->constant, light->linear, light->quadratic, 0);
+        gpu.params = glm::vec4(light->constant, light->linear, light->quadratic, 1);
         appState->spotLightGPUs.push_back(gpu);
     }
 
