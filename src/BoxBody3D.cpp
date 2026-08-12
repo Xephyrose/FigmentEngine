@@ -1,6 +1,6 @@
 #include "BoxBody3D.h"
 
-BoxBody3D::BoxBody3D(AppState &appState, b3BodyType bodyType, float pos_x, float pos_y, float pos_z, float width, float height, float depth) : PhysicsBody3D(appState, bodyType, pos_x, pos_y, pos_z) {
+BoxBody3D::BoxBody3D(b3BodyType bodyType, float pos_x, float pos_y, float pos_z, float width, float height, float depth) : PhysicsBody3D(bodyType, pos_x, pos_y, pos_z) {
     b3BoxHull collider = b3MakeBoxHull(width, height, depth);
 
     b3ShapeDef shapeDef = b3DefaultShapeDef();

@@ -3,7 +3,7 @@
 #include "game/Game.h"
 
 struct FightingGame : Game {
-    void Init(AppState &appState) override;
+    void Init() override;
 };
 
 

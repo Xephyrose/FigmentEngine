@@ -19,6 +19,11 @@
 #include "SDL3/SDL_log.h"
 #include "thirdparty/json.hpp"
 
+AppState::AppState() {
+    currentAspectRatio = static_cast<float>(windowWidth) / static_cast<float>(windowHeight);
+    fixedTimeStep = 1.0f / static_cast<float>(physics_tps);
+}
+
 AppState::~AppState() {
     for (const auto &material: materials | std::views::values) {delete material;}
     materials.clear();
@@ -48,10 +53,10 @@ AppState::~AppState() {
     samplers.clear();
 
     for (auto &mesh: meshes | std::views::values) {
-        mesh.ReleaseGPUResources(this);
+        mesh.ReleaseGPUResources();
     }
     meshes.clear();
-    quadMesh->ReleaseGPUResources(this);
+    quadMesh->ReleaseGPUResources();
 
     for (const auto &pipeline: pipelines | std::views::values) {
         if (pipeline) {
@@ -89,7 +94,7 @@ void AppState::updatePhysicsTimeStep() {
     fixedTimeStep = 1.0f / static_cast<float>(physics_tps);
 }
 
-SDL_Surface* AppState::DownloadGPUTexture(SDL_GPUTexture *texture) {
+SDL_Surface* AppState::DownloadGPUTexture(SDL_GPUTexture *texture) const {
     SDL_GPUTransferBufferCreateInfo createInfo{};
     createInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_DOWNLOAD;
     createInfo.size = 4096 * 4096 * 4;
@@ -367,7 +372,7 @@ bool AppState::LoadMesh(const std::string& path) {
     // }
 
     meshes.insert_or_assign(path, result);
-    meshes.at(path).UploadToGPU(*this);
+    meshes.at(path).UploadToGPU();
 
     return true;
 }
@@ -873,146 +878,146 @@ void AppState::CreateSpotLightBuffer() {
 
 void AppState::CreateDefaultMaterials() {
     SDL_Log("Creating default materials...");
-    auto* missing_2d = new Material2D(this, "missing_2d", "2D");
-    missing_2d->setTextureAlbedo(this, "missing.png");
-    missing_2d->setSampler(this, "nearest_repeat");
+    auto* missing_2d = new Material2D("missing_2d", "2D");
+    missing_2d->setTextureAlbedo("missing.png");
+    missing_2d->setSampler("nearest_repeat");
 
-    auto* missing = new MaterialUnlitTextured(this, "missing", "UnlitTextured");
-    missing->setTextureAlbedo(this, "missing.png");
-    missing->setSampler(this, "anisotropic_repeat");
+    auto* missing = new MaterialUnlitTextured("missing", "UnlitTextured");
+    missing->setTextureAlbedo("missing.png");
+    missing->setSampler("anisotropic_repeat");
 
-    new MaterialPhong(this, "phong", "Phong");
-    const auto phong_tex = new MaterialPhongTextured(this, "phong_textured", "PhongTextured");
-    phong_tex->setTextureAlbedo(this, "missing.png");
-    phong_tex->setSampler(this, "nearest_repeat");
-    new MaterialPhong(this, "blinn_phong", "BlinnPhong");
-    const auto blinn_phong_tex = new MaterialPhongTextured(this, "blinn_phong_textured", "BlinnPhongTextured");
-    blinn_phong_tex->setTextureAlbedo(this, "missing.png");
-    blinn_phong_tex->setSampler(this, "nearest_repeat");
+    new MaterialPhong("phong", "Phong");
+    const auto phong_tex = new MaterialPhongTextured("phong_textured", "PhongTextured");
+    phong_tex->setTextureAlbedo("missing.png");
+    phong_tex->setSampler("nearest_repeat");
+    new MaterialPhong("blinn_phong", "BlinnPhong");
+    const auto blinn_phong_tex = new MaterialPhongTextured("blinn_phong_textured", "BlinnPhongTextured");
+    blinn_phong_tex->setTextureAlbedo("missing.png");
+    blinn_phong_tex->setSampler("nearest_repeat");
 
     auto* line = new MaterialColor(this, "line", "Line");
     line->setColor(glm::vec4(1, 0, 1, 1));
 
-    auto* pbr = new MaterialPBR(this, "pbr", "PBR");
+    auto* pbr = new MaterialPBR("pbr", "PBR");
     pbr->setColorAlbedo(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
-    auto* pbr_orm = new MaterialPBRORM(this, "pbr_orm", "PBRORM");
+    auto* pbr_orm = new MaterialPBRORM("pbr_orm", "PBRORM");
     pbr_orm->setColorAlbedo(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
-    pbr_orm->setTextureAlbedo(this, "learnopengl_rustediron2_basecolor.png");
-    pbr_orm->setTextureORM(this, "learnopengl_rustediron2_orm.png");
-    pbr_orm->setTextureNormalMap(this, "learnopengl_rustediron2_normal.png");
+    pbr_orm->setTextureAlbedo("learnopengl_rustediron2_basecolor.png");
+    pbr_orm->setTextureORM("learnopengl_rustediron2_orm.png");
+    pbr_orm->setTextureNormalMap("learnopengl_rustediron2_normal.png");
 
-    auto* heightmap = new MaterialHeightMap(this, "heightmap", "HeightMap");
-    heightmap->setTextureAlbedo(this, "learnopengl_iceland_height_200_blurred.png");
+    auto* heightmap = new MaterialHeightMap("heightmap", "HeightMap");
+    heightmap->setTextureAlbedo("learnopengl_iceland_height_200_blurred.png");
 
-    auto* concrete_bricks = new MaterialPBRORM(this, "concrete_bricks", "PBRORM");
-    concrete_bricks->setTextureAlbedo(this, "brick_concrete_albedo.png");
-    concrete_bricks->setSampler(this, "anisotropic_repeat");
-    concrete_bricks->setTextureNormalMap(this, "brick_concrete_normal.png");
+    auto* concrete_bricks = new MaterialPBRORM("concrete_bricks", "PBRORM");
+    concrete_bricks->setTextureAlbedo("brick_concrete_albedo.png");
+    concrete_bricks->setSampler("anisotropic_repeat");
+    concrete_bricks->setTextureNormalMap("brick_concrete_normal.png");
 
-    auto* concrete_bricks_with_specks = new MaterialPBRORM(this, "concrete_bricks_with_specks", "PBRORM");
-    concrete_bricks_with_specks->setTextureAlbedo(this, "brick_concrete_specks_albedo.png");
-    concrete_bricks_with_specks->setSampler(this, "anisotropic_repeat");
-    concrete_bricks_with_specks->setTextureNormalMap(this, "brick_concrete_normal.png");
+    auto* concrete_bricks_with_specks = new MaterialPBRORM("concrete_bricks_with_specks", "PBRORM");
+    concrete_bricks_with_specks->setTextureAlbedo("brick_concrete_specks_albedo.png");
+    concrete_bricks_with_specks->setSampler("anisotropic_repeat");
+    concrete_bricks_with_specks->setTextureNormalMap("brick_concrete_normal.png");
 
-    auto* plaster = new MaterialPBRORM(this, "plaster", "PBRORM");
-    plaster->setSampler(this, "anisotropic_repeat");
-    plaster->setTextureNormalMap(this, "plaster_normal.png");
+    auto* plaster = new MaterialPBRORM("plaster", "PBRORM");
+    plaster->setSampler("anisotropic_repeat");
+    plaster->setTextureNormalMap("plaster_normal.png");
     plaster->setColorMetallic(0.13f);
     plaster->setColorRoughness(0.5f);
 
-    auto* reinforced_glass = new MaterialPBRORM(this, "reinforced_glass", "PBRORM");
-    reinforced_glass->setTextureAlbedo(this, "reinforced_glass_albedo.png");
-    reinforced_glass->setSampler(this, "anisotropic_repeat");
-    reinforced_glass->setTextureNormalMap(this, "reinforced_glass_normal.png");
+    auto* reinforced_glass = new MaterialPBRORM("reinforced_glass", "PBRORM");
+    reinforced_glass->setTextureAlbedo("reinforced_glass_albedo.png");
+    reinforced_glass->setSampler("anisotropic_repeat");
+    reinforced_glass->setTextureNormalMap("reinforced_glass_normal.png");
 
-    auto* fence = new MaterialPBRORM(this, "fence", "PBRORM");
-    fence->setTextureAlbedo(this, "fence_albedo.png");
-    fence->setSampler(this, "anisotropic_repeat");
-    fence->setTextureNormalMap(this, "fence_normal.png");
+    auto* fence = new MaterialPBRORM("fence", "PBRORM");
+    fence->setTextureAlbedo("fence_albedo.png");
+    fence->setSampler("anisotropic_repeat");
+    fence->setTextureNormalMap("fence_normal.png");
 
-    auto* asphalt = new MaterialPBRORM(this, "asphalt", "PBRORM");
-    asphalt->setTextureAlbedo(this, "asphalt_albedo.png");
-    asphalt->setSampler(this, "anisotropic_repeat");
-    asphalt->setTextureNormalMap(this, "asphalt_normal.png");
+    auto* asphalt = new MaterialPBRORM("asphalt", "PBRORM");
+    asphalt->setTextureAlbedo("asphalt_albedo.png");
+    asphalt->setSampler("anisotropic_repeat");
+    asphalt->setTextureNormalMap("asphalt_normal.png");
     asphalt->setColorRoughness(0.5f);
 
-    auto* asphalt_2 = new MaterialPBRORM(this, "asphalt_2", "PBRORM");
-    asphalt_2->setTextureAlbedo(this, "asphalt_2_albedo.png");
-    asphalt_2->setSampler(this, "anisotropic_repeat");
+    auto* asphalt_2 = new MaterialPBRORM("asphalt_2", "PBRORM");
+    asphalt_2->setTextureAlbedo("asphalt_2_albedo.png");
+    asphalt_2->setSampler("anisotropic_repeat");
 
-    auto* concrete = new MaterialPBRORM(this, "concrete", "PBRORM");
-    concrete->setTextureAlbedo(this, "concrete_albedo.png");
-    concrete->setSampler(this, "anisotropic_repeat");
+    auto* concrete = new MaterialPBRORM("concrete", "PBRORM");
+    concrete->setTextureAlbedo("concrete_albedo.png");
+    concrete->setSampler("anisotropic_repeat");
 
-    auto* concrete_with_specks = new MaterialPBRORM(this, "concrete_with_specks", "PBRORM");
-    concrete_with_specks->setTextureAlbedo(this, "concrete_specks_albedo.png");
-    concrete_with_specks->setSampler(this, "anisotropic_repeat");
+    auto* concrete_with_specks = new MaterialPBRORM("concrete_with_specks", "PBRORM");
+    concrete_with_specks->setTextureAlbedo("concrete_specks_albedo.png");
+    concrete_with_specks->setSampler("anisotropic_repeat");
 
-    auto* hardwood_dark = new MaterialPBRORM(this, "hardwood_dark", "PBRORM");
-    hardwood_dark->setTextureAlbedo(this, "hardwood_dark_albedo.png");
-    hardwood_dark->setSampler(this, "anisotropic_repeat");
-    hardwood_dark->setTextureNormalMap(this, "hardwood_dark_normal.png");
+    auto* hardwood_dark = new MaterialPBRORM("hardwood_dark", "PBRORM");
+    hardwood_dark->setTextureAlbedo("hardwood_dark_albedo.png");
+    hardwood_dark->setSampler("anisotropic_repeat");
+    hardwood_dark->setTextureNormalMap("hardwood_dark_normal.png");
 
-    auto* hardwood_light = new MaterialPBRORM(this, "hardwood_light", "PBRORM");
-    hardwood_light->setTextureAlbedo(this, "hardwood_light_albedo.png");
-    hardwood_light->setSampler(this, "anisotropic_repeat");
-    hardwood_light->setTextureNormalMap(this, "hardwood_light_normal.png");
+    auto* hardwood_light = new MaterialPBRORM("hardwood_light", "PBRORM");
+    hardwood_light->setTextureAlbedo("hardwood_light_albedo.png");
+    hardwood_light->setSampler("anisotropic_repeat");
+    hardwood_light->setTextureNormalMap("hardwood_light_normal.png");
 
-    auto* pine_end = new MaterialPBRORM(this, "pine_end", "PBRORM");
-    pine_end->setTextureAlbedo(this, "pine_end_albedo.png");
-    pine_end->setSampler(this, "anisotropic_repeat");
-    pine_end->setTextureNormalMap(this, "pine_end_normal.png");
+    auto* pine_end = new MaterialPBRORM("pine_end", "PBRORM");
+    pine_end->setTextureAlbedo("pine_end_albedo.png");
+    pine_end->setSampler("anisotropic_repeat");
+    pine_end->setTextureNormalMap("pine_end_normal.png");
 
-    auto* pine_wood_dark = new MaterialPBRORM(this, "pine_wood_dark", "PBRORM");
-    pine_wood_dark->setTextureAlbedo(this, "pine_wood_dark_albedo.png");
-    pine_wood_dark->setSampler(this, "anisotropic_repeat");
-    pine_wood_dark->setTextureNormalMap(this, "pine_wood_dark_normal.png");
+    auto* pine_wood_dark = new MaterialPBRORM("pine_wood_dark", "PBRORM");
+    pine_wood_dark->setTextureAlbedo("pine_wood_dark_albedo.png");
+    pine_wood_dark->setSampler("anisotropic_repeat");
+    pine_wood_dark->setTextureNormalMap("pine_wood_dark_normal.png");
 
-    auto* pine_wood_light = new MaterialPBRORM(this, "pine_wood_light", "PBRORM");
-    pine_wood_light->setTextureAlbedo(this, "pine_wood_light_albedo.png");
-    pine_wood_light->setSampler(this, "anisotropic_repeat");
-    pine_wood_light->setTextureNormalMap(this, "pine_wood_light_normal.png");
+    auto* pine_wood_light = new MaterialPBRORM("pine_wood_light", "PBRORM");
+    pine_wood_light->setTextureAlbedo("pine_wood_light_albedo.png");
+    pine_wood_light->setSampler("anisotropic_repeat");
+    pine_wood_light->setTextureNormalMap("pine_wood_light_normal.png");
 
-    auto* roof_tile = new MaterialPBRORM(this, "roof_tile", "PBRORM");
-    roof_tile->setTextureAlbedo(this, "roof_tile_albedo.png");
-    roof_tile->setSampler(this, "anisotropic_repeat");
-    roof_tile->setTextureNormalMap(this, "roof_tile_normal.png");
+    auto* roof_tile = new MaterialPBRORM("roof_tile", "PBRORM");
+    roof_tile->setTextureAlbedo("roof_tile_albedo.png");
+    roof_tile->setSampler("anisotropic_repeat");
+    roof_tile->setTextureNormalMap("roof_tile_normal.png");
 
-    auto* wood_plank = new MaterialPBRORM(this, "wood_plank", "PBRORM");
-    wood_plank->setTextureAlbedo(this, "wood_plank_albedo.png");
-    wood_plank->setSampler(this, "anisotropic_repeat");
-    wood_plank->setTextureNormalMap(this, "wood_plank_normal.png");
+    auto* wood_plank = new MaterialPBRORM("wood_plank", "PBRORM");
+    wood_plank->setTextureAlbedo("wood_plank_albedo.png");
+    wood_plank->setSampler("anisotropic_repeat");
+    wood_plank->setTextureNormalMap("wood_plank_normal.png");
 
-    auto* grid_grey = new MaterialPBRORM(this, "grid_grey", "PBRORM");
-    grid_grey->setTextureAlbedo(this, "grid_grey_albedo.png");
-    grid_grey->setSampler(this, "anisotropic_repeat");
+    auto* grid_grey = new MaterialPBRORM("grid_grey", "PBRORM");
+    grid_grey->setTextureAlbedo("grid_grey_albedo.png");
+    grid_grey->setSampler("anisotropic_repeat");
 
-    auto* grid_orange = new MaterialPBRORM(this, "grid_orange", "PBRORM");
-    grid_orange->setTextureAlbedo(this, "grid_orange_albedo.png");
-    grid_orange->setSampler(this, "anisotropic_repeat");
+    auto* grid_orange = new MaterialPBRORM("grid_orange", "PBRORM");
+    grid_orange->setTextureAlbedo("grid_orange_albedo.png");
+    grid_orange->setSampler("anisotropic_repeat");
 
-    auto* paint_red = new MaterialPBRORM(this, "paint_red", "PBRORM");
+    auto* paint_red = new MaterialPBRORM("paint_red", "PBRORM");
     paint_red->setColorAlbedo(glm::vec4(0.5f, 0.25f, 0.25f, 1.0f));
-    paint_red->setTextureNormalMap(this, "plaster_normal.png");
+    paint_red->setTextureNormalMap("plaster_normal.png");
     paint_red->setColorMetallic(0.13f);
     paint_red->setColorRoughness(0.5f);
 
-    auto* paint_beige = new MaterialPBRORM(this, "paint_beige", "PBRORM");
+    auto* paint_beige = new MaterialPBRORM("paint_beige", "PBRORM");
     paint_beige->setColorAlbedo(glm::vec4(0.75f, 0.55f, 0.45f, 1.0f));
-    paint_beige->setTextureNormalMap(this, "plaster_normal.png");
+    paint_beige->setTextureNormalMap("plaster_normal.png");
     paint_beige->setColorMetallic(0.13f);
     paint_beige->setColorRoughness(0.5f);
 
-    auto* clip = new MaterialPBRORM(this, "clip", "PBRORMAlpha");
+    auto* clip = new MaterialPBRORM("clip", "PBRORMAlpha");
     clip->setColorAlbedo(glm::vec4(1.0f, 0.0f, 0.0f, 0.5f));
 
-    auto* glass = new MaterialPBRORM(this, "glass", "PBRORMAlpha");
+    auto* glass = new MaterialPBRORM("glass", "PBRORMAlpha");
     glass->setColorAlbedo(glm::vec4(0.0f, 0.0f, 0.0f, 0.8f));
 
-    auto* metal_silver = new MaterialPBRORM(this, "metal_silver", "PBRORM");
+    auto* metal_silver = new MaterialPBRORM("metal_silver", "PBRORM");
     metal_silver->setColorAlbedo(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
 
-    auto* blend_brick_concrete = new MaterialPBRORM(this, "blend_brick_concrete", "PBRORM");
+    auto* blend_brick_concrete = new MaterialPBRORM("blend_brick_concrete", "PBRORM");
     blend_brick_concrete->setColorAlbedo(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
 }
 
@@ -1214,8 +1219,6 @@ void AppState::CreateShadowMap() {
         shadowMap = nullptr;
     }
 
-    constexpr int shadowMapSize = 4096 * 4;  // You can make this configurable
-
     SDL_GPUTextureCreateInfo info = {};
     info.type = SDL_GPU_TEXTURETYPE_2D;
     info.format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
@@ -1357,7 +1360,7 @@ void AppState::RenderShadowMap(SDL_GPUCommandBuffer* cmdBuf, const glm::mat4& li
     // SDL_Log("LightVP: [%f %f %f %f]", lightViewProj[0][0], lightViewProj[0][1], lightViewProj[0][2], lightViewProj[0][3]);
     SDL_PushGPUVertexUniformData(cmdBuf, 0, &lightViewProj, sizeof(lightViewProj));
 
-    root.DrawShadow(*this, cmdBuf, pass);
+    root.DrawShadow(cmdBuf, pass);
 
     SDL_EndGPURenderPass(pass);
 }

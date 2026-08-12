@@ -3,8 +3,8 @@
 #include "../../src/Input.h"
 #include "src/GLMHelper.h"
 
-void QuakePlayer3D::FixedUpdate(AppState &appState) {
-    IsGrounded(appState);
+void QuakePlayer3D::FixedUpdate() {
+    IsGrounded();
     b3Body_SetGravityScale(bodyId, !onGround);
 
     glm::vec3 velocity = GetLinearVelocity(bodyId);
@@ -15,8 +15,8 @@ void QuakePlayer3D::FixedUpdate(AppState &appState) {
     }
     velocity = GetLinearVelocity(bodyId);
 
-    SV_AirMove(velocity, static_cast<float>(appState.fixedTimeStep));
-    CapsuleBody3D::FixedUpdate(appState);
+    SV_AirMove(velocity, static_cast<float>(AppState::Get().fixedTimeStep));
+    CapsuleBody3D::FixedUpdate();
 }
 
 void QuakePlayer3D::SV_AirMove(glm::vec3 &velocity, const float delta) const {

@@ -19,13 +19,13 @@ struct Node : Resource {
 
     std::string name;
     void ImGuiDraw() override;
-    virtual void Update(AppState& appState);
-    virtual void FixedUpdate(AppState& appState);
-    virtual void PostPhysicsUpdate(AppState& appState);
-    virtual void Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer);
-    virtual void DrawShadow(AppState& appState, SDL_GPUCommandBuffer* commandBuffer, SDL_GPURenderPass* renderPass);
-    virtual void Input(AppState& appState);
-    virtual void Event(AppState& appState, SDL_Event &event);
+    virtual void Update();
+    virtual void FixedUpdate();
+    virtual void PostPhysicsUpdate();
+    virtual void Draw(SDL_GPUCommandBuffer *commandBuffer);
+    virtual void DrawShadow(SDL_GPUCommandBuffer* commandBuffer, SDL_GPURenderPass* renderPass);
+    virtual void Input();
+    virtual void Event(SDL_Event &event);
     void addChild(std::unique_ptr<Node> child);
     void killChild(Node* child);
     void killChild(const std::string& _name);

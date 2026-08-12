@@ -2,12 +2,12 @@
 
 #include "AppState.h"
 
-PhysicsBody2D::PhysicsBody2D(AppState &appState, b2BodyType bodyType, float size_x, float size_y, float pos_x, float pos_y) {
+PhysicsBody2D::PhysicsBody2D(b2BodyType bodyType, float size_x, float size_y, float pos_x, float pos_y) {
     name = "PhysicsBody2D";
     b2BodyDef bodyDef = b2DefaultBodyDef();
     bodyDef.type = bodyType;
     bodyDef.position = (b2Vec2){pos_x / 50, pos_y / 50};
-    bodyId = b2CreateBody(appState.worldId2, &bodyDef);
+    bodyId = b2CreateBody(AppState::Get().worldId2, &bodyDef);
     b2Polygon box = b2MakeBox(size_x / 50, size_y / 50);
 
     b2ShapeDef shapeDef = b2DefaultShapeDef();
@@ -20,10 +20,10 @@ Transform2D PhysicsBody2D::GetGlobalTransform() const {
     return localTransform;
 }
 
-void PhysicsBody2D::Update(AppState &appState) {
+void PhysicsBody2D::Update() {
     localTransform.rotation = glm::degrees(b2Rot_GetAngle(b2Body_GetRotation(bodyId)));
     localTransform.position.x = b2Body_GetPosition(bodyId).x * 50;
     localTransform.position.y = b2Body_GetPosition(bodyId).y * 50;
     // localTransform.logTransform();
-    Node2D::Update(appState);
+    Node2D::Update();
 }

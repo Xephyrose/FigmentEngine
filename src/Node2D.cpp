@@ -14,8 +14,7 @@ void Node2D::ImGuiDraw() {
 
 Transform2D Node2D::GetGlobalTransform() const {
     if (parent != nullptr) {
-        const auto* par = dynamic_cast<Node2D*> (parent);
-        if (par != nullptr) {
+        if (const auto* par = dynamic_cast<Node2D*> (parent); par != nullptr) {
             Transform2D globalTransform;
             globalTransform.position = par->GetGlobalTransform().position + localTransform.position;
             globalTransform.rotation = par->GetGlobalTransform().rotation + localTransform.rotation;

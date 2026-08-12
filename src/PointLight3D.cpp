@@ -20,17 +20,19 @@ void PointLight3D::ImGuiDraw() {
     }
 }
 
-PointLight3D::PointLight3D(AppState* appState) {
+PointLight3D::PointLight3D() {
     name = "PointLight3D";
-    Register(appState);
+    Register();
 }
 
-void PointLight3D::Register(AppState* appState) {
+void PointLight3D::Register() {
+    AppState* appState = &AppState::Get();
     appState->pointLights.push_back(this);
     appState->CreatePointLightBuffer();
 }
 
-void PointLight3D::Unregister(AppState* appState) {
+void PointLight3D::Unregister() {
+    AppState* appState = &AppState::Get();
     if (const auto it = std::ranges::find(appState->pointLights, this); it != appState->pointLights.end()) {
         appState->pointLights.erase(it);
         appState->CreatePointLightBuffer();

@@ -1,7 +1,6 @@
 #include "PhysicsBody3D.h"
 
 #include "AppState.h"
-#include "SDL3/SDL_log.h"
 
 inline glm::quat ToGLM(const b3Quat& q)
 {
@@ -20,12 +19,12 @@ inline b3Quat ToB3(const glm::quat& q)
         };
 }
 
-PhysicsBody3D::PhysicsBody3D(AppState &appState, b3BodyType bodyType, float pos_x, float pos_y, float pos_z) {
+PhysicsBody3D::PhysicsBody3D(b3BodyType bodyType, float pos_x, float pos_y, float pos_z) {
     name = "PhysicsBody3D";
     b3BodyDef bodyDef = b3DefaultBodyDef();
     bodyDef.type = bodyType;
     bodyDef.position = (b3Vec3){pos_x, pos_y, pos_z};
-    bodyId = b3CreateBody(appState.worldId3, &bodyDef);
+    bodyId = b3CreateBody(AppState::Get().worldId3, &bodyDef);
 }
 
 Transform3D PhysicsBody3D::GetGlobalTransform() const {
@@ -44,19 +43,20 @@ Transform3D PhysicsBody3D::GetGlobalTransformInterpolatedREAL(double factor) con
     return interpolated;
 }
 
-void PhysicsBody3D::FixedUpdate(AppState &appState) {
+void PhysicsBody3D::FixedUpdate() {
     last_tick_transform = localTransform;
-    Node3D::FixedUpdate(appState);
+    Node3D::FixedUpdate();
 }
 
-void PhysicsBody3D::PostPhysicsUpdate(AppState &appState) {
+void PhysicsBody3D::PostPhysicsUpdate() {
     localTransform.setQuaternion(ToGLM(b3Body_GetRotation(bodyId)));
     localTransform.setPosition(b3Body_GetPosition(bodyId));
     // localTransform.logTransform();
-    Node3D::PostPhysicsUpdate(appState);
+    Node3D::PostPhysicsUpdate();
 }
 
-TraceResult PhysicsBody3D::TraceCapsule(const AppState &appState, const b3Pos from, const b3Pos to, const float radius, const float height) const {
+TraceResult PhysicsBody3D::TraceCapsule(const b3Pos from, const b3Pos to, const float radius, const float height) const {
+    AppState* appState = &AppState::Get();
     TraceResult result = {};
     result.endPosition = to;
     result.normal = b3Vec3_axisY;
@@ -80,7 +80,7 @@ TraceResult PhysicsBody3D::TraceCapsule(const AppState &appState, const b3Pos fr
     context.ignoreCount = 1;
 
     const b3QueryFilter filter = b3DefaultQueryFilter();
-    b3World_CastShape( appState.worldId3, from, &proxy, translation, filter, ClosestShapeCastCallback, &context );
+    b3World_CastShape( appState->worldId3, from, &proxy, translation, filter, ClosestShapeCastCallback, &context );
 
     result.startedSolid = context.startedSolid;
     if ( context.hit )

@@ -10,9 +10,9 @@ struct PointLight3D : Node3D {
     float quadratic = 0.032f;
 
     void ImGuiDraw() override;
-    explicit PointLight3D(AppState* appState);
-    void Register(AppState* appState);
-    void Unregister(AppState* appState);
+    explicit PointLight3D();
+    void Register();
+    void Unregister();
 };
 
 #endif //FIGMENTENGINE_POINTLIGHT3D_H

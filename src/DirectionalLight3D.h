@@ -7,9 +7,9 @@ struct DirectionalLight3D : Node3D {
     float brightness = 1.0f;
 
     void ImGuiDraw() override;
-    explicit DirectionalLight3D(AppState* appState);
-    void Register(AppState* appState);
-    void Unregister(AppState* appState);
+    explicit DirectionalLight3D();
+    void Register();
+    void Unregister();
 };
 
 

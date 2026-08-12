@@ -6,23 +6,24 @@
 #include "Player2D.h"
 #include "src/Sprite2D.h"
 
-void FightingGame::Init(AppState &appState) {
+void FightingGame::Init() {
+    AppState* appState = &AppState::Get();
 
     // auto* camera2d = new Camera2D();
     // appState->current_camera_2d = camera2d;
     // addChild(std::unique_ptr<Node>(camera2d));
 
     auto* freeCam = new FreeCam2D();
-    appState.current_camera_2d = freeCam;
+    appState->current_camera_2d = freeCam;
     addChild(std::unique_ptr<Node>(freeCam));
 
-    auto* physicsBody = new PhysicsBody2D(appState, b2_staticBody, 800, 100, static_cast<float>(appState.windowWidth) / 2.0f, 800);
+    auto* physicsBody = new PhysicsBody2D(b2_staticBody, 800, 100, static_cast<float>(appState->windowWidth) / 2.0f, 800);
     addChild(std::unique_ptr<Node>(physicsBody));
 
     auto* editorSprite = new Sprite2D();
-    editorSprite->size.x = static_cast<float>(appState.windowWidth);
+    editorSprite->size.x = static_cast<float>(appState->windowWidth);
     physicsBody->addChild(std::unique_ptr<Node>(editorSprite));
 
-    auto* player = new Player2D(appState, 100, 100, static_cast<float>(appState.windowWidth) / 2.0f, 0);
+    auto* player = new Player2D(100, 100, static_cast<float>(appState->windowWidth) / 2.0f, 0);
     addChild(std::unique_ptr<Node>(player));
 }

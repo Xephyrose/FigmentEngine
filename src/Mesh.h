@@ -2,8 +2,8 @@
 #define FIGMENTENGINE_MESH_H
 #include <vector>
 
-#include "AppState.h"
 #include "Vertex.h"
+#include <SDL3/SDL_gpu.h>
 
 struct Submesh {
     std::string name;
@@ -27,8 +27,8 @@ struct Mesh {
     SDL_GPUBuffer* indexBuffer = nullptr;
     bool isOnGPU = false;
 
-    void UploadToGPU(const AppState& appState);
-    void ReleaseGPUResources(const AppState* appState);
+    void UploadToGPU();
+    void ReleaseGPUResources();
 
     [[nodiscard]] const Submesh *GetSubmesh(const std::string &name) const;
 

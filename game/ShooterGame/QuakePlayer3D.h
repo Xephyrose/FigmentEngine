@@ -5,7 +5,7 @@
 
 struct QuakePlayer3D : Player3D {
     using Player3D::Player3D;
-    void FixedUpdate(AppState& appState) override;
+    void FixedUpdate() override;
     void SV_AirMove(glm::vec3 &velocity, float delta) const;
     void SV_UserFriction(glm::vec3 &velocity, float delta) const;
     void SV_Accelerate(glm::vec3 &velocity, const glm::vec3 &wishDir, float wishSpeed, float delta) const;

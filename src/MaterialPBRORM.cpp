@@ -102,16 +102,16 @@ void MaterialPBRORM::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffe
     );
 }
 
-void MaterialPBRORM::setTextureORM(AppState *appState, const std::string &texture) {
+void MaterialPBRORM::setTextureORM(const std::string &texture) {
     textureORM = texture;
     if (textureORM != "none") {
-        appState->LoadTexture(textureORM);
+        AppState::Get().LoadTexture(textureORM);
     }
 }
 
-void MaterialPBRORM::setTextureNormalMap(AppState *appState, const std::string &texture) {
+void MaterialPBRORM::setTextureNormalMap(const std::string &texture) {
     textureNormalMap = texture;
     if (textureNormalMap != "none") {
-        appState->LoadTexture(textureNormalMap);
+        AppState::Get().LoadTexture(textureNormalMap);
     }
 }

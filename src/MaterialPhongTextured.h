@@ -16,11 +16,11 @@ struct MaterialPhongTextured : MaterialUnlitTextured {
     void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer, glm::mat4 model) override;
 
     void setColorAmbient(glm::vec4 color);
-    void setTextureAmbient(AppState* appState, const std::string &texture);
+    void setTextureAmbient(const std::string &texture);
     void setColorSpecular(glm::vec4 color);
-    void setTextureSpecular(AppState* appState, const std::string &texture);
+    void setTextureSpecular(const std::string &texture);
 
-    virtual void setTextureNormalMap(AppState* appState, const std::string &texture);
+    virtual void setTextureNormalMap(const std::string &texture);
 };
 
 

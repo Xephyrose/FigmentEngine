@@ -6,10 +6,10 @@
 #include "thirdparty/imgui/imgui.h"
 #include "thirdparty/imgui/imgui_stdlib.h"
 
-MaterialUnlitTextured::MaterialUnlitTextured(AppState* appState, const std::string &name, const std::string &pipeline) {
+MaterialUnlitTextured::MaterialUnlitTextured(const std::string &name, const std::string &pipeline) {
     this->name = name;
     this->pipeline = pipeline;
-    appState->materials.insert_or_assign(name, this);
+    AppState::Get().materials.insert_or_assign(name, this);
 }
 
 void MaterialUnlitTextured::ImGuiDraw() {
@@ -59,13 +59,13 @@ void MaterialUnlitTextured::setColorAlbedo(const glm::vec4 new_color) {
     color = new_color;
 }
 
-void MaterialUnlitTextured::setTextureAlbedo(AppState* appState, const std::string &new_texture) {
+void MaterialUnlitTextured::setTextureAlbedo(const std::string &new_texture) {
     texture = new_texture;
     if (texture != "none") {
-        appState->LoadTexture(texture);
+        AppState::Get().LoadTexture(texture);
     }
 }
 
-void MaterialUnlitTextured::setSampler(AppState* appState, const std::string &new_sampler) {
+void MaterialUnlitTextured::setSampler(const std::string &new_sampler) {
     sampler = new_sampler;
 }

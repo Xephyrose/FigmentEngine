@@ -22,21 +22,22 @@
 #include "Input.h"
 #include "Material.h"
 #include "Sprite2D.h"
-#include "Vertex.h"
 #include "thirdparty/tiny_gltf.h"
 
 #ifdef __linux__
 #include <dlfcn.h>
 #endif
 
-void HandleInput(AppState* appState) {
-    appState->root.Input(*appState);
+void HandleInput() {
+    AppState* appState = &AppState::Get();
+    appState->root.Input();
     if (Input::IsJustPressed(SDL_SCANCODE_X)) {
         appState->debug = !appState->debug;
     }
 }
 
-void FixedDelta(AppState* appState) {
+void FixedDelta() {
+    AppState* appState = &AppState::Get();
     appState->lastTime = appState->currentTime;
     appState->currentTime = SDL_GetTicks();
     appState->delta = appState->currentTime - appState->lastTime;
@@ -48,18 +49,18 @@ void FixedDelta(AppState* appState) {
     appState->fixedTimeStepAccumulator += frameTimeSeconds;
 
     while (appState->fixedTimeStepAccumulator >= appState->fixedTimeStep) {
-        HandleInput(appState);
-        appState->root.FixedUpdate(*appState);
+        HandleInput();
+        appState->root.FixedUpdate();
         b2World_Step(appState->worldId2, static_cast<float>(appState->fixedTimeStep), 4);
         b3World_Step(appState->worldId3, static_cast<float>(appState->fixedTimeStep), 4);
-        appState->root.PostPhysicsUpdate(*appState);
+        appState->root.PostPhysicsUpdate();
         Input::UpdateInputs();
         appState->fixedTimeStepAccumulator -= appState->fixedTimeStep;
     }
 }
 
-void HandleUpdate(AppState* appState) {
-    appState->root.Update(*appState);
+void HandleUpdate() {
+    AppState::Get().root.Update();
 }
 
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
@@ -70,8 +71,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
             SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "x11");
         }
     #endif
-    auto* appState = new AppState();
-    *appstate = appState;
+    AppState* appState = &AppState::Get();
 
     b2WorldDef worldDef2 = b2DefaultWorldDef();
     worldDef2.gravity = (b2Vec2){0.0f, 19.6f};
@@ -134,7 +134,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     appState->quadMesh = new Mesh();
     appState->quadMesh->CreateQuad(1, 1, -1);
-    appState->quadMesh->UploadToGPU(*appState);
+    appState->quadMesh->UploadToGPU();
 
     // IMGUI_CHECKVERSION(); // Crashes on ImGui docking branch (?)
     ImGui::CreateContext();
@@ -159,7 +159,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     init_info.PresentMode = SDL_GPU_PRESENTMODE_VSYNC;
     ImGui_ImplSDLGPU3_Init(&init_info);
 
-    appState->root.Init(*appState);
+    appState->root.Init();
 
     return SDL_APP_CONTINUE;
 }
@@ -167,12 +167,12 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 // ReSharper disable once CppParameterMayBeConstPtrOrRef
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 {
-    auto* appState = static_cast<AppState*>(appstate);
+    AppState* appState = &AppState::Get();
     if (appState->debug) {
         ImGui_ImplSDL3_ProcessEvent(event);
     }
 
-    appState->root.Event(*appState, *event);
+    appState->root.Event(*event);
 
     switch (event->type)
     {
@@ -336,7 +336,8 @@ void PrepareSpotLightBuffer(AppState *appState, SDL_GPUCommandBuffer *commandBuf
     SDL_EndGPUCopyPass(copyPass);
 }
 
-SDL_AppResult RenderFrame(AppState* appState) {
+SDL_AppResult RenderFrame() {
+    AppState* appState = &AppState::Get();
     if (appState->debug) {
         ImGui_ImplSDLGPU3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
@@ -403,7 +404,7 @@ SDL_AppResult RenderFrame(AppState* appState) {
 
         if (ImGui::Button("Spawn 100 Lights")) {
             for (int i = 0; i < 100; i++) {
-                auto* pointLight = new PointLight3D(appState);
+                auto* pointLight = new PointLight3D();
                 pointLight->localTransform.position.x = 50 - static_cast<float>(rand() % 100); // NOLINT(*-msc50-cpp)
                 pointLight->localTransform.position.y = rand() % 10; // NOLINT(*-narrowing-conversions, *-msc50-cpp)
                 pointLight->localTransform.position.z = 50 - static_cast<float>(rand() % 100); // NOLINT(*-msc50-cpp)
@@ -504,7 +505,7 @@ SDL_AppResult RenderFrame(AppState* appState) {
             return SDL_APP_FAILURE;
         }
 
-        appState->root.Draw(*appState, commandBuffer);
+        appState->root.Draw(commandBuffer);
 
         SDL_EndGPURenderPass(appState->renderPass);
         appState->renderPass = nullptr;
@@ -535,18 +536,9 @@ SDL_AppResult RenderFrame(AppState* appState) {
 
 SDL_AppResult SDL_AppIterate(void* appstate)
 {
-    auto* appState = static_cast<AppState*>(appstate);
-
-    FixedDelta(appState);
-    HandleUpdate(appState);
-    return RenderFrame(appState);
+    FixedDelta();
+    HandleUpdate();
+    return RenderFrame();
 }
 
-void SDL_AppQuit(void* appstate, SDL_AppResult result)
-{
-    const auto appState = static_cast<AppState*>(appstate);
-
-    SDL_WaitForGPUIdle(appState->device);
-
-    delete appState;
-}
+void SDL_AppQuit(void* appstate, SDL_AppResult result) {}

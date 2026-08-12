@@ -4,7 +4,7 @@
 #include "Material.h"
 
 struct MaterialPhong : Material {
-    MaterialPhong(AppState* appState, const std::string &name, const std::string &pipeline);
+    MaterialPhong(const std::string &name, const std::string &pipeline);
     void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer, glm::mat4 model) override;
 };
 

@@ -18,17 +18,19 @@ void DirectionalLight3D::ImGuiDraw() {
     }
 }
 
-DirectionalLight3D::DirectionalLight3D(AppState* appState) {
+DirectionalLight3D::DirectionalLight3D() {
     name = "DirectionalLight3D";
-    Register(appState);
+    Register();
 }
 
-void DirectionalLight3D::Register(AppState* appState) {
+void DirectionalLight3D::Register() {
+    AppState* appState = &AppState::Get();
     appState->directionalLights.push_back(this);
     appState->CreateDirectionalLightBuffer();
 }
 
-void DirectionalLight3D::Unregister(AppState* appState) {
+void DirectionalLight3D::Unregister() {
+    AppState* appState = &AppState::Get();
     if (const auto it = std::ranges::find(appState->directionalLights, this); it != appState->directionalLights.end()) {
         appState->directionalLights.erase(it);
         appState->CreateDirectionalLightBuffer();

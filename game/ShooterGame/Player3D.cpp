@@ -8,7 +8,7 @@
 
 #include "src/MeshInstance3D.h"
 
-Player3D::Player3D(AppState &appState, const float pos_x, const float pos_y, const float pos_z, const float radius, const float height) : CapsuleBody3D(appState, b3_dynamicBody, pos_x, pos_y, pos_z, radius, height), height(height), radius(radius) {
+Player3D::Player3D(const float pos_x, const float pos_y, const float pos_z, const float radius, const float height) : CapsuleBody3D(b3_dynamicBody, pos_x, pos_y, pos_z, radius, height), height(height), radius(radius) {
     name = "Player3D";
     b3MotionLocks locks = {};
     locks.angularX = true;
@@ -26,7 +26,7 @@ Player3D::Player3D(AppState &appState, const float pos_x, const float pos_y, con
     yaw->addChild(std::unique_ptr<Node>(pitch));
 
     cam = new Camera3D();
-    appState.current_camera_3d = cam;
+    AppState::Get().current_camera_3d = cam;
     pitch->addChild(std::unique_ptr<Node>(cam));
 
     auto* meshInstance2 = new MeshInstance3D();
@@ -36,8 +36,8 @@ Player3D::Player3D(AppState &appState, const float pos_x, const float pos_y, con
     pitch->addChild(std::unique_ptr<Node>(meshInstance2));
 }
 
-void Player3D::FixedUpdate(AppState &appState) {
-    IsGrounded(appState);
+void Player3D::FixedUpdate() {
+    IsGrounded();
     b3Body_SetGravityScale(bodyId, !onGround);
 
     glm::vec3 velocity = GetLinearVelocity(bodyId);
@@ -71,21 +71,22 @@ void Player3D::FixedUpdate(AppState &appState) {
     }
 
     b3Body_SetLinearVelocity(bodyId, b3Vec3(moveDirection.x * speed, b3Body_GetLinearVelocity(bodyId).y, moveDirection.z * speed));
-    CapsuleBody3D::FixedUpdate(appState);
+    CapsuleBody3D::FixedUpdate();
 }
 
-void Player3D::Event(AppState &appState, SDL_Event &event) {
-    if (event.type == SDL_EVENT_MOUSE_MOTION && appState.isMouseRelative) {
-        yaw->localTransform.rotate(glm::vec3(0, -event.motion.xrel * appState.sensitivity, 0));
-        pitch->localTransform.rotate(glm::vec3(-event.motion.yrel * appState.sensitivity,0, 0));
+void Player3D::Event(SDL_Event &event) {
+    AppState* appState = &AppState::Get();
+    if (event.type == SDL_EVENT_MOUSE_MOTION && appState->isMouseRelative) {
+        yaw->localTransform.rotate(glm::vec3(0, -event.motion.xrel * appState->sensitivity, 0));
+        pitch->localTransform.rotate(glm::vec3(-event.motion.yrel * appState->sensitivity,0, 0));
     }
 
-    if (event.button.button == SDL_BUTTON_RIGHT && appState.debug) {
-        appState.isMouseRelative = event.type == SDL_EVENT_MOUSE_BUTTON_DOWN;
-        SDL_SetWindowRelativeMouseMode(appState.window, appState.isMouseRelative);
+    if (event.button.button == SDL_BUTTON_RIGHT && appState->debug) {
+        appState->isMouseRelative = event.type == SDL_EVENT_MOUSE_BUTTON_DOWN;
+        SDL_SetWindowRelativeMouseMode(appState->window, appState->isMouseRelative);
     }
 
-    CapsuleBody3D::Event(appState, event);
+    CapsuleBody3D::Event(event);
 }
 
 bool Player3D::IsStandableSurface(const b3Vec3 normal) const
@@ -94,7 +95,7 @@ bool Player3D::IsStandableSurface(const b3Vec3 normal) const
     return b3Dot( normal, b3Vec3_axisY ) >= maxSlopeCos;
 }
 
-bool Player3D::IsGrounded(const AppState &appState) {
+bool Player3D::IsGrounded() {
     const b3Pos pos = b3Body_GetPosition(bodyId);
 
     b3Pos from = pos;
@@ -103,7 +104,7 @@ bool Player3D::IsGrounded(const AppState &appState) {
     b3Pos to = pos;
     to.y -= 0.015625;
 
-    const TraceResult tr = TraceCapsule(appState, from, to, radius, height);
+    const TraceResult tr = TraceCapsule(from, to, radius, height);
 
     onGround = tr.hit && IsStandableSurface(tr.normal);
     return onGround;

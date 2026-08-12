@@ -6,7 +6,6 @@
 #include "../thirdparty/imgui/imgui_stdlib.h"
 #include "Material.h"
 #include "Mesh.h"
-#include "SDL3/SDL_log.h"
 
 Sprite2D::Sprite2D() : size(glm::vec2(100.0f, 100.0f)) {
     name = "Sprite2D";
@@ -25,25 +24,26 @@ void Sprite2D::ImGuiDraw() {
     }
 }
 
-void Sprite2D::Draw(AppState& appState, SDL_GPUCommandBuffer* commandBuffer) {
-    if (!appState.current_camera_2d) return;
-    const Mesh* quadMesh = appState.quadMesh;
+void Sprite2D::Draw(SDL_GPUCommandBuffer* commandBuffer) {
+    AppState* appState = &AppState::Get();
+    if (!appState->current_camera_2d) return;
+    const Mesh* quadMesh = appState->quadMesh;
 
     if (!quadMesh->isOnGPU) return;
 
     const SDL_GPUBufferBinding vertexBinding = { .buffer = quadMesh->vertexBuffer, .offset = 0 };
-    SDL_BindGPUVertexBuffers(appState.renderPass, 0, &vertexBinding, 1);
+    SDL_BindGPUVertexBuffers(appState->renderPass, 0, &vertexBinding, 1);
     if (!quadMesh->indices.empty()) {
         const SDL_GPUBufferBinding indexBinding = { .buffer = quadMesh->indexBuffer, .offset = 0 };
-        SDL_BindGPUIndexBuffer(appState.renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+        SDL_BindGPUIndexBuffer(appState->renderPass, &indexBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
     }
 
     Transform2D transform = GetGlobalTransform();
     transform.scale *= size;
 
-    Material* material = appState.GetMaterial(sprite);
-    if (material == nullptr) material = appState.GetMaterial("missing_2d");
-    material->Bind(&appState, commandBuffer, transform.getMatrix());
+    Material* material = appState->GetMaterial(sprite);
+    if (material == nullptr) material = appState->GetMaterial("missing_2d");
+    material->Bind(appState, commandBuffer, transform.getMatrix());
 
-    SDL_DrawGPUIndexedPrimitives(appState.renderPass, quadMesh->indices.size(), 1, 0, 0, 0);
+    SDL_DrawGPUIndexedPrimitives(appState->renderPass, quadMesh->indices.size(), 1, 0, 0, 0);
 }

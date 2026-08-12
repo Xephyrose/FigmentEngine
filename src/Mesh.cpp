@@ -3,16 +3,17 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
 #include "Mesh.h"
-#include <thirdparty/tiny_gltf.h>
 #include <cstring>
-#include <vector>
 #include <string>
+#include <vector>
 #include <SDL3/SDL_filesystem.h>
+#include <thirdparty/tiny_gltf.h>
 
 #include "Material.h"
 #include "SDL3/SDL_log.h"
 
-void Mesh::UploadToGPU(const AppState& appState) {
+void Mesh::UploadToGPU() {
+    const AppState* appState = &AppState::Get();
     if (isOnGPU) return;
 
     // Create vertex buffer
@@ -20,17 +21,17 @@ void Mesh::UploadToGPU(const AppState& appState) {
         .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
         .size = static_cast<Uint32>(vertices.size() * sizeof(Vertex))
     };
-    vertexBuffer = SDL_CreateGPUBuffer(appState.device, &vertexBufferInfo);
+    vertexBuffer = SDL_CreateGPUBuffer(appState->device, &vertexBufferInfo);
 
     // Create index buffer
     const SDL_GPUBufferCreateInfo indexBufferInfo = {
         .usage = SDL_GPU_BUFFERUSAGE_INDEX,
         .size = static_cast<Uint32>(indices.size() * sizeof(uint16_t))
     };
-    indexBuffer = SDL_CreateGPUBuffer(appState.device, &indexBufferInfo);
+    indexBuffer = SDL_CreateGPUBuffer(appState->device, &indexBufferInfo);
 
     // Upload data
-    SDL_GPUCommandBuffer* uploadCmd = SDL_AcquireGPUCommandBuffer(appState.device);
+    SDL_GPUCommandBuffer* uploadCmd = SDL_AcquireGPUCommandBuffer(appState->device);
     SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmd);
 
     // Upload vertices
@@ -38,19 +39,19 @@ void Mesh::UploadToGPU(const AppState& appState) {
         .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
         .size = static_cast<Uint32>(vertices.size() * sizeof(Vertex))
     };
-    SDL_GPUTransferBuffer* vertexTransfer = SDL_CreateGPUTransferBuffer(appState.device, &transferBufferInfo);
+    SDL_GPUTransferBuffer* vertexTransfer = SDL_CreateGPUTransferBuffer(appState->device, &transferBufferInfo);
     if (!vertexTransfer) {
         SDL_Log("Failed to create vertex transfer buffer!");
         return;
     }
-    void* vertexData = SDL_MapGPUTransferBuffer(appState.device, vertexTransfer, false);
+    void* vertexData = SDL_MapGPUTransferBuffer(appState->device, vertexTransfer, false);
     if (!vertexData) {
         SDL_Log("Failed to map vertex transfer buffer!");
-        SDL_ReleaseGPUTransferBuffer(appState.device, vertexTransfer);
+        SDL_ReleaseGPUTransferBuffer(appState->device, vertexTransfer);
         return;
     }
     memcpy(vertexData, vertices.data(), vertices.size() * sizeof(Vertex));
-    SDL_UnmapGPUTransferBuffer(appState.device, vertexTransfer);
+    SDL_UnmapGPUTransferBuffer(appState->device, vertexTransfer);
 
     SDL_GPUTransferBufferLocation transferLocation = {
         .transfer_buffer = vertexTransfer,
@@ -68,10 +69,10 @@ void Mesh::UploadToGPU(const AppState& appState) {
     transferBufferInfo.size = static_cast<Uint32>(indices.size() * sizeof(uint16_t));
 
     // Upload indices similarly
-    SDL_GPUTransferBuffer* indexTransfer = SDL_CreateGPUTransferBuffer(appState.device, &transferBufferInfo);
-    void* indexData = SDL_MapGPUTransferBuffer(appState.device, indexTransfer, false);
+    SDL_GPUTransferBuffer* indexTransfer = SDL_CreateGPUTransferBuffer(appState->device, &transferBufferInfo);
+    void* indexData = SDL_MapGPUTransferBuffer(appState->device, indexTransfer, false);
     memcpy(indexData, indices.data(), indices.size() * sizeof(uint16_t));
-    SDL_UnmapGPUTransferBuffer(appState.device, indexTransfer);
+    SDL_UnmapGPUTransferBuffer(appState->device, indexTransfer);
 
     SDL_GPUTransferBufferLocation indexTransferLocation = {
         .transfer_buffer = indexTransfer,
@@ -90,8 +91,8 @@ void Mesh::UploadToGPU(const AppState& appState) {
     SDL_SubmitGPUCommandBuffer(uploadCmd);
 
     // Cleanup transfer buffers
-    SDL_ReleaseGPUTransferBuffer(appState.device, vertexTransfer);
-    SDL_ReleaseGPUTransferBuffer(appState.device, indexTransfer);
+    SDL_ReleaseGPUTransferBuffer(appState->device, vertexTransfer);
+    SDL_ReleaseGPUTransferBuffer(appState->device, indexTransfer);
 
     // Set GPU buffer pointers for submeshes
     for (auto& submesh : submeshes) {
@@ -102,7 +103,8 @@ void Mesh::UploadToGPU(const AppState& appState) {
     isOnGPU = true;
 }
 
-void Mesh::ReleaseGPUResources(const AppState* appState) {
+void Mesh::ReleaseGPUResources() {
+    AppState* appState = &AppState::Get();
     if (appState && appState->device) {
         if (vertexBuffer) {
             SDL_ReleaseGPUBuffer(appState->device, vertexBuffer);

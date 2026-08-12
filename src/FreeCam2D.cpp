@@ -10,15 +10,16 @@ void FreeCam2D::ImGuiDraw() {
     Camera2D::ImGuiDraw();
 }
 
-void FreeCam2D::Event(AppState &appState, SDL_Event &event) {
-    if (event.type == SDL_EVENT_MOUSE_MOTION && appState.isMouseRelative) {
+void FreeCam2D::Event(SDL_Event &event) {
+    AppState* appState = &AppState::Get();
+    if (event.type == SDL_EVENT_MOUSE_MOTION && appState->isMouseRelative) {
         localTransform.move(glm::vec2(-event.motion.xrel, -event.motion.yrel));
     }
 
-    if (event.button.button == SDL_BUTTON_RIGHT && appState.debug) {
-        appState.isMouseRelative = event.type == SDL_EVENT_MOUSE_BUTTON_DOWN;
-        SDL_SetWindowRelativeMouseMode(appState.window, appState.isMouseRelative);
+    if (event.button.button == SDL_BUTTON_RIGHT && appState->debug) {
+        appState->isMouseRelative = event.type == SDL_EVENT_MOUSE_BUTTON_DOWN;
+        SDL_SetWindowRelativeMouseMode(appState->window, appState->isMouseRelative);
     }
 
-    Camera2D::Event(appState, event);
+    Camera2D::Event(event);
 }

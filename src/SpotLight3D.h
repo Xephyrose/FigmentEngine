@@ -12,9 +12,9 @@ struct SpotLight3D : Node3D {
     float outerCutoff = 15.0f;
 
     void ImGuiDraw() override;
-    explicit SpotLight3D(AppState* appState);
-    void Register(AppState* appState);
-    void Unregister(AppState* appState);
+    explicit SpotLight3D();
+    void Register();
+    void Unregister();
 };
 
 

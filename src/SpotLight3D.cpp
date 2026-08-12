@@ -25,17 +25,19 @@ void SpotLight3D::ImGuiDraw() {
     }
 }
 
-SpotLight3D::SpotLight3D(AppState* appState) {
+SpotLight3D::SpotLight3D() {
     name = "SpotLight3D";
-    Register(appState);
+    Register();
 }
 
-void SpotLight3D::Register(AppState* appState) {
+void SpotLight3D::Register() {
+    AppState* appState = &AppState::Get();
     appState->spotLights.push_back(this);
     appState->CreateSpotLightBuffer();
 }
 
-void SpotLight3D::Unregister(AppState* appState) {
+void SpotLight3D::Unregister() {
+    AppState* appState = &AppState::Get();
     if (const auto it = std::ranges::find(appState->spotLights, this); it != appState->spotLights.end()) {
         appState->spotLights.erase(it);
         appState->CreateSpotLightBuffer();

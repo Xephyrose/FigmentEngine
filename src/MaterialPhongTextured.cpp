@@ -112,10 +112,10 @@ void MaterialPhongTextured::setColorAmbient(const glm::vec4 color) {
     colorAmbient = color;
 }
 
-void MaterialPhongTextured::setTextureAmbient(AppState *appState, const std::string &texture) {
+void MaterialPhongTextured::setTextureAmbient(const std::string &texture) {
     textureAmbient = texture;
     if (textureAmbient != "none") {
-        appState->LoadTexture(textureAmbient);
+        AppState::Get().LoadTexture(textureAmbient);
     }
 }
 
@@ -123,16 +123,16 @@ void MaterialPhongTextured::setColorSpecular(const glm::vec4 color) {
     colorSpecular = color;
 }
 
-void MaterialPhongTextured::setTextureSpecular(AppState *appState, const std::string &texture) {
+void MaterialPhongTextured::setTextureSpecular(const std::string &texture) {
     textureSpecular = texture;
     if (textureSpecular != "none") {
-        appState->LoadTexture(textureSpecular);
+        AppState::Get().LoadTexture(textureSpecular);
     }
 }
 
-void MaterialPhongTextured::setTextureNormalMap(AppState *appState, const std::string &texture) {
+void MaterialPhongTextured::setTextureNormalMap(const std::string &texture) {
     textureNormalMap = texture;
     if (textureNormalMap != "none") {
-        appState->LoadTexture(textureNormalMap);
+        AppState::Get().LoadTexture(textureNormalMap);
     }
 }

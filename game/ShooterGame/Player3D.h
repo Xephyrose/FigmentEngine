@@ -4,10 +4,10 @@
 #include "src/CapsuleBody3D.h"
 
 struct Player3D : CapsuleBody3D {
-    Player3D(AppState &appState, float pos_x, float pos_y, float pos_z, float radius, float height);
-    void FixedUpdate(AppState& appState) override;
-    void Event(AppState& appState, SDL_Event &event) override;
-    bool IsGrounded(const AppState &appState);
+    Player3D(float pos_x, float pos_y, float pos_z, float radius, float height);
+    void FixedUpdate() override;
+    void Event(SDL_Event &event) override;
+    bool IsGrounded();
     [[nodiscard]] bool IsStandableSurface(b3Vec3 normal) const;
     Camera3D* cam;
     Node3D* yaw;

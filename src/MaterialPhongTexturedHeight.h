@@ -11,7 +11,7 @@ struct BlinnPhongMaterialLayer {
 };
 
 struct MaterialPhongTexturedHeight : Material {
-    MaterialPhongTexturedHeight(AppState* appState, const std::string &name, const std::string &pipeline, const std::vector<BlinnPhongMaterialLayer> &initial_layers);
+    MaterialPhongTexturedHeight(const std::string &name, const std::string &pipeline, const std::vector<BlinnPhongMaterialLayer> &initial_layers);
     std::vector<BlinnPhongMaterialLayer> layers;
     // these must be textures with layers, as you can't create a Texture2DArray from regular GPUTextures
     std::string textureAlbedo = "none";
@@ -22,12 +22,12 @@ struct MaterialPhongTexturedHeight : Material {
 
     void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer, glm::mat4 model) override;
 
-    void setSampler(AppState* appState, const std::string &new_sampler);
+    void setSampler(const std::string &new_sampler);
 
-    void setTextureAlbedo(AppState* appState, const std::string &texture);
-    void setTextureAmbient(AppState* appState, const std::string &texture);
-    void setTextureSpecular(AppState* appState, const std::string &texture);
-    void setTextureNormalMap(AppState* appState, const std::string &texture);
+    void setTextureAlbedo(const std::string &texture);
+    void setTextureAmbient(const std::string &texture);
+    void setTextureSpecular(const std::string &texture);
+    void setTextureNormalMap(const std::string &texture);
 };
 
 #endif //FIGMENTENGINE_MATERIALPHONGTEXTUREDHEIGHT_H

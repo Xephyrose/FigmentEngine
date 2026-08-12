@@ -3,7 +3,7 @@
 #include "PhysicsBody3D.h"
 
 struct CapsuleBody3D : PhysicsBody3D {
-    CapsuleBody3D(AppState &appState, b3BodyType bodyType, float pos_x, float pos_y, float pos_z, float radius, float totalHeight);
+    CapsuleBody3D(b3BodyType bodyType, float pos_x, float pos_y, float pos_z, float radius, float totalHeight);
     b3Capsule collider{};
 };
 

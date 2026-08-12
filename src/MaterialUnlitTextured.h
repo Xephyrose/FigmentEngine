@@ -4,7 +4,7 @@
 #include "Material.h"
 
 struct MaterialUnlitTextured : Material {
-    MaterialUnlitTextured(AppState* appState, const std::string &name, const std::string &pipeline);
+    MaterialUnlitTextured(const std::string &name, const std::string &pipeline);
     void ImGuiDraw() override;
     std::string texture = "none";
     std::string sampler = "anisotropic_repeat";
@@ -13,8 +13,8 @@ struct MaterialUnlitTextured : Material {
     void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer, glm::mat4 model) override;
 
     void setColorAlbedo(glm::vec4 color);
-    void setTextureAlbedo(AppState* appState, const std::string &texture);
-    void setSampler(AppState* appState, const std::string &new_sampler);
+    void setTextureAlbedo(const std::string &texture);
+    void setSampler(const std::string &new_sampler);
 };
 
 #endif //FIGMENTENGINE_MATERIAL_UNLIT_TEXTURED_H

@@ -7,28 +7,28 @@ Game::Game() {
     name = "root";
 }
 
-void Game::Init(AppState& appState) {}
+void Game::Init() {}
 
 void Game::ImGuiDraw() {
     Node::ImGuiDraw();
 }
 
-void Game::Update(AppState &appState) {
-    Node::Update(appState);
+void Game::Update() {
+    Node::Update();
 }
 
-void Game::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) {
-    Node::Draw(appState, commandBuffer);
+void Game::Draw(SDL_GPUCommandBuffer *commandBuffer) {
+    Node::Draw(commandBuffer);
 }
 
-void Game::DrawShadow(AppState &appState, SDL_GPUCommandBuffer *commandBuffer, SDL_GPURenderPass *renderPass) {
-    Node::DrawShadow(appState, commandBuffer, renderPass);
+void Game::DrawShadow(SDL_GPUCommandBuffer *commandBuffer, SDL_GPURenderPass *renderPass) {
+    Node::DrawShadow(commandBuffer, renderPass);
 }
 
-void Game::Input(AppState &appState) {
-    Node::Input(appState);
+void Game::Input() {
+    Node::Input();
 }
 
-void Game::Event(AppState &appState, SDL_Event &event) {
-    Node::Event(appState, event);
+void Game::Event(SDL_Event &event) {
+    Node::Event(event);
 }

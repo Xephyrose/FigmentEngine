@@ -1,6 +1,8 @@
 #include "Node.h"
 
 #include <utility>
+
+#include "AppState.h"
 #include "../thirdparty/imgui/imgui.h"
 #include "../thirdparty/imgui/imgui_stdlib.h"
 
@@ -14,45 +16,45 @@ void Node::ImGuiDraw() {
     }
 }
 
-void Node::Update(AppState& appState) {
+void Node::Update() {
     for (const auto & i : children) {
-        i->Update(appState);
+        i->Update();
     }
 }
 
-void Node::FixedUpdate(AppState& appState) {
+void Node::FixedUpdate() {
     for (const auto & i : children) {
-        i->FixedUpdate(appState);
+        i->FixedUpdate();
     }
 }
 
-void Node::PostPhysicsUpdate(AppState &appState) {
+void Node::PostPhysicsUpdate() {
     for (const auto & i : children) {
-        i->PostPhysicsUpdate(appState);
+        i->PostPhysicsUpdate();
     }
 }
 
-void Node::Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) {
+void Node::Draw(SDL_GPUCommandBuffer *commandBuffer) {
     for (const auto & i : children) {
-        i->Draw(appState, commandBuffer);
+        i->Draw(commandBuffer);
     }
 }
 
-void Node::DrawShadow(AppState &appState, SDL_GPUCommandBuffer *commandBuffer, SDL_GPURenderPass* renderPass) {
+void Node::DrawShadow(SDL_GPUCommandBuffer *commandBuffer, SDL_GPURenderPass* renderPass) {
     for (const auto & i : children) {
-        i->DrawShadow(appState, commandBuffer, renderPass);
+        i->DrawShadow(commandBuffer, renderPass);
     }
 }
 
-void Node::Input(AppState& appState) {
+void Node::Input() {
     for (const auto & i : children) {
-        i->Input(appState);
+        i->Input();
     }
 }
 
-void Node::Event(AppState &appState, SDL_Event &event) {
+void Node::Event(SDL_Event &event) {
     for (const auto & i : children) {
-        i->Event(appState, event);
+        i->Event(event);
     }
 }
 

@@ -8,9 +8,9 @@
 #include "src/HeightFieldBody3D.h"
 #include "src/MeshInstance3D.h"
 
-void ShooterGame::Init(AppState &appState) {
+void ShooterGame::Init() {
 
-    auto* box = new BoxBody3D(appState, b3_staticBody, 0, -0.738988f, 0, 100, 0.01f, 100);
+    auto* box = new BoxBody3D(b3_staticBody, 0, -0.738988f, 0, 100, 0.01f, 100);
     addChild(std::unique_ptr<Node>(box));
 
     // auto* player = new FreeCam3D();
@@ -18,7 +18,7 @@ void ShooterGame::Init(AppState &appState) {
 
     // auto* player = new Player3D(appState, 0, 10, 0, 0.35f, 2.2f);
 
-    auto* player = new QuakePlayer3D(appState, 0, 10, 0, 0.35f, 2.2f);
+    auto* player = new QuakePlayer3D(0, 10, 0, 0.35f, 2.2f);
     addChild(std::unique_ptr<Node>(player));
 
     // auto* pointLight = new PointLight3D(&appState);
@@ -34,14 +34,14 @@ void ShooterGame::Init(AppState &appState) {
     // pointLight1->color.y  = 0.5f;
     // addChild(std::unique_ptr<Node>(pointLight1));
 
-    auto* pointLight2 = new PointLight3D(&appState);
+    auto* pointLight2 = new PointLight3D();
     pointLight2->localTransform.position.x = 17;
     pointLight2->localTransform.position.y = 5;
     pointLight2->localTransform.position.z = 6;
     pointLight2->brightness = 5;
     addChild(std::unique_ptr<Node>(pointLight2));
 
-    auto* directionalLight = new DirectionalLight3D(&appState);
+    auto* directionalLight = new DirectionalLight3D();
     directionalLight->localTransform.rotation.x = -135;
     directionalLight->localTransform.rotation.y = -135;
     directionalLight->localTransform.position.x = 50;
@@ -49,7 +49,7 @@ void ShooterGame::Init(AppState &appState) {
     directionalLight->brightness = 5;
     addChild(std::unique_ptr<Node>(directionalLight));
 
-    // auto* directionalLight2 = new DirectionalLight3D(&appState);
+    // auto* directionalLight2 = new DirectionalLight3D();
     // directionalLight2->localTransform.rotation.x = -54;
     // directionalLight2->localTransform.rotation.y = -135;
     // directionalLight2->localTransform.position.x = 50;
@@ -57,7 +57,7 @@ void ShooterGame::Init(AppState &appState) {
     // directionalLight2->brightness = 5;
     // addChild(std::unique_ptr<Node>(directionalLight2));
 
-    auto* spotLight = new SpotLight3D(&appState);
+    auto* spotLight = new SpotLight3D();
     spotLight->localTransform.position.x = 17;
     spotLight->localTransform.position.y = 1;
     spotLight->localTransform.position.z = 5;
@@ -69,7 +69,7 @@ void ShooterGame::Init(AppState &appState) {
 
     // appState.LoadTexture("learnopengl_iceland_height_200_blurred.png");
 
-    // auto* terrain = new HeightFieldBody3D(appState, b3_staticBody, 0, 0, 0,
+    // auto* terrain = new HeightFieldBody3D(b3_staticBody, 0, 0, 0,
     //     appState.surfaces["learnopengl_iceland_height_200_blurred.png"],
     //     appState.surfaces["learnopengl_iceland_height_200_blurred.png"]->w,
     //     appState.surfaces["learnopengl_iceland_height_200_blurred.png"]->h,

@@ -26,17 +26,17 @@ struct ClosestShapeCastContext
 };
 
 struct PhysicsBody3D : Node3D {
-    PhysicsBody3D(AppState &appState, b3BodyType bodyType, float pos_x, float pos_y, float pos_z);
+    PhysicsBody3D(b3BodyType bodyType, float pos_x, float pos_y, float pos_z);
 
     static float ClosestShapeCastCallback(b3ShapeId _shapeId, b3Pos point, b3Vec3 normal, float fraction, uint64_t userMaterialId, int triangleIndex, int childIndex, void* context);
-    [[nodiscard]] TraceResult TraceCapsule(const AppState &appState, b3Pos from, b3Pos to, float radius, float height) const;
+    [[nodiscard]] TraceResult TraceCapsule(b3Pos from, b3Pos to, float radius, float height) const;
 
     b3BodyId bodyId{};
     b3ShapeId shapeId{};
     Transform3D last_tick_transform;
 
-    void FixedUpdate(AppState& appState) override;
-    void PostPhysicsUpdate(AppState& appState) override;
+    void FixedUpdate() override;
+    void PostPhysicsUpdate() override;
     [[nodiscard]] Transform3D GetGlobalTransform() const override;
 protected:
     [[nodiscard]] Transform3D GetGlobalTransformInterpolatedREAL(double factor) const override;

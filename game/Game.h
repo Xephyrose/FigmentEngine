@@ -4,13 +4,13 @@
 
 struct Game : Node {
     Game();
-    virtual void Init(AppState& appState);
+    virtual void Init();
     void ImGuiDraw() override;
-    void Update(AppState& appState) override;
-    void Draw(AppState &appState, SDL_GPUCommandBuffer *commandBuffer) override;
-    void DrawShadow(AppState& appState, SDL_GPUCommandBuffer* commandBuffer, SDL_GPURenderPass* renderPass) override;
-    void Input(AppState& appState) override;
-    void Event(AppState& appState, SDL_Event &event) override;
+    void Update() override;
+    void Draw(SDL_GPUCommandBuffer *commandBuffer) override;
+    void DrawShadow(SDL_GPUCommandBuffer* commandBuffer, SDL_GPURenderPass* renderPass) override;
+    void Input() override;
+    void Event(SDL_Event &event) override;
 };
 
 

@@ -3,7 +3,7 @@
 #include "game/Game.h"
 
 struct ShooterGame : Game {
-    void Init(AppState &appState) override;
+    void Init() override;
 };
 
 #endif //FIGMENTENGINE_SHOOTERGAME_H

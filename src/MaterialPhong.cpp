@@ -3,10 +3,10 @@
 
 #include "Camera3D.h"
 
-MaterialPhong::MaterialPhong(AppState *appState, const std::string &name, const std::string &pipeline) {
+MaterialPhong::MaterialPhong(const std::string &name, const std::string &pipeline) {
     this->name = name;
     this->pipeline = pipeline;
-    appState->materials.insert_or_assign(name, this);
+    AppState::Get().materials.insert_or_assign(name, this);
 }
 
 void MaterialPhong::Bind(AppState *appState, SDL_GPUCommandBuffer *commandBuffer, const glm::mat4 model) {

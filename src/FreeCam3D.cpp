@@ -17,12 +17,12 @@ void FreeCam3D::ImGuiDraw() {
     }
 }
 
-void FreeCam3D::Update(AppState &appState) {
-    localTransform.move(moveDirection * speed * static_cast<float>(appState.delta));
-    Camera3D::Update(appState);
+void FreeCam3D::Update() {
+    localTransform.move(moveDirection * speed * static_cast<float>(AppState::Get().delta));
+    Camera3D::Update();
 }
 
-void FreeCam3D::Input(AppState &appState) {
+void FreeCam3D::Input() {
     const glm::vec3 forward = localTransform.getForward();
     const glm::vec3 right = localTransform.getRight();
 
@@ -38,20 +38,21 @@ void FreeCam3D::Input(AppState &appState) {
         moveDirection = glm::normalize(moveDirection);
     }
 
-    Camera3D::Input(appState);
+    Camera3D::Input();
 }
 
-void FreeCam3D::Event(AppState &appState, SDL_Event &event) {
-    if (event.type == SDL_EVENT_MOUSE_MOTION && appState.isMouseRelative) {
-        localTransform.rotate(glm::vec3(-event.motion.yrel * appState.sensitivity,-event.motion.xrel * appState.sensitivity, 0));
+void FreeCam3D::Event(SDL_Event &event) {
+    AppState* appState = &AppState::Get();
+    if (event.type == SDL_EVENT_MOUSE_MOTION && appState->isMouseRelative) {
+        localTransform.rotate(glm::vec3(-event.motion.yrel * appState->sensitivity,-event.motion.xrel * appState->sensitivity, 0));
     }
 
-    if (event.button.button == SDL_BUTTON_RIGHT && appState.debug) {
-        appState.isMouseRelative = event.type == SDL_EVENT_MOUSE_BUTTON_DOWN;
-        SDL_SetWindowRelativeMouseMode(appState.window, appState.isMouseRelative);
+    if (event.button.button == SDL_BUTTON_RIGHT && appState->debug) {
+        appState->isMouseRelative = event.type == SDL_EVENT_MOUSE_BUTTON_DOWN;
+        SDL_SetWindowRelativeMouseMode(appState->window, appState->isMouseRelative);
     }
 
-    if (event.type == SDL_EVENT_MOUSE_WHEEL && appState.isMouseRelative) {
+    if (event.type == SDL_EVENT_MOUSE_WHEEL && appState->isMouseRelative) {
         if (event.wheel.y > 0) {
             speed *= 1.5f;
         } else if (event.wheel.y < 0) {
@@ -59,5 +60,5 @@ void FreeCam3D::Event(AppState &appState, SDL_Event &event) {
         }
     }
 
-    Camera3D::Event(appState, event);
+    Camera3D::Event(event);
 }

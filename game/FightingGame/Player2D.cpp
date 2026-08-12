@@ -3,7 +3,7 @@
 #include "../../src/Input.h"
 #include "../../src/Sprite2D.h"
 
-Player2D::Player2D(AppState &appState, const float size_x, const float size_y, const float pos_x, const float pos_y) : PhysicsBody2D(appState, b2_dynamicBody, size_x, size_y, pos_x, pos_y) {
+Player2D::Player2D(const float size_x, const float size_y, const float pos_x, const float pos_y) : PhysicsBody2D(b2_dynamicBody, size_x, size_y, pos_x, pos_y) {
     name = "Player2D";
     auto* sprite = new Sprite2D();
     addChild(std::unique_ptr<Node>(sprite));
@@ -12,7 +12,7 @@ Player2D::Player2D(AppState &appState, const float size_x, const float size_y, c
     b2Body_SetMotionLocks(bodyId, locks);
 }
 
-void Player2D::FixedUpdate(AppState &appState) {
+void Player2D::FixedUpdate() {
     // Keep in mind this is the velocity at the START of the method
     auto [velX, velY] = b2Body_GetLinearVelocity(bodyId);
     auto moveDirection = glm::vec2(0.0f);
