@@ -23,6 +23,11 @@ struct MaterialPhongTexturedHeight : Material {
     void Bind(AppState* appState, SDL_GPUCommandBuffer* commandBuffer, glm::mat4 model) override;
 
     void setSampler(AppState* appState, const std::string &new_sampler);
+
+    void setTextureAlbedo(AppState* appState, const std::string &texture);
+    void setTextureAmbient(AppState* appState, const std::string &texture);
+    void setTextureSpecular(AppState* appState, const std::string &texture);
+    void setTextureNormalMap(AppState* appState, const std::string &texture);
 };
 
 #endif //FIGMENTENGINE_MATERIALPHONGTEXTUREDHEIGHT_H
