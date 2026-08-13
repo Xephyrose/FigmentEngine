@@ -50,3 +50,5 @@ cmake --build ./cmake-build-debug --target FigmentEngine -- -j 10
 ```
 
 WARNING: Only Vulkan is known to work. Metal is untested, and DirectX fails to bind any pipeline that includes a StructuredBuffer (?). For this reason, DirectX is currently force-disabled.
+
+Full disclosure, this repo is mainly public as it's been a learning experience for me. it's in no way perfect and I'm not planning on maintaining it, but rather using what I've learned to make something better.
