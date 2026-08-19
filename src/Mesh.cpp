@@ -94,12 +94,6 @@ void Mesh::UploadToGPU() {
     SDL_ReleaseGPUTransferBuffer(appState->device, vertexTransfer);
     SDL_ReleaseGPUTransferBuffer(appState->device, indexTransfer);
 
-    // Set GPU buffer pointers for submeshes
-    for (auto& submesh : submeshes) {
-        submesh.vertexBuffer = vertexBuffer;
-        submesh.indexBuffer = indexBuffer;
-    }
-
     isOnGPU = true;
 }
 

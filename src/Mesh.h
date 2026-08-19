@@ -13,9 +13,6 @@ struct Submesh {
     size_t vertexCount;
     size_t startIndex;
     size_t indexCount;
-
-    SDL_GPUBuffer* vertexBuffer = nullptr;
-    SDL_GPUBuffer* indexBuffer = nullptr;
 };
 
 struct Mesh {
